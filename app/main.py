@@ -12,6 +12,7 @@ from app.registry_service import RegistryService
 from app.kyc_engine import SmartKYCEngine
 from app.order_service import OrderService
 from app.partner_service import PartnerService
+from app.data_intelligence import DataIntelligenceEngine
 
 app = FastAPI(
     title="VyaparSetu Platform API",
@@ -34,6 +35,7 @@ registry_service = RegistryService()
 kyc_engine = SmartKYCEngine(registry_service)
 order_service = OrderService()
 partner_service = PartnerService()
+data_intelligence = DataIntelligenceEngine()
 
 # Models
 class ProfileRequest(BaseModel):
@@ -141,6 +143,10 @@ def get_partner_leads(limit: int = 15, segment: Optional[str] = None):
 @app.get("/api/partner/stats")
 def get_partner_stats():
     return partner_service.get_partner_stats()
+
+@app.get("/api/intelligence/summary")
+def get_intelligence_summary():
+    return data_intelligence.generate_full_report()
 
 # Mount frontend static files
 static_dir = os.path.join(os.path.dirname(__file__), 'static')

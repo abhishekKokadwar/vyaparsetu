@@ -1,0 +1,193 @@
+{
+  "generated_at": "2026-11-07T02:00:56.413575",
+  "funnel_analysis": {
+    "total_leads": 5000,
+    "total_activated": 368,
+    "total_dropped": 4632,
+    "overall_conversion_rate_pct": 7.36,
+    "funnel_stages": [
+      {
+        "stage": "Lead",
+        "count": 5000,
+        "drop_at_this_stage": 0,
+        "step_conversion_pct": 100.0,
+        "cumulative_conversion_pct": 100.0
+      },
+      {
+        "stage": "Contacted",
+        "count": 3406,
+        "drop_at_this_stage": 1594,
+        "step_conversion_pct": 68.12,
+        "cumulative_conversion_pct": 68.12
+      },
+      {
+        "stage": "Needs assessed",
+        "count": 1974,
+        "drop_at_this_stage": 1432,
+        "step_conversion_pct": 57.96,
+        "cumulative_conversion_pct": 39.48
+      },
+      {
+        "stage": "Quote accepted",
+        "count": 861,
+        "drop_at_this_stage": 1113,
+        "step_conversion_pct": 43.62,
+        "cumulative_conversion_pct": 17.22
+      },
+      {
+        "stage": "KYC complete",
+        "count": 588,
+        "drop_at_this_stage": 273,
+        "step_conversion_pct": 68.29,
+        "cumulative_conversion_pct": 11.76
+      },
+      {
+        "stage": "Activated",
+        "count": 368,
+        "drop_at_this_stage": 220,
+        "step_conversion_pct": 62.59,
+        "cumulative_conversion_pct": 7.36
+      }
+    ]
+  },
+  "drop_cause_clusters": {
+    "total_dropped_analyzed": 4632,
+    "clusters": [
+      {
+        "cluster_name": "Field Scheduling & Sales Friction",
+        "drop_count": 2102,
+        "pct_of_total_drops": 45.38,
+        "has_gstin_pct": 71.55,
+        "avg_existing_spend_inr": 3296.98,
+        "vyaparsetu_addressability": "HIGH (Directly solved by self-serve advisor & tracker)"
+      },
+      {
+        "cluster_name": "Quote & Pricing Friction",
+        "drop_count": 1113,
+        "pct_of_total_drops": 24.03,
+        "has_gstin_pct": 65.23,
+        "avg_existing_spend_inr": 2764.73,
+        "vyaparsetu_addressability": "HIGH (Directly solved by self-serve advisor & tracker)"
+      },
+      {
+        "cluster_name": "Incumbent Lock-in & Intent Gap",
+        "drop_count": 605,
+        "pct_of_total_drops": 13.06,
+        "has_gstin_pct": 66.78,
+        "avg_existing_spend_inr": 2990.08,
+        "vyaparsetu_addressability": "MEDIUM / LOW"
+      },
+      {
+        "cluster_name": "Fulfillment, Payment & Network Friction",
+        "drop_count": 539,
+        "pct_of_total_drops": 11.64,
+        "has_gstin_pct": 80.15,
+        "avg_existing_spend_inr": 4124.49,
+        "vyaparsetu_addressability": "MEDIUM / LOW"
+      },
+      {
+        "cluster_name": "Paperwork & Verification Bottlenecks",
+        "drop_count": 273,
+        "pct_of_total_drops": 5.89,
+        "has_gstin_pct": 47.62,
+        "avg_existing_spend_inr": 3015.02,
+        "vyaparsetu_addressability": "HIGH (Directly solved by self-serve advisor & tracker)"
+      }
+    ]
+  },
+  "segment_economics": {
+    "segment_cohorts": [
+      {
+        "segment": "Micro retail & services",
+        "total_leads": 2709,
+        "pct_of_total_base": 54.2,
+        "activated_count": 110,
+        "conversion_rate_pct": 4.06,
+        "avg_existing_spend_inr": 903.29,
+        "avg_bundle_value_inr": 2504.82,
+        "blended_cac_inr": 812.4,
+        "avg_days_to_activate": 16.65,
+        "avg_customer_chase_calls": 3.16,
+        "churn_within_6m_pct": 22.73,
+        "avg_nps_score": 7.05
+      },
+      {
+        "segment": "Professional offices",
+        "total_leads": 1247,
+        "pct_of_total_base": 24.9,
+        "activated_count": 138,
+        "conversion_rate_pct": 11.07,
+        "avg_existing_spend_inr": 2592.7,
+        "avg_bundle_value_inr": 6795.87,
+        "blended_cac_inr": 1183.54,
+        "avg_days_to_activate": 16.92,
+        "avg_customer_chase_calls": 3.07,
+        "churn_within_6m_pct": 13.77,
+        "avg_nps_score": 6.92
+      },
+      {
+        "segment": "Small multi-site businesses",
+        "total_leads": 755,
+        "pct_of_total_base": 15.1,
+        "activated_count": 83,
+        "conversion_rate_pct": 10.99,
+        "avg_existing_spend_inr": 9123.64,
+        "avg_bundle_value_inr": 31233.49,
+        "blended_cac_inr": 1716.54,
+        "avg_days_to_activate": 18.77,
+        "avg_customer_chase_calls": 2.78,
+        "churn_within_6m_pct": 10.84,
+        "avg_nps_score": 6.7
+      },
+      {
+        "segment": "Small manufacturers",
+        "total_leads": 289,
+        "pct_of_total_base": 5.8,
+        "activated_count": 37,
+        "conversion_rate_pct": 12.8,
+        "avg_existing_spend_inr": 13914.19,
+        "avg_bundle_value_inr": 19979.73,
+        "blended_cac_inr": 1961.94,
+        "avg_days_to_activate": 20.51,
+        "avg_customer_chase_calls": 2.86,
+        "churn_within_6m_pct": 8.11,
+        "avg_nps_score": 6.46
+      }
+    ]
+  },
+  "statistical_validation": {
+    "gstin_significance_test": {
+      "hypothesis": "H1: Leads with verified GSTIN activate at a significantly higher rate than non-GST leads.",
+      "contingency_table": {
+        "Activated": {
+          "N": 30,
+          "Y": 338
+        },
+        "Dropped": {
+          "N": 1436,
+          "Y": 3196
+        }
+      },
+      "chi2_statistic": 84.7907,
+      "p_value": 3.316842225898812e-20,
+      "is_statistically_significant": true,
+      "insight": "GSTIN status is an extreme positive predictor (p < 0.001). 1-click GST auto-validation is critical."
+    },
+    "lead_source_efficiency_test": {
+      "hypothesis": "H1: Lead source channel significantly influences conversion likelihood.",
+      "chi2_statistic": 61.8083,
+      "p_value": 5.138000642546726e-12,
+      "is_statistically_significant": true,
+      "insight": "Referrals convert highest (14.8%) while WhatsApp cold campaigns convert lowest (2.8%) due to lack of trust."
+    },
+    "onboarding_friction_vs_churn_test": {
+      "hypothesis": "H1: Customers who experienced high chase calls during onboarding exhibit higher 6-month churn.",
+      "t_statistic": 2.706,
+      "p_value": 0.008445664832244338,
+      "is_statistically_significant": true,
+      "mean_calls_churned": 3.39,
+      "mean_calls_retained": 2.94,
+      "insight": "Customers who made 4+ chase calls are significantly more likely to churn within 6 months. Order tracking directly protects LTV."
+    }
+  }
+}
