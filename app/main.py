@@ -92,6 +92,10 @@ class OrderRescheduleRequest(BaseModel):
     new_slot: str
     days_extension: Optional[int] = 1
 
+class SalvageCampaignRequest(BaseModel):
+    lead_ids: List[str]
+    partner_id: Optional[str] = "PARTNER-BENGALURU-01"
+
 # --- API Endpoints ---
 
 @app.get("/api/catalogue")
@@ -219,14 +223,45 @@ def get_order_notifications(order_id: str):
     return {'order_id': order_id, 'notifications': res}
 
 @app.get("/api/partner/leads")
-def get_partner_leads(limit: int = 15, segment: Optional[str] = None):
+def get_partner_leads(
+    limit: int = 15,
+    offset: int = 0,
+    segment: Optional[str] = None,
+    city_tier: Optional[int] = None,
+    min_score: Optional[int] = None,
+    drop_category: Optional[str] = None,
+    propensity_tier: Optional[str] = None
+):
+    leads = partner_service.get_dropped_leads(
+        limit=limit,
+        offset=offset,
+        segment=segment,
+        city_tier=city_tier,
+        min_score=min_score,
+        drop_category=drop_category,
+        propensity_tier=propensity_tier
+    )
     return {
-        'leads': partner_service.get_dropped_leads(limit=limit, segment=segment)
+        'total': len(leads),
+        'limit': limit,
+        'offset': offset,
+        'leads': leads
     }
+
+@app.get("/api/partner/lead/{lead_id}")
+def get_partner_lead_detail(lead_id: str):
+    res = partner_service.get_lead_detail(lead_id)
+    if not res:
+        raise HTTPException(status_code=404, detail="Lead not found")
+    return res
 
 @app.get("/api/partner/stats")
 def get_partner_stats():
     return partner_service.get_partner_stats()
+
+@app.post("/api/partner/salvage-campaign")
+def trigger_salvage_campaign(req: SalvageCampaignRequest):
+    return partner_service.simulate_salvage_campaign(req.lead_ids, partner_id=req.partner_id)
 
 @app.get("/api/intelligence/summary")
 def get_intelligence_summary():

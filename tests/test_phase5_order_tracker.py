@@ -194,3 +194,4 @@ def test_already_activated_boundary(order_service):
     # Try advancing beyond final stage
     res_extra = order_service.advance_stage(oid)
     assert res_extra['status'] == 'ALREADY_ACTIVATED'
+
