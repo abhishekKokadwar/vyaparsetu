@@ -85,6 +85,13 @@ class OrderCreateRequest(BaseModel):
     estimated_install_days: int = 3
     selected_products: List[str] = []
 
+class OrderAdvanceRequest(BaseModel):
+    technician_pin: Optional[str] = None
+
+class OrderRescheduleRequest(BaseModel):
+    new_slot: str
+    days_extension: Optional[int] = 1
+
 # --- API Endpoints ---
 
 @app.get("/api/catalogue")
@@ -184,6 +191,32 @@ def get_order_tracking(order_id: str):
     if not res:
         raise HTTPException(status_code=404, detail="Order not found")
     return res
+
+@app.post("/api/orders/{order_id}/advance")
+def advance_order_stage(order_id: str, req: OrderAdvanceRequest):
+    res = order_service.advance_stage(order_id, technician_pin=req.technician_pin)
+    if res.get('status') == 'ERROR':
+        raise HTTPException(status_code=404, detail=res['message'])
+    if res.get('status') == 'PIN_AUTHENTICATION_FAILED':
+        raise HTTPException(status_code=403, detail=res['message'])
+    return res
+
+@app.post("/api/orders/{order_id}/reschedule")
+def reschedule_order(order_id: str, req: OrderRescheduleRequest):
+    res = order_service.reschedule_appointment(order_id, new_slot=req.new_slot, days_extension=req.days_extension)
+    if res.get('status') == 'ERROR':
+        raise HTTPException(status_code=404, detail=res['message'])
+    return res
+
+@app.get("/api/orders/lookup/{phone}")
+def lookup_orders_by_phone(phone: str):
+    orders = order_service.lookup_by_phone(phone)
+    return {'total': len(orders), 'orders': orders}
+
+@app.get("/api/orders/{order_id}/notifications")
+def get_order_notifications(order_id: str):
+    res = order_service.get_order_notifications(order_id)
+    return {'order_id': order_id, 'notifications': res}
 
 @app.get("/api/partner/leads")
 def get_partner_leads(limit: int = 15, segment: Optional[str] = None):
