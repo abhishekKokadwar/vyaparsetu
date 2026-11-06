@@ -66,6 +66,15 @@ class KYCVerifyRequest(BaseModel):
     applicant_code: str
     consent_granted: bool = True
 
+class ConsentRecordRequest(BaseModel):
+    applicant_code: str
+    entity_name: str
+    purpose: Optional[str] = "telecom_kyc_and_activation"
+
+class ConsentRevokeRequest(BaseModel):
+    applicant_code: str
+    reason: Optional[str] = "User withdrawal of digital consent"
+
 class OrderCreateRequest(BaseModel):
     business_name: str
     contact_name: str
@@ -145,6 +154,25 @@ def get_kyc_applicants():
 @app.post("/api/kyc/verify-applicant")
 def verify_kyc_applicant(req: KYCVerifyRequest):
     return kyc_engine.verify_applicant_by_code(req.applicant_code, consent_granted=req.consent_granted)
+
+@app.post("/api/kyc/consent")
+def record_kyc_consent(req: ConsentRecordRequest):
+    return kyc_engine.record_consent(req.applicant_code, req.entity_name, purpose=req.purpose)
+
+@app.post("/api/kyc/consent/revoke")
+def revoke_kyc_consent(req: ConsentRevokeRequest):
+    return kyc_engine.revoke_consent(req.applicant_code, reason=req.reason)
+
+@app.get("/api/kyc/consent/logs")
+def get_consent_logs(applicant_code: Optional[str] = None):
+    return {
+        'total': len(kyc_engine.get_consent_history(applicant_code)),
+        'logs': kyc_engine.get_consent_history(applicant_code)
+    }
+
+@app.get("/api/kyc/evaluate-all")
+def evaluate_all_kyc_applicants():
+    return kyc_engine.evaluate_all_applicants()
 
 @app.post("/api/orders/create")
 def create_order(req: OrderCreateRequest):

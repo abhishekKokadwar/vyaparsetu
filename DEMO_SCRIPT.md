@@ -24,7 +24,7 @@
 #### Scene 1: The Problem Hook (0:00 – 0:30)
 * **Screen:** Open on the baseline funnel slide showing 5,000 leads $\rightarrow$ only 368 activations.
 * **Speaker:**
-  > *"Hello Airtel leadership and jury members! Today, over 6 Crore Indian MSMEs are digitizing rapidly—but Accel Business drops 93% of small business leads. Why? Because onboarding a kirana or clinic currently takes 17.6 days of paper friction, 3 status chase calls, and costs ₹15,000 in CAC.*  
+  > *"Hello Airtel leadership and jury members! Today, over 6 Crore Indian MSMEs are digitizing rapidly—but Accel Business drops 93% of small business leads. Why? Because onboarding a kirana or clinic currently takes 17.6 days of paper friction, 3 status chase calls, and costs ₹15,053 to acquire each customer.*  
   > *We built **VyaparSetu** to transform this slow 2-week paper marathon into a **10-minute self-serve onboarding experience in a single sitting** on mobile."*
 
 ---
@@ -59,7 +59,7 @@
 * **Screen:** Click *Confirm & Activate Service*. The screen smoothly transitions to the **Live Order Tracker**. Show the 5 visual milestones, technician assigned (Ramesh Kumar), and OTP pin. Then briefly show the **Partner Portal** tab with dropped leads.
 * **Speaker:**
   > *"Once verified, the order is confirmed without human intervention. The owner tracks installation milestones in real-time on our Order Tracker—viewing their assigned engineer's name and visit slot, completely eliminating the 3 anxious chase calls.*  
-  > *And for local channel partners, our Partner Portal analyzes the 4,632 dropped leads in the dataset using AI Propensity Scoring to unlock ₹4.26 Crore in salvageable ARR with 12% commission attribution."*
+  > *And for local channel partners, our Partner Portal analyzes the 4,632 dropped leads in the dataset using AI Propensity Scoring and gives partners a ranked call list — every assisted close is QR-tagged, so they still earn their commission."*
 
 ---
 
@@ -67,9 +67,9 @@
 * **Screen:** Cut to Slide 7 of the presentation deck showing the KPI matrix.
 * **Speaker:**
   > *"The impact for Accel Business is transformative:*  
-  > *• Lead-to-Activation jumps from **7.4% to 24.5%**—a 3.3x surge.*  
-  > *• Blended CAC plunges **81% from ₹15,000 to ₹2,800**.*  
-  > *• Activation time drops from **17.6 days to under 48 hours**.*  
+  > *• From the same 5,000 leads, activations double: **7.4% → 15%**, 368 → 750.*  
+  > *• Cost per activation halves: **₹15,053 → under ₹7,500**.*  
+  > *• Time to activate falls from **17.6 days to 5 or less**, and chase calls from 3 to under 0.5.*  
   > *VyaparSetu makes India's MSMEs go digital in one sitting. Thank you!"*
 
 ---

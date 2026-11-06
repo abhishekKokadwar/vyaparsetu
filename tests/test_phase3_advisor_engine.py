@@ -171,3 +171,4 @@ def test_caching_and_sub_millisecond_latency(advisor):
     assert res2['cache_hit'] is True
     assert res2['selected_product_ids'] == res1['selected_product_ids']
     assert res2['pricing']['monthly_total_inr'] == res1['pricing']['monthly_total_inr']
+

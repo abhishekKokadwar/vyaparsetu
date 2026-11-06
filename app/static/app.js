@@ -3,6 +3,7 @@
 let currentLanguage = 'en';
 let allProducts = [];
 let selectedProductIds = new Set(['P01', 'P19', 'P07', 'P23']); // Default Kirana bundle
+let productQuantities = {}; // advisor-chosen quantities, so the quote matches the advisor price
 let activeCategoryFilter = 'all';
 let currentRecommendation = null;
 let currentApplicant = null;
@@ -149,7 +150,7 @@ function toggleProductSelection(pid, checked) {
 
 // Recalculate Live Quote Pricing & Dependencies
 async function recalculateQuotePricing() {
-  const items = Array.from(selectedProductIds).map(pid => ({ product_id: pid, quantity: 1 }));
+  const items = Array.from(selectedProductIds).map(pid => ({ product_id: pid, quantity: productQuantities[pid] || 1 }));
   
   if (items.length === 0) {
     document.getElementById('bill-item-count').textContent = '0 products';
@@ -167,8 +168,8 @@ async function recalculateQuotePricing() {
 
     document.getElementById('bill-item-count').textContent = `${pricing.items.length} products`;
     document.getElementById('bill-setup-fee').textContent = `₹${pricing.setup_total_inr.toLocaleString('en-IN')}`;
-    document.getElementById('bill-contract').textContent = `${pricing.contract_months} Months`;
-    document.getElementById('bill-install-days').textContent = `${pricing.estimated_install_days} Days`;
+    document.getElementById('bill-contract').textContent = `${pricing.contract_lock_months} Months`;
+    document.getElementById('bill-install-days').textContent = `${pricing.estimated_install_sla_days} Days`;
     document.getElementById('bill-monthly-total').innerHTML = `₹${pricing.monthly_total_inr.toLocaleString('en-IN')}<span class="text-xs text-slate-400 font-normal">/mo</span>`;
 
     // Validate
@@ -249,8 +250,8 @@ async function submitAdvisorProfile() {
 function renderAdvisorRecommendation(data) {
   document.getElementById('rec-bundle-title').textContent = data.bundle_name;
   document.getElementById('rec-price').innerHTML = `₹${data.pricing.monthly_total_inr.toLocaleString('en-IN')}<span class="text-xs text-slate-500 font-normal"> /mo</span>`;
-  document.getElementById('rec-contract').textContent = `${data.pricing.contract_months} Months`;
-  document.getElementById('rec-install').textContent = `${data.pricing.estimated_install_days} Days`;
+  document.getElementById('rec-contract').textContent = `${data.pricing.contract_lock_months} Months`;
+  document.getElementById('rec-install').textContent = `${data.pricing.estimated_install_sla_days} Days`;
 
   // Reasoning points
   const listEl = document.getElementById('rec-reasoning-list');
@@ -268,12 +269,13 @@ function renderAdvisorRecommendation(data) {
       <td class="py-2 px-3 font-semibold text-slate-800">${it.product_name}</td>
       <td class="py-2 px-3 text-slate-500">${it.category}</td>
       <td class="py-2 px-3 text-center font-mono">${it.quantity}</td>
-      <td class="py-2 px-3 text-right font-bold text-slate-900">₹${it.total_monthly.toLocaleString('en-IN')}</td>
+      <td class="py-2 px-3 text-right font-bold text-slate-900">₹${it.total_monthly_inr.toLocaleString('en-IN')}</td>
     </tr>
   `).join('');
 
   // Sync selected products to Quote tab
   selectedProductIds = new Set(data.selected_product_ids);
+  productQuantities = Object.fromEntries(data.pricing.items.map(it => [it.product_id, it.quantity]));
   renderCatalogList();
   recalculateQuotePricing();
 
@@ -515,7 +517,7 @@ async function placeOrderAfterKYC() {
   const bizName = currentApplicant?.business_name || document.getElementById('adv-biz-type').value;
   const bundle = currentRecommendation?.bundle_name_en || 'Vyapar Booster Pack';
   const price = currentRecommendation?.pricing?.monthly_total_inr || 2597;
-  const installDays = currentRecommendation?.pricing?.estimated_install_days || 3;
+  const installDays = currentRecommendation?.pricing?.estimated_install_sla_days || 3;
 
   const payload = {
     business_name: bizName,

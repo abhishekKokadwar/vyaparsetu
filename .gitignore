@@ -50,3 +50,4 @@ $RECYCLE.BIN/
 .DS_Store
 
 deck/render/
+.playwright-mcp/
