@@ -75,13 +75,15 @@ class RegistryService:
 
     @staticmethod
     def mask_phone(phone: str) -> str:
-        """Masks central digits of contact numbers: '9876543210' -> '98XXXXXX10'"""
-        if not phone or len(phone) < 10:
-            return phone
-        clean = re.sub(r'[^0-9]', '', str(phone))
-        if len(clean) == 10:
-            return f"{clean[:2]}XXXXXX{clean[8:]}"
-        return clean
+        """Masks central digits of contact numbers: '+91 98450 12345' -> '+91 98XXXXXX45' or '98XXXXXX45'"""
+        if not phone or len(str(phone).strip()) < 10:
+            return str(phone)
+        digits = re.sub(r'[^0-9]', '', str(phone))
+        if len(digits) >= 10:
+            last10 = digits[-10:]
+            prefix = "+91 " if len(digits) > 10 else ""
+            return f"{prefix}{last10[:2]}XXXXXX{last10[8:]}"
+        return str(phone)
 
     @staticmethod
     def validate_gstin_format(gstin: str) -> bool:
