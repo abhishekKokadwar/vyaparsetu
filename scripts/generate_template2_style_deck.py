@@ -211,7 +211,7 @@ pm0.font.bold = True
 pm0.font.color.rgb = C_RED
 
 pm1 = tf_m.add_paragraph()
-pm1.text = "Team: Hacker_247  |  Members: Abhishek Kokadwar & Sumit Sahu  |  Campus: ABV-IIITM Gwalior\nGitHub Repo: github.com/abhishekKokadwar/airtel-sync-udyam-digital  |  Working Prototype: http://localhost:8000"
+pm1.text = "Team: Hacker_247  |  Members: Abhishek Kokadwar & Sumit Sahu  |  Campus: ABV-IIITM Gwalior\nGitHub Repo: github.com/abhishekKokadwar/vyaparsetu  |  Working Prototype: http://localhost:8000"
 pm1.font.size = Pt(11)
 pm1.font.color.rgb = C_SLATE
 pm1.space_before = Pt(4)
@@ -361,7 +361,7 @@ p.space_before = Pt(6)
 
 c3 = create_card(s4, Inches(8.75), Inches(1.5), Inches(3.75), Inches(4.75), "PROTOTYPE & REPO ARTIFACTS", "VERIFIABLE SUBMISSIONS", bg_color=C_PURPLE_BG, border_color=C_PURPLE)
 p = c3.add_paragraph()
-p.text = "★ Live GitHub Repository:\n   github.com/abhishekKokadwar/\n   airtel-sync-udyam-digital\n\n★ Working Local Prototype:\n   • Run: 'py run.py'\n   • URL: http://localhost:8000\n   • SVG Viewer: http://localhost:8000/diagrams\n\n★ Demo Video Walkthrough:\n   3-Minute timed demo script (DEMO_SCRIPT.md) covering live K01-K12 verification."
+p.text = "★ Live GitHub Repository:\n   github.com/abhishekKokadwar/\n   vyaparsetu\n\n★ Working Local Prototype:\n   • Run: 'py run.py'\n   • URL: http://localhost:8000\n   • SVG Viewer: http://localhost:8000/diagrams\n\n★ Demo Video Walkthrough:\n   3-Minute timed demo script (DEMO_SCRIPT.md) covering live K01-K12 verification."
 p.font.size = Pt(9.5)
 p.font.bold = True
 p.font.color.rgb = C_DARK
@@ -453,3 +453,4 @@ add_takeaway(s7, "Conclusion: VyaparSetu establishes Accel Business as the undis
 
 prs.save(OUTPUT_PPTX)
 print(f"Successfully generated Template 2 style 8-slide presentation at {OUTPUT_PPTX}!")
+

@@ -262,3 +262,4 @@ with open(os.path.join(diagrams_dir, 'customer_journey_diagram.svg'), 'w', encod
     f.write(journey_svg.strip())
 
 print("Saved architecture_diagram.svg and customer_journey_diagram.svg to app/static/diagrams/!")
+

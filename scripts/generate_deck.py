@@ -216,7 +216,7 @@ p.space_before = Pt(6)
 
 c2 = add_card(s4, Inches(5.0), Inches(1.4), Inches(4.0), Inches(3.2), "Prototype & Repository Links", bg_color=RGBColor(245, 243, 255), border_color=C_PURPLE)
 p = c2.add_paragraph()
-p.text = "★ Live GitHub Repository:\n   github.com/abhishekKokadwar/airtel-sync-udyam-digital\n\n★ Prototype Features:\n   • Working GenAI Advisor in English & Hindi\n   • Interactive Catalog Configurator with 25 products\n   • Smart KYC with K01-K12 Live Answer Key\n   • Self-Service Real-Time Order Tracker\n   • Partner Portal with AI Propensity Scoring\n\n★ 3-Minute Video Walkthrough Link Included in Repo"
+p.text = "★ Live GitHub Repository:\n   github.com/abhishekKokadwar/vyaparsetu\n\n★ Prototype Features:\n   • Working GenAI Advisor in English & Hindi\n   • Interactive Catalog Configurator with 25 products\n   • Smart KYC with K01-K12 Live Answer Key\n   • Self-Service Real-Time Order Tracker\n   • Partner Portal with AI Propensity Scoring\n\n★ 3-Minute Video Walkthrough Link Included in Repo"
 p.font.size = Pt(9.5)
 p.font.color.rgb = C_DARK
 p.space_before = Pt(6)
