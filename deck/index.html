@@ -116,12 +116,12 @@ S.push(()=>{
 
   // why they drop
   s+=card(1030,300,780,370);
-  s+=kick(1060,342,'Why 4,632 leads dropped',MUTED)+T(1780,342,'red = fixable by self-serve',{size:15,fill:MUTED,anchor:'end'});
-  const cl=[['Reach & scheduling','unreachable, no time for a visit, visit not booked',2102,45,1],
-            ['Quote & price','too complex, too slow, price too high',1113,24,1],
-            ['Lock-in / low intent','happy with current provider, only wanted a SIM',605,13,0],
-            ['Install & payment','install delays, payment, coverage',539,12,0],
-            ['Paperwork & KYC','missing GST/Udyam papers, mismatches',273,6,1]];
+  s+=kick(1060,342,'Why 4,632 leads dropped',MUTED)+T(1780,342,'red = fixable by self-serve (49% · 2,290 leads)',{size:15,fill:MUTED,anchor:'end'});
+  const cl=[['Reach & scheduling','unreachable (805), no time for visit (531), visit not booked (296)',1632,35,1],
+            ['Quote friction','quote too complex (206), quote too slow (179)',385,8,1],
+            ['Paperwork & KYC','missing GST/Udyam (94), long paperwork (79), mismatches (100)',273,6,1],
+            ['Price & competitor','price too high (414), competitor cheaper (207)',621,13,0],
+            ['Lock-in & others','locked in (325), wrong number (319), only mobile (280), others (797)',1721,37,0]];
   cl.forEach(([n,d,c,p,fix],i)=>{
     const y=372+i*56;
     s+=T(1060,y+22,n,{size:21,w:700});
@@ -132,13 +132,13 @@ S.push(()=>{
   // KPI tiles
   const k=[['17.6 days','to activate'],['3.0 calls','status chases'],['₹15,053','cost per activation'],['15.2%','6-month churn']];
   k.forEach(([v,l],i)=>{ const x=1030+i*200; s+=card(x,690,182,190); s+=T(x+18,760,v,{font:SERIF,size:34,w:700,fill:i==2?RED:INK}); s+=W(x+18,800,150,l,{size:17,fill:SLATE}).svg; });
-  s+=foot(2,'**75% of drops are process friction, not product** — exactly what a self-serve journey removes.');
+  s+=foot(2,'**About half of all drops (49% · 2,290 leads) are pure process friction** — exactly what a self-serve digital journey removes.');
   return s;
 });
 
 // 3 · SEGMENTS & BUNDLES
 S.push(()=>{
-  let s=head(3,'Who first · what bundle','Four segments, four bundles, one monthly price each','Prices from the product catalogue · segment stats from smb_leads.csv');
+  let s=head(3,'Who first · what bundle','Four segments, four bundles, one monthly price each','Baseline configurations; VyaparSaarthi dynamically sizes seats and hardware per establishment');
   const seg=[
     {wave:'WAVE 1 · SELF-SERVE',wc:RED,name:'Micro retail & services',ex:'kirana · salon · pharmacy',st:[['54%','of leads'],['4.1%','convert'],['22.7%','6-mo churn']],
      b:'Vyapar Starter',items:[['Biz 5G AirFiber 100',899],['Cloud POS & UPI billing',599],['Business Postpaid 299',299],['Cloud CCTV · 1 camera',199]],tot:'₹1,996',term:'12 months · setup ₹4,300',

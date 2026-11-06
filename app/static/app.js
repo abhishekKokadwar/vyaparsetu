@@ -625,9 +625,9 @@ async function loadPartnerPortal() {
     const statsRes = await fetch('/api/partner/stats');
     const stats = await statsRes.json();
     document.getElementById('ptnr-dropped-leads').textContent = stats.total_dropped_leads.toLocaleString('en-IN');
-    document.getElementById('ptnr-salvageable').textContent = stats.high_propensity_salvageable.toLocaleString('en-IN');
-    document.getElementById('ptnr-arr').textContent = `₹${(stats.potential_arr_inr / 10000000).toFixed(2)} Cr`;
-    document.getElementById('ptnr-comm').textContent = `₹${(stats.commission_pool_inr / 100000).toFixed(1)} Lakh`;
+    document.getElementById('ptnr-salvageable').textContent = stats.high_propensity_count.toLocaleString('en-IN');
+    document.getElementById('ptnr-arr').textContent = `₹${(stats.projected_recoverable_arr_inr / 10000000).toFixed(2)} Cr`;
+    document.getElementById('ptnr-comm').textContent = `₹${(stats.partner_commission_pool_inr / 100000).toFixed(1)} Lakh`;
 
     loadPartnerLeads();
   } catch (err) {
