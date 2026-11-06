@@ -52,3 +52,4 @@ def test_statistical_significance_gstin(engine):
     assert gst_test['is_statistically_significant'] is True
     assert gst_test['p_value'] < 0.001, "GST status must have p < 0.001"
     assert gst_test['chi2_statistic'] > 50, "Chi2 statistic must be substantial"
+

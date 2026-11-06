@@ -48,6 +48,10 @@ class ProfileRequest(BaseModel):
     current_spend: Optional[int] = 0
     preferred_language: str = "en"
 
+class ChatQueryRequest(BaseModel):
+    query: str
+    current_profile: Optional[dict] = None
+
 class ValidationRequest(BaseModel):
     selected_product_ids: List[str]
     city_tier: int = 1
@@ -83,14 +87,14 @@ def get_catalogue():
 
 @app.post("/api/catalogue/validate")
 def validate_catalogue(req: ValidationRequest):
-    is_valid, errors = catalog_engine.validate_selection(
+    is_valid, errors, suggestions = catalog_engine.validate_selection(
         req.selected_product_ids,
         city_tier=req.city_tier,
         employees=req.employee_count,
         sites=req.num_sites,
         has_gstin=req.has_gstin
     )
-    return {'is_valid': is_valid, 'errors': errors}
+    return {'is_valid': is_valid, 'errors': errors, 'suggestions': suggestions}
 
 @app.post("/api/catalogue/pricing")
 def get_bundle_pricing(req: BundlePricingRequest):
@@ -99,6 +103,25 @@ def get_bundle_pricing(req: BundlePricingRequest):
 @app.post("/api/advisor/recommend")
 def recommend_bundle(req: ProfileRequest):
     return advisor_engine.recommend(req.model_dump())
+
+@app.post("/api/advisor/chat")
+def advisor_chat(req: ChatQueryRequest):
+    updated_profile = advisor_engine.parse_conversational_query(req.query, req.current_profile)
+    clarifications = advisor_engine.detect_clarifications(updated_profile)
+    recommendation = advisor_engine.recommend(updated_profile)
+    return {
+        'profile': updated_profile,
+        'clarifications': clarifications,
+        'recommendation': recommendation
+    }
+
+@app.get("/api/advisor/benchmark-matrix")
+def get_benchmark_matrix():
+    return advisor_engine.evaluate_jury_scenarios()
+
+@app.get("/api/advisor/cache-stats")
+def get_advisor_cache_stats():
+    return advisor_engine.get_cache_stats()
 
 @app.get("/api/registry/gstin/{gstin}")
 def lookup_gstin(gstin: str):
