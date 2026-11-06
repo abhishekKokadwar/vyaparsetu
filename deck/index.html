@@ -1,0 +1,346 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>VyaparSetu · Hacker_247 · Airtel Sync 2026</title>
+<style>
+  html,body{margin:0;background:#1e1e1e}
+  .slide{position:relative;width:1920px;height:1080px;margin:0 auto 24px;overflow:hidden}
+  .slide img{position:absolute;inset:0;width:100%;height:100%}
+  .slide svg{position:absolute;inset:0}
+  html:has(body.one),body.one{background:transparent}
+  body.one .slide{margin:0}
+  body.bare .slide img{display:none}
+</style>
+</head>
+<body>
+<div id="deck"></div>
+<script>
+// ?s=N renders only slide N at 1920x1080; &bare=1 hides the template background (for PPTX overlay export)
+const q = new URLSearchParams(location.search);
+
+// ---------- design tokens ----------
+const RED='#E40000', INK='#0F172A', SLATE='#475569', MUTED='#64748B', LINE='#E2E8F0',
+      SOFT='#F8FAFC', REDBG='#FFF1F1', GREEN='#059669', GREENBG='#ECFDF5', AMBER='#D97706', AMBERBG='#FFF7E6';
+const SERIF="Georgia, 'Nirmala UI', serif", SANS="'Segoe UI', 'Nirmala UI', sans-serif", MONO="Consolas, monospace";
+const TOTAL=7;
+
+// ---------- svg helpers ----------
+const esc = s => String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+const ctx = document.createElement('canvas').getContext('2d');
+
+function T(x,y,s,o={}){
+  const {size=20,w=400,fill=INK,font=SANS,anchor='start',ls=0,style=''}=o;
+  return `<text x="${x}" y="${y}" font-family="${font}" font-size="${size}" font-weight="${w}" fill="${fill}" text-anchor="${anchor}" letter-spacing="${ls}" ${style}>${esc(s)}</text>`;
+}
+// wrapped text; **bold** spans supported. returns {svg, h}
+function W(x,y,width,s,o={}){
+  const {size=20,w=400,fill=INK,font=SANS,lh=1.35,bfill=fill}=o;
+  const toks=[]; s.split('**').forEach((part,i)=>part.split(/(\s+)/).forEach(t=>{ if(t) toks.push({t,b:i%2===1}); }));
+  const lines=[[]]; let cur=0;
+  for(const k of toks){
+    ctx.font=`${k.b?700:w} ${size}px ${font}`; const tw=ctx.measureText(k.t).width;
+    if(/^\s+$/.test(k.t)){ if(lines.at(-1).length){ lines.at(-1).push(k); cur+=tw; } continue; }
+    if(cur+tw>width && lines.at(-1).length){ while(lines.at(-1).length && /^\s+$/.test(lines.at(-1).at(-1).t)) lines.at(-1).pop(); lines.push([]); cur=0; }
+    lines.at(-1).push(k); cur+=tw;
+  }
+  const L=size*lh;
+  const svg=lines.map((ln,i)=>`<text x="${x}" y="${y+i*L}" font-family="${font}" font-size="${size}" fill="${fill}" xml:space="preserve">`+
+     ln.map(k=>`<tspan font-weight="${k.b?700:w}" ${k.b?`fill="${bfill}"`:''}>${esc(k.t)}</tspan>`).join('')+`</text>`).join('');
+  return {svg,h:lines.length*L};
+}
+const R=(x,y,w,h,o={})=>{const {fill='#fff',stroke='none',r=0,sw=1.5,dash='',op=1}=o;
+  return `<rect x="${x}" y="${y}" width="${w}" height="${h}" rx="${r}" fill="${fill}" stroke="${stroke}" stroke-width="${sw}" ${dash?`stroke-dasharray="${dash}"`:''} opacity="${op}"/>`;};
+const C=(cx,cy,r,o={})=>{const {fill=INK,stroke='none',sw=2}=o; return `<circle cx="${cx}" cy="${cy}" r="${r}" fill="${fill}" stroke="${stroke}" stroke-width="${sw}"/>`;};
+const Ln=(x1,y1,x2,y2,o={})=>{const {stroke=LINE,sw=2,dash='',marker=''}=o;
+  return `<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke="${stroke}" stroke-width="${sw}" ${dash?`stroke-dasharray="${dash}"`:''} ${marker?`marker-end="url(#${marker})"`:''}/>`;};
+// card: white panel, thin border, optional left accent / hard offset shadow (bold-card look)
+function card(x,y,w,h,o={}){
+  const {accent='',fill='#fff',stroke=LINE,shadow=false,r=14}=o; let s='';
+  if(shadow) s+=R(x+8,y+8,w,h,{fill:INK,r});
+  s+=R(x,y,w,h,{fill,stroke:shadow?INK:stroke,r,sw:shadow?2.5:1.5});
+  if(accent) s+=`<path d="M${x} ${y+r} a${r} ${r} 0 0 1 ${r} -${r} h0 v${h} h0 a${r} ${r} 0 0 1 -${r} -${r}z" fill="${accent}"/>`+R(x,y,6,h,{fill:accent});
+  return s;
+}
+const kick=(x,y,s,fill=RED)=>T(x,y,s.toUpperCase(),{font:MONO,size:16,w:700,fill,ls:2.5});
+function pill(x,y,s,o={}){const {fill=REDBG,color=RED,size=15}=o; ctx.font=`700 ${size}px ${MONO}`; const w=ctx.measureText(s).width+size*0.16*s.length+24;
+  return {svg:R(x,y,w,size+16,{fill,r:(size+16)/2})+T(x+12,y+size+3,s,{font:MONO,size,w:700,fill:color,ls:size*0.16}),w};}
+const tick=(cx,cy,c=GREEN)=>C(cx,cy,11,{fill:c})+`<path d="M${cx-5} ${cy} l3.5 4 l6.5 -8" stroke="#fff" stroke-width="2.6" fill="none" stroke-linecap="round" stroke-linejoin="round"/>`;
+const cross=(cx,cy)=>C(cx,cy,11,{fill:RED})+`<path d="M${cx-4.5} ${cy-4.5} l9 9 m0 -9 l-9 9" stroke="#fff" stroke-width="2.6" stroke-linecap="round"/>`;
+const defs=`<defs><marker id="ar" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0L10 5L0 10z" fill="${MUTED}"/></marker>
+<marker id="arR" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0L10 5L0 10z" fill="${RED}"/></marker></defs>`;
+
+// common chrome for content slides — sits inside the template's safe area (logos top, Unstop bottom-right)
+function head(n,k,title,sub){
+  return kick(110,165,`${String(n).padStart(2,'0')} · ${k}`)+
+    T(110,226,title,{font:SERIF,size:46,w:700})+(sub?T(110,266,sub,{size:22,fill:SLATE}):'');
+}
+function foot(n,takeaway){
+  const t=W(140,938,1640,takeaway,{size:21,fill:'#fff',bfill:'#FF6B6B'}), h=t.h+36;
+  return R(110,900,1700,h,{fill:INK,r:12})+R(110,900,8,h,{fill:RED})+t.svg+
+    T(110,1040,`HACKER_247 · ABV-IIITM GWALIOR  ·  ${String(n).padStart(2,'0')} / ${String(TOTAL).padStart(2,'0')}`,{font:MONO,size:16,fill:MUTED,ls:2});
+}
+
+// ---------- slides ----------
+const S=[];
+
+// 1 · COVER (on template cover art)
+S.push(()=>{
+  let s='';
+  s+=kick(120,560,'Airtel Sync 2026 · Digital Track · Project Udyam Digital','#FF5A5A');
+  s+=T(116,670,'VyaparSetu',{font:SERIF,size:104,w:700,fill:'#fff'});
+  s+=T(124,740,'व्यापारसेतु — a bridge to digital for every small business',{size:30,fill:'#FFD0D0'});
+  s+=W(124,800,820,'Discover the right bundle, buy it, finish KYC and track activation — **on one phone, in one sitting, in the owner’s language.**',{size:26,fill:'#E5E7EB',bfill:'#fff'}).svg;
+  // team strip
+  s+=R(120,900,840,92,{fill:'#000',op:.55,r:14})+R(120,900,6,92,{fill:RED});
+  s+=T(150,938,'TEAM HACKER_247  ·  ABV-IIITM GWALIOR',{font:MONO,size:18,w:700,fill:'#fff',ls:2});
+  s+=T(150,972,'Abhishek Kokadwar  ·  Sumit Sahu   |   github.com/abhishekKokadwar/vyaparsetu',{size:19,fill:'#CBD5E1'});
+  return s;
+});
+
+// 2 · PROBLEM
+S.push(()=>{
+  let s=head(2,'The problem · smb_leads.csv, Apr–Jun 2026','93 of every 100 leads never go live','Accel Business, Apr–Jun 2026: 5,000 leads → 368 activations.');
+  // funnel
+  s+=card(110,300,900,580);
+  s+=kick(140,342,'Funnel · count and % of previous stage',MUTED);
+  const st=[['Leads generated',5000,null],['Contacted',3406,68],['Needs assessed',1974,58],['Quote accepted',861,44],['KYC complete',588,68],['Activated',368,63]];
+  st.forEach(([n,c,p],i)=>{
+    const y=372+i*78, bw=Math.max(14,520*c/5000), hot=i===3;
+    s+=T(140,y+31,n,{size:21,w:hot?700:600,fill:hot?RED:INK});
+    s+=R(345,y,bw,44,{fill:hot?RED:(i===5?GREEN:INK),r:6,op:hot||i===5?1:1-i*0.11});
+    s+=T(345+bw+12,y+30,c.toLocaleString('en-IN'),{size:21,w:700,fill:hot?RED:INK});
+    if(p!==null){ const pl=pill(905,y+8,`${p}%`,{fill:hot?REDBG:SOFT,color:hot?RED:SLATE}); s+=pl.svg; }
+  });
+  s+=T(140,852,'Biggest drop: needs assessed → quote accepted (–56%)',{size:20,w:700,fill:RED});
+
+  // why they drop
+  s+=card(1030,300,780,370);
+  s+=kick(1060,342,'Why 4,632 leads dropped',MUTED)+T(1780,342,'red = fixable by self-serve',{size:15,fill:MUTED,anchor:'end'});
+  const cl=[['Reach & scheduling','unreachable, no time for a visit, visit not booked',2102,45,1],
+            ['Quote & price','too complex, too slow, price too high',1113,24,1],
+            ['Lock-in / low intent','happy with current provider, only wanted a SIM',605,13,0],
+            ['Install & payment','install delays, payment, coverage',539,12,0],
+            ['Paperwork & KYC','missing GST/Udyam papers, mismatches',273,6,1]];
+  cl.forEach(([n,d,c,p,fix],i)=>{
+    const y=372+i*56;
+    s+=T(1060,y+22,n,{size:21,w:700});
+    s+=R(1440,y+6,220,22,{fill:SOFT,r:5})+R(1440,y+6,220*p/45,22,{fill:fix?RED:'#94A3B8',r:5});
+    s+=T(1672,y+24,`${c.toLocaleString('en-IN')} · ${p}%`,{size:17,w:700,fill:fix?RED:SLATE});
+  });
+
+  // KPI tiles
+  const k=[['17.6 days','to activate'],['3.0 calls','status chases'],['₹15,053','cost per activation'],['15.2%','6-month churn']];
+  k.forEach(([v,l],i)=>{ const x=1030+i*200; s+=card(x,690,182,190); s+=T(x+18,760,v,{font:SERIF,size:34,w:700,fill:i==2?RED:INK}); s+=W(x+18,800,150,l,{size:17,fill:SLATE}).svg; });
+  s+=foot(2,'**75% of drops are process friction, not product** — exactly what a self-serve journey removes.');
+  return s;
+});
+
+// 3 · SEGMENTS & BUNDLES
+S.push(()=>{
+  let s=head(3,'Who first · what bundle','Four segments, four bundles, one monthly price each','Prices from the product catalogue · segment stats from smb_leads.csv');
+  const seg=[
+    {wave:'WAVE 1 · SELF-SERVE',wc:RED,name:'Micro retail & services',ex:'kirana · salon · pharmacy',st:[['54%','of leads'],['4.1%','convert'],['22.7%','6-mo churn']],
+     b:'Vyapar Starter',items:[['Biz 5G AirFiber 100',899],['Cloud POS & UPI billing',599],['Business Postpaid 299',299],['Cloud CCTV · 1 camera',199]],tot:'₹1,996',term:'12 months · setup ₹4,300',
+     why:'Cheaper than today’s ₹2,505 average'},
+    {wave:'WAVE 1 · LAUNCH SEGMENT',wc:RED,name:'Professional offices',ex:'clinic · CA firm · coaching',st:[['25%','of leads'],['11.1%','convert'],['13.8%','6-mo churn']],
+     b:'Vyapar Pro Office',items:[['Biz Fibre 300',1499],['Cloud email × 5 users',625],['Endpoint security × 5',495],['Cloud backup 1 TB',499],['Secure guest Wi-Fi',399]],tot:'₹3,517',term:'12 months · setup ₹1,000',
+     why:'Best conversion + retention'},
+    {wave:'WAVE 2 · DIGITAL + FIELD',wc:AMBER,name:'Multi-site businesses',ex:'restaurant chain · 3–10 stores',st:[['15%','of leads'],['11.0%','convert'],['10.8%','6-mo churn']],
+     b:'Vyapar Multi-Site (3 sites)',items:[['Biz Fibre 300 × 3',4497],['4G/5G failover × 3',1497],['Cloud POS × 3',1797],['Cloud CCTV × 6',1194]],tot:'₹8,985',term:'12 months · one bill for all sites',
+     why:'Highest value: ₹31k average bundle'},
+    {wave:'WAVE 3 · FIELD-LED',wc:SLATE,name:'Small manufacturers',ex:'auto-parts · textile unit',st:[['6%','of leads'],['12.8%','convert'],['8.1%','6-mo churn']],
+     b:'Vyapar Factory',items:[['Leased line 20 Mbps',8000],['Managed firewall',1999],['Machine IoT × 5',745],['Business Postpaid 599 × 3',1797]],tot:'₹12,541',term:'24 months · 21-day line install',
+     why:'Lowest churn; needs a site survey'},
+  ];
+  seg.forEach((g,i)=>{
+    const x=110+i*430, w=410, y=300; const first=i<2;
+    s+=card(x,y,w,580,{shadow:i===1});
+    const p=pill(x+22,y+22,g.wave,{fill:g.wc===RED?REDBG:(g.wc===AMBER?AMBERBG:SOFT),color:g.wc,size:13}); s+=p.svg;
+    s+=T(x+22,y+92,g.name,{font:SERIF,size:27,w:700});
+    s+=T(x+22,y+120,g.ex,{size:17,fill:MUTED});
+    g.st.forEach(([v,l],j)=>{ const sx=x+22+j*128; s+=T(sx,y+168,v,{size:26,w:700,fill:j==1&&first?RED:INK}); s+=T(sx,y+192,l,{size:15,fill:MUTED}); });
+    s+=Ln(x+22,y+214,x+w-22,y+214);
+    s+=T(x+22,y+248,g.b,{size:20,w:700,fill:RED});
+    g.items.forEach(([n,pr],j)=>{ const yy=y+282+j*31; s+=T(x+22,yy,n,{size:17,fill:SLATE}); s+=T(x+w-22,yy,'₹'+pr.toLocaleString('en-IN'),{size:17,w:600,anchor:'end',fill:INK}); });
+    s+=Ln(x+22,y+432,x+w-22,y+432,{dash:'4 4'});
+    s+=T(x+22,y+478,g.tot,{font:SERIF,size:40,w:700})+T(x+30+ (ctx.font=`700 40px ${SERIF}`, ctx.measureText(g.tot).width),y+478,'/month',{size:18,fill:MUTED});
+    s+=T(x+22,y+503,g.term,{size:15,fill:MUTED});
+    s+=R(x+22,y+522,w-44,40,{fill:SOFT,r:8})+T(x+36,y+548,'→ '+g.why,{size:17,w:600,fill:INK});
+  });
+  s+=foot(3,'**Launch with professional offices and micro retail** — both can buy fully online; add-ons toggle in the quote.');
+  return s;
+});
+
+// 4 · JOURNEY
+S.push(()=>{
+  let s=head(4,'The solution · working prototype','From first question to a booked install in one session','Four phone screens replace the field visit, the PDF quote and paper KYC.');
+  const st=[
+    {n:'Advisor',t:'~3 min',was:'Sales visit after 3+ calls',b:['Chat in Hindi, English + 6 languages','Explains “why this bundle” plainly']},
+    {n:'Quote & pay',t:'~2 min',was:'PDF quote in 3–5 days',b:['One monthly price, no product codes','Add-ons toggle; rules checked live']},
+    {n:'Smart KYC',t:'~3 min',was:'Paper copies, in person',b:['GSTIN / Udyam lookup fills the form','OCR checks, consent, DigiLocker, e-sign']},
+    {n:'Tracker',t:'2–5 days',was:'3 chase calls per customer',b:['5 milestones, technician and slot','WhatsApp updates, no chase calls']},
+  ];
+  const x0=110,w=400,g=33,y=300;
+  st.forEach((p,i)=>{
+    const x=x0+i*(w+g);
+    s+=card(x,y,w,500);
+    s+=C(x+40,y+42,22,{fill:RED})+T(x+40,y+50,i+1,{size:22,w:700,fill:'#fff',anchor:'middle'});
+    s+=T(x+76,y+51,p.n,{font:SERIF,size:27,w:700});
+    const pl=pill(x+w-20-((ctx.font=`700 13px ${MONO}`),ctx.measureText(p.t).width+13*0.16*p.t.length+24),y+26,p.t,{size:13,fill:SOFT,color:SLATE}); s+=pl.svg;
+    if(i<3) s+=`<path d="M${x+w+4} ${y+42} h${g-10}" stroke="${RED}" stroke-width="3" marker-end="url(#arR)"/>`;
+    // mini phone mock
+    const mx=x+22,my=y+84,mw=w-44,mh=196;
+    s+=R(mx,my,mw,mh,{fill:SOFT,stroke:LINE,r:12});
+    if(i===0){
+      s+=R(mx+14,my+16,250,40,{fill:'#fff',stroke:LINE,r:10})+T(mx+28,my+42,'आपका व्यवसाय क्या है?',{size:17});
+      s+=R(mx+mw-234,my+68,220,40,{fill:INK,r:10})+T(mx+mw-220,my+94,'Dental clinic, 6 staff',{size:17,fill:'#fff'});
+      s+=R(mx+14,my+120,mw-28,60,{fill:REDBG,stroke:RED,r:10,sw:1})+T(mx+28,my+145,'Vyapar Pro Office · ₹3,517/mo',{size:17,w:700,fill:RED})+T(mx+28,my+168,'Fibre 300, email for 5, backup, guest Wi-Fi',{size:14,fill:SLATE});
+    }
+    if(i===1){
+      [['Biz Fibre 300','₹1,499',1],['Cloud email × 5','₹625',1],['Endpoint security × 5','₹495',1],['Static IP','₹200',0]].forEach(([n,v,on],j)=>{
+        const yy=my+30+j*36; s+=T(mx+16,yy,n,{size:16,fill:on?INK:MUTED})+T(mx+mw-78,yy,v,{size:16,w:600,anchor:'end',fill:on?INK:MUTED});
+        s+=R(mx+mw-62,yy-16,44,22,{fill:on?GREEN:'#CBD5E1',r:11})+C(on?mx+mw-29:mx+mw-51,yy-5,8,{fill:'#fff'});
+      });
+      s+=Ln(mx+16,my+158,mx+mw-16,my+158)+T(mx+16,my+184,'Total / month',{size:16,w:700})+T(mx+mw-16,my+184,'₹3,517',{size:20,w:700,fill:RED,anchor:'end'});
+    }
+    if(i===2){
+      [['GSTIN 23AAB•••••4K1Z9','Active',1],['Udyam UDYAM-MP-••-0451','Matched',1],['Address proof','257 days old',0]].forEach(([n,v,ok],j)=>{
+        const yy=my+32+j*40; s+=(ok?tick(mx+26,yy-6):cross(mx+26,yy-6))+T(mx+46,yy,n,{size:15,fill:INK})+T(mx+mw-14,yy,v,{size:15,w:700,anchor:'end',fill:ok?GREEN:RED});
+      });
+      s+=R(mx+14,my+142,mw-28,40,{fill:'#fff',stroke:LINE,r:8})+R(mx+26,my+153,18,18,{fill:INK,r:4})+`<path d="M${mx+30} ${my+162} l4 4 l7 -8" stroke="#fff" stroke-width="2.4" fill="none"/>`+T(mx+54,my+168,'I consent: used only for this connection',{size:14,fill:SLATE});
+    }
+    if(i===3){
+      const ms=['Order','KYC','Survey','Install','Live']; const sx=mx+30, step=(mw-60)/4;
+      s+=Ln(sx,my+44,sx+step*4,my+44,{stroke:LINE,sw:4})+Ln(sx,my+44,sx+step*2,my+44,{stroke:GREEN,sw:4});
+      ms.forEach((m,j)=>{ const cx=sx+j*step; s+= j<2?tick(cx,my+44):(j===2?C(cx,my+44,11,{fill:'#fff',stroke:RED,sw:4}):C(cx,my+44,9,{fill:'#fff',stroke:'#CBD5E1',sw:3})); s+=T(cx,my+80,m,{size:14,anchor:'middle',fill:j<=2?INK:MUTED,w:j===2?700:400}); });
+      s+=R(mx+14,my+106,mw-28,74,{fill:'#fff',stroke:LINE,r:10})+C(mx+46,my+143,20,{fill:INK})+T(mx+46,my+150,'RK',{size:15,w:700,fill:'#fff',anchor:'middle'});
+      s+=T(mx+78,my+136,'Ravi K. · Fri 10:00–12:00',{size:16,w:700})+T(mx+78,my+162,'Visit PIN 4821 · tap to reschedule',{size:14,fill:SLATE});
+    }
+    // bullets
+    let yy=y+326;
+    p.b.forEach(b=>{ s+=C(x+30,yy-6,4,{fill:RED}); const t=W(x+44,yy,w-66,b,{size:18.5,fill:INK,lh:1.3}); s+=t.svg; yy+=t.h+12; });
+    s+=R(x+22,y+424,w-44,54,{fill:SOFT,r:10})+T(x+38,y+457,'TODAY',{font:MONO,size:13,w:700,fill:MUTED,ls:2})+T(x+112,y+457,p.was,{size:16.5,fill:SLATE,style:'text-decoration="line-through"'});
+  });
+  s+=foot(4,'**Working prototype:** 15 APIs · rules engine · mock GSTIN/Udyam registries · KYC checks · tracker · partner back office.');
+  return s;
+});
+
+// 5 · ARCHITECTURE + PRIVACY
+S.push(()=>{
+  let s=head(5,'Architecture · trust','The AI suggests, the rules engine decides, and privacy is built in','Main components and data flows, with DPDP Act 2023 controls.');
+  s+=card(110,300,1070,580);
+  s+=kick(140,342,'Solution architecture',MUTED);
+  const lane=(x,w,title,items,col)=>{ let o=T(x,382,title,{font:MONO,size:14,w:700,fill:col,ls:2});
+    const h=64, step=(448-h)/(items.length-1);
+    items.forEach(([a],j)=>{ const y=398+j*step; o+=R(x,y,w,h,{fill:col===RED?REDBG:SOFT,stroke:col===RED?'#FCA5A5':LINE,r:10});
+      o+=T(x+16,y+39,a,{size:17,w:700}); }); return o; };
+  s+=lane(140,210,'CHANNELS',[['Mobile web / PWA','EN, हिंदी + 6 languages'],['WhatsApp','same flow in chat'],['Partner tablet','assisted mode, QR-tagged'],['Field sales app',''],['Voice (next)','']],INK);
+  s+=lane(390,300,'VYAPARSETU CORE',[['GenAI Advisor','LLM for the chat; output is checked by the rules engine'],['Catalogue rules engine','25 products: city tier, size, GSTIN rules, dependencies'],['Smart KYC (OCR + lookup)',''],['Order tracker','milestones, technician dispatch, WhatsApp'],['Lead scoring','propensity score for leads to call back']],RED);
+  s+=lane(730,200,'DATA',[['Consent ledger','purpose, time, version'],['Doc vault (30 days)',''],['Lead & order DB','PAN digits masked'],['Catalogue',''],['Audit log','']],INK);
+  s+=lane(970,180,'ACCEL SYSTEMS',[['CRM','partner payouts'],['Billing (one bill)',''],['Provisioning','field workforce'],['GSTN / Udyam',''],['Partner payouts','']],INK);
+  [[352,388],[692,728],[932,968]].forEach(([xa,xb])=>[622].forEach(y=>{ s+=`<path d="M${xa} ${y} H${xb}" stroke="${RED}" stroke-width="3" marker-end="url(#arR)"/>`; }));
+
+  // DPDP pillars
+  s+=card(1200,300,610,340);
+  s+=kick(1230,342,'DPDP Act, 2023 · built into the flow',GREEN);
+  const dp=[['Consent','Separate yes/no consent before any upload, logged with time'],['Purpose limitation','KYC data used only for activation and billing, not marketing'],['Data minimisation','Only needed fields kept; PAN digits in GSTIN are masked'],['Storage limitation','Images deleted 30 days after activation; only a hash is kept']];
+  dp.forEach(([a,b],j)=>{ const y=378+j*64; s+=tick(1242,y+4); s+=T(1266,y+11,a,{size:18,w:700}); s+=W(1266,y+35,520,b,{size:15,fill:SLATE,lh:1.25}).svg; });
+
+  // KYC result grid
+  s+=card(1200,660,610,220);
+  s+=kick(1230,700,'Smart KYC on the 12 specimen applicants',MUTED);
+  const rej={K01:'GSTIN cancelled',K04:'GST cert unreadable',K05:'Udyam missing',K11:'bill > 90 days'};
+  for(let i=1;i<=12;i++){ const k='K'+String(i).padStart(2,'0'), x=1230+((i-1)%6)*94, y=718+Math.floor((i-1)/6)*52, bad=rej[k];
+    s+=R(x,y,84,42,{fill:bad?REDBG:GREENBG,stroke:bad?'#FCA5A5':'#A7F3D0',r:8})+T(x+42,y+28,k,{font:MONO,size:17,w:700,fill:bad?RED:GREEN,anchor:'middle'}); }
+  s+=W(1230,840,560,'**4 flagged:** cancelled GSTIN · unreadable GST cert · missing Udyam · old address proof',{size:14.5,fill:SLATE,bfill:RED,lh:1.25}).svg;
+  s+=foot(5,'**The LLM never sets a price or approves KYC** — catalogue rules and registry data do, with an audit trail.');
+  return s;
+});
+
+// 6 · COMPETITION
+S.push(()=>{
+  let s=head(6,'Competitive analysis','Rivals sell one piece; we sell the whole setup in one sitting','Our assessment of public SMB offerings, Oct 2026.   ● full   ◐ partial   ○ none');
+  const cols=['Jio Business','Tata Tele Business','Local ISP / reseller','Single-product apps (POS, email, CCTV)','VyaparSetu (Accel)'];
+  const rows=[
+    ['Buy online, no sales visit',[1,0,0,2,2]],
+    ['Connectivity + IT + security on one bill',[1,1,0,0,2]],
+    ['Guided advice in the owner’s language',[0,0,1,0,2]],
+    ['KYC done in minutes, paperless',[1,0,0,1,2]],
+    ['Live order and install tracking',[1,0,0,1,2]],
+    ['Local, in-person help when needed',[1,1,2,0,2]],
+    ['Business SLA and single support number',[1,2,0,1,2]],
+    ['Entry price for micro budgets',[2,0,2,1,1]],
+  ];
+  const X=110,Y=300,lw=520,cw=236,rh=44,hh=74;
+  s+=card(X,Y,1700,hh+rows.length*rh+16);
+  s+=R(X+lw+cw*4,Y,cw,hh+rows.length*rh+16,{fill:REDBG,stroke:RED,r:14,sw:2.5});
+  cols.forEach((c,i)=>{ const cx=X+lw+cw*i+cw/2; const t=W(0,0,cw-30,c,{size:17}); const lines=Math.round(t.h/(17*1.35));
+    s+=W(cx-(cw-30)/2,Y+(lines>1?36:48),cw-30,c,{size:17,w:700,fill:i===4?RED:INK}).svg.replace(/<text /g,`<text text-anchor="middle" `).replace(/x="[\d.]+"/g,`x="${cx}"`); });
+  const dot=(cx,cy,v)=> v===2?C(cx,cy,12,{fill:INK}) : v===1? C(cx,cy,12,{fill:'#fff',stroke:INK,sw:2.5})+`<path d="M${cx} ${cy-12} a12 12 0 0 1 0 24z" fill="${INK}"/>` : C(cx,cy,12,{fill:'#fff',stroke:'#CBD5E1',sw:2.5});
+  rows.forEach(([n,v],j)=>{ const y=Y+hh+j*rh;
+    s+=Ln(X+20,y,X+1680,y,{stroke:LINE,sw:1.2});
+    s+=T(X+30,y+29,n,{size:19,w:600});
+    v.forEach((d,i)=>{ const cx=X+lw+cw*i+cw/2; s+= i===4 ? (d===2?C(cx,y+22,12,{fill:RED}):C(cx,y+22,12,{fill:'#fff',stroke:RED,sw:2.5})+`<path d="M${cx} ${y+10} a12 12 0 0 1 0 24z" fill="${RED}"/>`) : dot(cx,y+22,d); });
+  });
+  // right to win
+  const rw=[['Nothing new to build','All 4 bundles come from the existing 25-product catalogue.'],
+            ['Partners stay in the loop','Self-serve sales are QR-tagged, so the local partner still earns.'],
+            ['Trust from verified data','GSTIN leads activate ~5× more; we verify them in seconds.']];
+  rw.forEach(([a,b],i)=>{ const x=110+i*575; s+=card(x,762,550,122,{accent:RED}); s+=T(x+30,798,a,{font:SERIF,size:22,w:700}); s+=W(x+30,834,500,b,{size:17.5,fill:SLATE,lh:1.3}).svg; });
+  s+=foot(6,'**Our gap is price, not scope:** one bill for everything the shop needs, from ₹1,996 a month.');
+  return s;
+});
+
+// 7 · IMPACT
+S.push(()=>{
+  let s=head(7,'Impact · metrics · rollout','Twice the activations from the same leads, at half the cost each','6-month targets against the Apr–Jun 2026 baseline.');
+  // KPI table
+  s+=card(110,300,990,420);
+  const hd=['Metric','Today','6-mo target','Main lever'], cx=[140,500,640,800];
+  hd.forEach((h,i)=>s+=T(cx[i],342,h.toUpperCase(),{font:MONO,size:14,w:700,fill:MUTED,ls:2}));
+  const km=[['Lead → activation','7.4%','15%','advisor + instant quote'],
+            ['Time to activate','17.6 d','≤ 5 d','paperless KYC'],
+            ['Status chase calls','3.0','< 0.5','tracker + WhatsApp'],
+            ['Cost per activation','₹15,053','≤ ₹7,500','fewer field visits'],
+            ['6-month churn','15.2%','< 10%','right-sized bundles']];
+  km.forEach(([m,a,b,l],j)=>{ const y=362+j*70;
+    s+=Ln(130,y,1080,y,{stroke:LINE,sw:1.2});
+    s+=T(140,y+42,m,{size:20,w:700});
+    s+=T(500,y+42,a,{size:22,fill:SLATE,style:'text-decoration="line-through"'});
+    s+=T(640,y+42,b,{font:SERIF,size:28,w:700,fill:RED});
+    s+=T(800,y+41,l,{size:17,fill:SLATE}); });
+
+  // business math hero
+  s+=card(1120,300,690,250,{shadow:true});
+  s+=kick(1150,340,'Same 5,000 leads a quarter',RED);
+  s+=T(1150,410,'368',{font:SERIF,size:58,w:700,fill:MUTED})+`<path d="M1272 392 h60" stroke="${RED}" stroke-width="4" marker-end="url(#arR)"/>`+T(1350,410,'750',{font:SERIF,size:58,w:700,fill:INK})+T(1470,410,'activations',{size:22,fill:SLATE});
+  s+=W(1150,456,640,'**+₹26 L a month** in new revenue (382 × ₹6,900 median bundle) ≈ **₹3.2 Cr a year** from each quarter’s leads.',{size:18,fill:SLATE,bfill:INK,lh:1.35}).svg;
+
+  // field force & partners
+  s+=card(1120,570,690,310,{accent:INK});
+  s+=T(1150,610,'Field force and partners: they gain, not lose',{font:SERIF,size:22,w:700});
+  [['Partners','sell in assisted mode, earn on QR-tagged sales'],
+   ['Field sales','call a ranked list of unclosed leads'],
+   ['Complex deals','multi-site and factory stay field-led']].forEach(([a,b],j)=>{
+    const y=672+j*68; s+=C(1160,y-6,5,{fill:RED}); s+=W(1176,y,610,`**${a}:** ${b}`,{size:19,fill:SLATE,bfill:INK,lh:1.3}).svg; });
+
+  // rollout
+  s+=card(110,740,990,140);
+  s+=kick(140,778,'Rollout',MUTED);
+  const ph=[['0–3 mo · Pilot','2 cities · Hindi/English'],['3–6 mo · Scale','Tier 1–2 · WhatsApp · 6 languages'],['6–12 mo · National','Multi-site, factory · voice']];
+  ph.forEach(([a,b],i)=>{ const x=140+i*318; s+=R(x,796,300,8,{fill:i===0?RED:(i===1?'#F87171':'#FCA5A5'),r:4}); s+=T(x,830,a,{size:18,w:700}); s+=T(x,858,b,{size:16,fill:SLATE}); });
+  s+=foot(7,'**Risks covered:** AI errors → rules engine · channel conflict → QR commission · low digital comfort → assisted mode.');
+  return s;
+});
+
+// ---------- render ----------
+const only=+q.get('s')||0, bare=q.has('bare');
+if(only) document.body.classList.add('one'); if(bare) document.body.classList.add('bare');
+document.getElementById('deck').innerHTML=S.map((f,i)=>{
+  if(only && i+1!==only) return '';
+  return `<div class="slide"><img src="assets/tpl${i===0?1:2}.jpg"><svg viewBox="0 0 1920 1080" width="1920" height="1080" xmlns="http://www.w3.org/2000/svg">${defs}${f()}</svg></div>`;
+}).join('');
+</script>
+</body>
+</html>

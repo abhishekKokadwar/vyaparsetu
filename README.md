@@ -12,7 +12,7 @@
 
 ## 📌 Executive Summary
 
-India's 6 Crore+ Micro, Small, and Medium Enterprises (MSMEs) are increasingly adopting digital tools (UPI/POS, WhatsApp Business, cloud email, CCTV). However, Accel Business (Airtel Enterprise) currently suffers from a **7.36% funnel conversion**, **₹15,000 CAC**, **17.6-day onboarding cycles**, and **3+ status chase calls** per customer due to legacy field-sales processes and complex documentation.
+India's 6 Crore+ Micro, Small, and Medium Enterprises (MSMEs) are increasingly adopting digital tools (UPI/POS, WhatsApp Business, cloud email, CCTV). However, Accel Business (Airtel Enterprise) currently suffers from a **7.36% funnel conversion**, **₹15,053 CAC**, **17.6-day onboarding cycles**, and **3.0 status chase calls** per customer due to legacy field-sales processes and complex documentation.
 
 **Project Udyam Digital** reimagines this journey as a 10-minute, digital-first self-serve experience on mobile:
 1. **GenAI Conversational Advisor:** Multilingual (Hindi/English) discovery engine that asks 4 intuitive questions and recommends a tailored product bundle adhering strictly to `product_catalogue.csv` rules.
@@ -39,8 +39,10 @@ India's 6 Crore+ Micro, Small, and Medium Enterprises (MSMEs) are increasingly a
 ├── PLAN.md                        # Complete project blueprint & execution plan
 ├── DPDP_COMPLIANCE_NOTE.md        # Official 1-Page DPDP Act 2023 compliance architecture
 ├── DEMO_SCRIPT.md                 # 3-Minute timed demo walkthrough script
-├── VyaparSetu_Hacker247_Submission.pptx # 7-Slide official submission deck
-├── VyaparSetu_Hacker247_Submission.pdf  # Exported submission PDF
+├── Hacker_247_ABVIIITMGwalior.pptx  # 7-slide submission deck (official Sync template)
+├── Hacker_247_ABVIIITMGwalior.pdf   # Same deck as PDF
+├── deck/index.html                 # Deck source: every slide drawn as SVG by JS
+├── scripts/build_svg_deck.py       # Rebuilds the PPTX + PDF from deck/index.html
 ├── app/                           # Full-stack working prototype (FastAPI + Modern UI)
 ├── run.py                         # One-click runner (http://localhost:8000)
 └── README.md                      # Project overview and documentation
@@ -50,13 +52,17 @@ India's 6 Crore+ Micro, Small, and Medium Enterprises (MSMEs) are increasingly a
 
 ## 🎯 Target Impact Metrics
 
-| Metric | Current Baseline | Project Udyam Digital Target | Improvement |
+6-month targets against the Apr–Jun 2026 baseline (`smb_leads.csv`).
+
+| Metric | Today | 6-month target | Main lever |
 |---|---|---|---|
-| **Lead-to-Activation Conversion** | 7.36% (368 / 5,000) | **24.5%** | **3.3x Increase** |
-| **Blended CAC** | ₹15,000 | **₹2,800** | **81% Cost Reduction** |
-| **Lead-to-Activation Cycle Time** | 17.6 days | **< 48 hours** | **89% Faster Onboarding** |
-| **Customer Status Chases** | 3.2 calls / lead | **< 0.3 calls / lead** | **90% Call Center Deflection** |
-| **6-Month Churn Rate** | ~18.4% | **< 8.0%** | Higher stickiness from bundle synergy |
+| **Lead → activation** | 7.4% (368 / 5,000) | **15%** | advisor + instant quote |
+| **Time to activate** | 17.6 days | **≤ 5 days** (fibre install-bound) | paperless KYC |
+| **Status chase calls** | 3.0 per customer | **< 0.5** | tracker + WhatsApp updates |
+| **Cost per activation** | ₹15,053 | **≤ ₹7,500** | fewer field visits |
+| **6-month churn** | 15.2% | **< 10%** | right-sized bundles |
+
+Same 5,000 leads a quarter → 750 activations instead of 368: about +₹26 L a month in new revenue (382 × ₹6,900 median bundle), roughly ₹3.2 Cr a year from each quarter's leads.
 
 ---
 
@@ -66,8 +72,8 @@ India's 6 Crore+ Micro, Small, and Medium Enterprises (MSMEs) are increasingly a
 - [x] **Comprehensive Product & Engineering Roadmap (6 Fixed + 5 Stretch Phases)** (`ROADMAP.md`)
 - [x] **Interactive Full-Stack Web Application** (FastAPI backend + Modern UI served via `run.py`)
 - [x] **Smart KYC Engine with Automated Document & Expiry Verification** (Live K01–K12 Answer Key)
-- [x] **Official 7-Slide Submission Presentation Deck** (`VyaparSetu_Hacker247_Submission.pptx`)
-- [x] **Official Submission PDF** (`VyaparSetu_Hacker247_Submission.pdf`)
+- [x] **7-Slide Submission Deck on the official template** (`Hacker_247_ABVIIITMGwalior.pptx`)
+- [x] **Submission PDF** (`Hacker_247_ABVIIITMGwalior.pdf`)
 - [x] **1-Page DPDP Act 2023 Compliance & Data Minimisation Note** (`DPDP_COMPLIANCE_NOTE.md`)
 - [x] **3-Minute Demo Video Walkthrough Script** (`DEMO_SCRIPT.md`)
 
