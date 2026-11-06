@@ -1,0 +1,229 @@
+--- PAGE 1 ---
+
+
+--- PAGE 2 ---
+Page 2
+YTL HACKATHON 2026 · ENTERPRISE TRACK A
+Project Udyam Digital
+Making small businesses go digital in one sitting
+Case study and problem statement · Prepared by Ankit Srivastava · October 2026
+About this case. Teams submit a working prototype plus a short business case, so we can assess
+technical depth and business judgement together. The case uses a fictional operator, Accel
+Telecom, and its B2B arm Accel Business. All figures and data are synthetic and built for the
+exercise; they are not company data.
+Context
+Accel Telecom leads India's mobile market and is a top-2 player in home broadband. Its enterprise
+arm, Accel Business, serves large corporates well but has a small share of India's 6 crore+ micro,
+small and medium enterprises (MSMEs): kirana stores, clinics, coaching centres, small
+manufacturers, CA firms and restaurants.
+These businesses increasingly need more than a SIM. A typical clinic or retail shop now wants fixed
+broadband or a leased line, a few business SIMs, a WhatsApp/SMS channel to reach customers,
+cloud email and storage, basic cybersecurity, and CCTV or POS connectivity. Today they buy each
+piece from a different vendor, often from a local reseller, with no single bill or support number.
+Accel Business already offers most of these products, but sells them one at a time through a field
+sales force built for large accounts. The journey for a small business owner is slow and paper-heavy:
+I
+Needs are discovered in a visit by a sales executive, who often pitches whatever is on target that
+month
+I
+A quote takes 3–5 days and comes as a PDF with product codes the owner does not understand
+I
+KYC needs GST certificate, Udyam registration, address proof and signatory ID, collected
+physically or over email
+I
+Installation and activation take 10–14 days on average, with 3–4 follow-up calls from the customer
+I
+Each product is billed and supported separately after activation
+As a result, cost to acquire a small business is high, conversion is low, and a large share of interested
+prospects drop out before activation. Competitors and digital-first players are starting to offer
+instant online sign-up for single products.
+
+
+--- PAGE 3 ---
+Page 3
+The problem
+Design and build a digital-first acquisition and onboarding journey that lets a small
+business owner discover the right bundle, buy it and get it activated with minimal
+human effort — on a phone, in their preferred language.
+Key questions
+1.
+Which MSME segments should Accel Business prioritise first, and what bundle (products, price
+point, contract length) fits each?
+2.
+How should needs discovery work without a salesperson? Think of a conversational advisor (chat
+or voice, in Hindi and regional languages) that asks a few questions and recommends a bundle
+with a clear monthly price.
+3.
+How can KYC and documentation be made near-instant (e.g. GSTIN/Udyam lookup, document
+OCR, DigiLocker, e-sign) while staying compliant with the DPDP Act, 2023 — consent, purpose
+limitation and data minimisation?
+4.
+What role should the existing field force and local channel partners play, so the digital journey
+adds to them instead of competing with them?
+5.
+How will you measure success? Define the 3–5 metrics that matter (e.g. lead-to-activation
+conversion, time to activate, cost of acquisition, 6-month churn) and the targets you would set.
+Build challenge
+Build a working prototype of the journey covering at least:
+Advisor
+A GenAI-powered assistant that asks about the business (type, size, locations,
+current tools) and recommends a bundle from the product catalogue,
+explaining why in plain language
+Quote and checkout
+A single, transparent monthly price with add-ons the owner can toggle
+Smart KYC
+Document upload with extraction and validation, mocked lookups of GSTIN and
+Udyam data, and a clear consent screen
+Tracker
+An order status view the owner can check instead of calling support
+Stretch goals: a voice or WhatsApp front end; a back-office view for sales or partners showing
+leads the advisor could not close; a simple propensity score for which leads to call.
+
+
+--- PAGE 4 ---
+Page 4
+What teams submit
+1.
+Working prototype (demo video of 3 minutes max + code repository)
+2.
+Solution architecture diagram with the main components and data flows
+3.
+Business case in 10 slides or fewer: target customer, value, pricing or savings, rollout, risks
+4.
+A 1-page note on data privacy and security choices made in the design
+Data provided
+Students receive YTL_TrackA_Udyam_Digital_Data.zip, with a README explaining every column. All
+data is synthetic: businesses, people and identifiers are fictional.
+File
+Size
+Use it for
+product_catalogue.csv
+25 products
+Advisor recommendations and quotes: price ranges, setup
+fees, contract length, eligibility rules (city tier, size, GSTIN
+needed) and product dependencies
+smb_leads.csv
+5,000 leads
+One quarter of SMB leads: profile, source, funnel stage reached,
+drop reason, stage dates; for activated leads the bundle
+bought, value, 6-month churn and NPS
+mock_gstin_registry.csv
+3,534 records
+Backing data for a mock GSTIN lookup API (legal name,
+address, status incl. cancelled/suspended)
+mock_udyam_registry.csv
+2,723 records
+Backing data for a mock Udyam lookup API
+kyc_documents/
+47 images, 12
+applicants
+Specimen GST and Udyam certificates, signatory IDs and utility
+bills for OCR and validation; some contain planted problems
+Judges get a separate pack, YTL_TrackA_Judges_Only.zip, which must not be shared with students: 15 advisor test
+scenarios to run live during demos, the KYC answer key, the signals planted in the leads data, and the scripts that
+regenerate the data.
+
+
+--- PAGE 5 ---
+Page 5
+Appendix A1: SMB acquisition funnel
+Only 7% of SMB leads get activated; the steepest drop is from needs assessed to quote
+accepted
+5,000 leads → 368 activations, Apr–Jun 2026 (smb_leads.csv)
+% of previous stage
+Leads generated
+5,000
+—
+Contacted
+3,406
+68%
+Needs assessed
+1,974
+58%
+Quote accepted
+861
+44%
+KYC complete
+588
+68%
+Activated
+368
+63%
+Source: smb_leads.csv (synthetic) · Tier 1–2 cities, Apr–Jun 2026
+17.6 days
+average lead to activation
+3×
+status chases per customer
+₹15,000
+blended acquisition cost
+per activated SMB
+9.6% vs 2.0%
+activation with vs without
+GSTIN
+Activated customers took 17.6 days on average from lead to activation and chased status 3 times.
+Blended acquisition cost is about ₹15,000 per activated SMB, against a median bundle of
+₹6,900/month (micro businesses average about ₹2,500). Leads with a GSTIN activate at 9.6%, those
+without at 2.0%.
+
+
+--- PAGE 6 ---
+Page 6
+Appendix A2: Customer segments (indicative)
+Segment
+Share of
+SMB
+base
+Typical
+example
+Current setup
+Key needs
+Price
+sensitivity
+Micro retail &
+services
+55%
+Kirana, salon,
+pharmacy
+Owner's mobile +
+hotspot, UPI QR
+Reliable internet for
+UPI/POS, WhatsApp
+catalogue
+Very high
+Professional
+offices
+25%
+Clinic, CA firm,
+coaching centre
+Home
+broadband,
+personal Gmail
+Uptime, cloud
+email/storage, data
+security
+Medium
+Small multi-site
+businesses
+15%
+Restaurant
+chain, 3–10 store
+retailer
+Mixed ISPs per
+site, no central IT
+One bill, central
+management, CCTV,
+failover
+Medium–low
+Small
+manufacturers
+5%
+Auto-parts unit,
+textile unit
+Leased line or
+local ISP
+Dedicated bandwidth,
+IoT for machines, ERP
+access
+Low
+
+
