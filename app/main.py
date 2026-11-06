@@ -153,3 +153,4 @@ def serve_index():
     if os.path.exists(index_file):
         return FileResponse(index_file)
     return {"message": "VyaparSetu API is running. Build static frontend to access UI."}
+

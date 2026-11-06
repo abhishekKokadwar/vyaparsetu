@@ -24,3 +24,4 @@ with open('udyam_digital_data/kyc_extracted.json', 'w', encoding='utf-8') as out
     json.dump(results, out, indent=2)
 
 print("Saved all extracted OCR data to udyam_digital_data/kyc_extracted.json")
+

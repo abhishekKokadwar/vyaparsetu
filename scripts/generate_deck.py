@@ -300,3 +300,4 @@ p.space_before = Pt(4)
 
 prs.save(OUTPUT_PATH)
 print(f"Successfully generated 7-slide submission presentation at {OUTPUT_PATH}!")
+

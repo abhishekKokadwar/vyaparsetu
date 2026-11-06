@@ -76,3 +76,4 @@ for app_id in sorted(applicants.keys()):
     if issues:
         print(f"     ISSUES: {'; '.join(issues)}")
     print("-" * 60)
+

@@ -35,9 +35,15 @@ India's 6 Crore+ Micro, Small, and Medium Enterprises (MSMEs) are increasingly a
 │   ├── mock_gstin_registry.csv    # 3,534 GST records with status and addresses
 │   ├── mock_udyam_registry.csv    # 2,723 MSME Udyam records
 │   └── kyc_documents/             # 47 specimen KYC documents (K01-K12)
+├── ROADMAP.md                     # Comprehensive 6 Fixed + 5 Stretch Phases Roadmap
 ├── PLAN.md                        # Complete project blueprint & execution plan
-├── README.md                      # Project overview and documentation
-└── .gitignore                     # Git ignore rules
+├── DPDP_COMPLIANCE_NOTE.md        # Official 1-Page DPDP Act 2023 compliance architecture
+├── DEMO_SCRIPT.md                 # 3-Minute timed demo walkthrough script
+├── VyaparSetu_Hacker247_Submission.pptx # 7-Slide official submission deck
+├── VyaparSetu_Hacker247_Submission.pdf  # Exported submission PDF
+├── app/                           # Full-stack working prototype (FastAPI + Modern UI)
+├── run.py                         # One-click runner (http://localhost:8000)
+└── README.md                      # Project overview and documentation
 ```
 
 ---
@@ -57,12 +63,13 @@ India's 6 Crore+ Micro, Small, and Medium Enterprises (MSMEs) are increasingly a
 ## 📑 Deliverables Roadmap
 
 - [x] **Project Execution Plan & Data Analysis** (`PLAN.md`)
-- [ ] **Interactive Full-Stack Web Application** (FastAPI backend + Interactive UI)
-- [ ] **Smart KYC Engine with Automated Document & Expiry Verification**
-- [ ] **Solution Architecture Diagram**
-- [ ] **Official 7-Slide Submission Presentation Deck** (`.pptx` & `.pdf`)
-- [ ] **1-Page DPDP Act 2023 Compliance & Data Minimisation Note**
-- [ ] **3-Minute Demo Video Walkthrough Script**
+- [x] **Comprehensive Product & Engineering Roadmap (6 Fixed + 5 Stretch Phases)** (`ROADMAP.md`)
+- [x] **Interactive Full-Stack Web Application** (FastAPI backend + Modern UI served via `run.py`)
+- [x] **Smart KYC Engine with Automated Document & Expiry Verification** (Live K01–K12 Answer Key)
+- [x] **Official 7-Slide Submission Presentation Deck** (`VyaparSetu_Hacker247_Submission.pptx`)
+- [x] **Official Submission PDF** (`VyaparSetu_Hacker247_Submission.pdf`)
+- [x] **1-Page DPDP Act 2023 Compliance & Data Minimisation Note** (`DPDP_COMPLIANCE_NOTE.md`)
+- [x] **3-Minute Demo Video Walkthrough Script** (`DEMO_SCRIPT.md`)
 
 ---
 

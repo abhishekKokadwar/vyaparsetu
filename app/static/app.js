@@ -687,3 +687,4 @@ function assistDroppedLead(bizName, segment, tier, emp, hasGst) {
   document.querySelector(`input[name="adv-has-gst"][value="${hasGst ? 'yes' : 'no'}"]`).checked = true;
   submitAdvisorProfile();
 }
+

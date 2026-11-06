@@ -220,3 +220,4 @@ class AdvisorEngine:
             'is_compliant': is_valid,
             'validation_errors': validation_errors
         }
+

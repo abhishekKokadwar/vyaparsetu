@@ -99,3 +99,4 @@ class PartnerService:
             'potential_arr_inr': est_recoverable_arr,
             'commission_pool_inr': int(est_recoverable_arr * 0.12)
         }
+

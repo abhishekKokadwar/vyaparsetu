@@ -130,3 +130,4 @@ class CatalogEngine:
             'estimated_install_days': max_install_days,
             'items': details
         }
+

@@ -125,3 +125,4 @@ class RegistryService:
                 'state': r['state']
             })
         return results
+
