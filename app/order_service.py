@@ -155,11 +155,13 @@ class OrderService:
         order_num = f"VS-2026-{uuid.uuid4().hex[:5].upper()}"
         prods = order_data.get('selected_products', [])
         
-        # Dynamic SLA calculation from products
+        # Dynamic SLA calculation from products with strict catalog floor enforcement
+        catalog_sla = self.calculate_bundle_sla(prods)
         if 'estimated_install_days' in order_data and int(order_data['estimated_install_days']) > 0:
-            install_days = int(order_data['estimated_install_days'])
+            # Enforce catalog SLA floor: cannot promise faster delivery than physical infrastructure allows
+            install_days = max(int(order_data['estimated_install_days']), catalog_sla)
         else:
-            install_days = self.calculate_bundle_sla(prods)
+            install_days = catalog_sla
 
         now = datetime.now()
         est_activation = (now + timedelta(days=install_days)).strftime("%d %b %Y")

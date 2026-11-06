@@ -2,6 +2,7 @@ import pandas as pd
 import os
 import re
 from typing import Dict, List, Optional, Any
+from app.registry_service import RegistryService
 
 LEADS_PATH = os.path.join(os.path.dirname(__file__), '..', 'udyam_digital_data', 'smb_leads.csv')
 
@@ -278,7 +279,8 @@ class PartnerService:
                 'city_tier': int(r['city_tier']),
                 'has_gstin': str(r['has_gstin']).upper() == 'Y',
                 'has_udyam': str(r.get('has_udyam', 'N')).upper() == 'Y',
-                'gstin': r['gstin'] if pd.notna(r['gstin']) else '',
+                'gstin': RegistryService.mask_gstin(str(r['gstin'])) if pd.notna(r['gstin']) and str(r['gstin']).strip() else '',
+                'gstin_masked': RegistryService.mask_gstin(str(r['gstin'])) if pd.notna(r['gstin']) and str(r['gstin']).strip() else '',
                 'employee_count': int(r['employee_count']) if pd.notna(r['employee_count']) else 1,
                 'monthly_spend': int(r['monthly_telecom_spend_inr']) if pd.notna(r['monthly_telecom_spend_inr']) else 0,
                 'stage_reached': r['stage_reached'],

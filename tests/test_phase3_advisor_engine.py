@@ -139,6 +139,38 @@ def test_conversational_query_parsing(advisor):
     assert p_en['employee_count'] == 15
     assert p_en['has_gstin'] is True
 
+def test_audit_colloquial_and_regional_queries(advisor):
+    """Verify robust parsing across edge queries identified during audit"""
+    # 1. '4 restaurants in bangalore'
+    p1 = advisor.parse_conversational_query("4 restaurants in bangalore")
+    assert p1['num_sites'] == 4
+    assert p1['city_tier'] == 1
+    assert p1['segment'] == 'multi'
+    rec1 = advisor.recommend(p1)
+    assert rec1['segment'] == 'multi'
+
+    # 2. 'beauty parlour hai'
+    p2 = advisor.parse_conversational_query("beauty parlour hai")
+    assert p2['segment'] == 'micro'
+    assert p2['preferred_language'] == 'hi'
+
+    # 3. Marathi 'medical store'
+    p3 = advisor.parse_conversational_query("माझे पुण्यात मेडिकल स्टोअर आहे 3 कामगार आहेत")
+    assert p3['preferred_language'] == 'mr'
+    assert p3['city_tier'] == 1
+    assert p3['employee_count'] == 3
+    assert p3['segment'] == 'prof'
+    rec3 = advisor.recommend(p3)
+    assert "आपल्या" in rec3['pitch_narrative']
+
+    # 4. 'We have GST and 15 teachers in coaching center'
+    p4 = advisor.parse_conversational_query("We have GST and 15 teachers in coaching center")
+    assert p4['has_gstin'] is True
+    assert p4['employee_count'] == 15
+    assert p4['segment'] == 'prof'
+    rec4 = advisor.recommend(p4)
+    assert 'P11' in rec4['selected_product_ids'] # Static IP unlocked by GSTIN
+
 def test_clarification_detection(advisor):
     """Verify ambiguity detection when key fields are omitted"""
     ambiguous_profile = {

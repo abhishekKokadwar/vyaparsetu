@@ -195,3 +195,15 @@ def test_already_activated_boundary(order_service):
     res_extra = order_service.advance_stage(oid)
     assert res_extra['status'] == 'ALREADY_ACTIVATED'
 
+def test_catalog_sla_floor_enforcement(order_service):
+    """Verify that caller cannot override SLA below catalog technical feasibility (e.g. 3d on 21d leased line)"""
+    leased_line_payload = {
+        'business_name': 'Enterprise Leased Line Client',
+        'contact_phone': '+91 98111 22233',
+        'selected_products': ['P05'], # Internet Leased Line 20 (21-day technical install SLA)
+        'estimated_install_days': 3    # Attempt to promise 3 days
+    }
+    order = order_service.create_order(leased_line_payload)
+    # The order MUST enforce the 21-day floor
+    assert order['estimated_install_days'] >= 21
+

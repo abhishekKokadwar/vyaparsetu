@@ -194,15 +194,15 @@ S.push(()=>{
     s+=R(mx,my,mw,mh,{fill:SOFT,stroke:LINE,r:12});
     if(i===0){
       s+=R(mx+14,my+16,250,40,{fill:'#fff',stroke:LINE,r:10})+T(mx+28,my+42,'आपका व्यवसाय क्या है?',{size:17});
-      s+=R(mx+mw-234,my+68,220,40,{fill:INK,r:10})+T(mx+mw-220,my+94,'Dental clinic, 6 staff',{size:17,fill:'#fff'});
-      s+=R(mx+14,my+120,mw-28,60,{fill:REDBG,stroke:RED,r:10,sw:1})+T(mx+28,my+145,'Vyapar Pro Office · ₹3,517/mo',{size:17,w:700,fill:RED})+T(mx+28,my+168,'Fibre 300, email for 5, backup, guest Wi-Fi',{size:14,fill:SLATE});
+      s+=R(mx+mw-234,my+68,220,40,{fill:INK,r:10})+T(mx+mw-220,my+94,'Dental clinic, 4 staff',{size:17,fill:'#fff'});
+      s+=R(mx+14,my+120,mw-28,60,{fill:REDBG,stroke:RED,r:10,sw:1})+T(mx+28,my+145,'Vyapar Professional Suite · ₹3,097/mo',{size:17,w:700,fill:RED})+T(mx+28,my+168,'Fibre 300, email × 4, backup, guest Wi-Fi, static IP',{size:13,fill:SLATE});
     }
     if(i===1){
-      [['Biz Fibre 300','₹1,499',1],['Cloud email × 5','₹625',1],['Endpoint security × 5','₹495',1],['Static IP','₹200',0]].forEach(([n,v,on],j)=>{
+      [['Biz Fibre 300','₹1,499',1],['Cloud email × 4','₹500',1],['Cloud backup 1TB','₹499',1],['Guest Wi-Fi','₹399',1]].forEach(([n,v,on],j)=>{
         const yy=my+30+j*36; s+=T(mx+16,yy,n,{size:16,fill:on?INK:MUTED})+T(mx+mw-78,yy,v,{size:16,w:600,anchor:'end',fill:on?INK:MUTED});
         s+=R(mx+mw-62,yy-16,44,22,{fill:on?GREEN:'#CBD5E1',r:11})+C(on?mx+mw-29:mx+mw-51,yy-5,8,{fill:'#fff'});
       });
-      s+=Ln(mx+16,my+158,mx+mw-16,my+158)+T(mx+16,my+184,'Total / month',{size:16,w:700})+T(mx+mw-16,my+184,'₹3,517',{size:20,w:700,fill:RED,anchor:'end'});
+      s+=Ln(mx+16,my+158,mx+mw-16,my+158)+T(mx+16,my+184,'Total / month (+ ₹200 Static IP)',{size:14,w:700})+T(mx+mw-16,my+184,'₹3,097',{size:20,w:700,fill:RED,anchor:'end'});
     }
     if(i===2){
       [['GSTIN 23AAB•••••4K1Z9','Active',1],['Udyam UDYAM-MP-••-0451','Matched',1],['Address proof','257 days old',0]].forEach(([n,v,ok],j)=>{

@@ -22,9 +22,9 @@ def test_gstin_format_validator(registry):
     # Invalid GSTINs
     assert registry.validate_gstin_format("") is False
     assert registry.validate_gstin_format("INVALID123") is False
-    assert registry.validate_gstin_format("27ABCDE1234F1Z") is False # 14 chars
-    assert registry.validate_gstin_format("27ABCDE1234F1Z55") is False # 16 chars
-    assert registry.validate_gstin_format("99ABCDE1234F1A5") is False # 13th char must be 'Z'
+    assert registry.validate_gstin_format("27ABCDE1234F1Z") is False  # 14 chars
+    assert registry.validate_gstin_format("27ABCDE1234F1Z55") is False  # 16 chars
+    assert registry.validate_gstin_format("99ABCDE1234F1A5") is False  # 13th char must be 'Z'
 
 def test_udyam_format_validator(registry):
     """Verify Udyam registration structure validation with '00' district marker"""
@@ -33,9 +33,9 @@ def test_udyam_format_validator(registry):
     assert registry.validate_udyam_format("UDYAM-DL-00-9876543") is True
 
     # Invalid formats
-    assert registry.validate_udyam_format("UDYAM-MH-01-1234567") is False # Non-00 district
-    assert registry.validate_udyam_format("UDYAM-M-00-1234567") is False # 1-char state
-    assert registry.validate_udyam_format("UDYAM-MH-00-123456") is False # 6 digits instead of 7
+    assert registry.validate_udyam_format("UDYAM-MH-01-1234567") is False  # Non-00 district
+    assert registry.validate_udyam_format("UDYAM-M-00-1234567") is False  # 1-char state
+    assert registry.validate_udyam_format("UDYAM-MH-00-123456") is False  # 6 digits instead of 7
     assert registry.validate_udyam_format("MSME-MH-00-1234567") is False
 
 def test_pii_masking(registry):
@@ -57,7 +57,7 @@ def test_pii_masking(registry):
 def test_registry_lookup_performance_and_accuracy(registry):
     """Verify O(1) hash indexed lookups and active status validation"""
     # Lookup active GSTIN from dataset
-    res = registry.lookup_gstin("27AAACW1234F1Z1") # should handle not found cleanly
+    res = registry.lookup_gstin("27AAACW1234F1Z1")  # should handle not found cleanly
     assert res['found'] is False
 
     # Search existing business by name
@@ -94,19 +94,14 @@ def test_dpdp_consent_enforcement_and_audit_hash(kyc_engine):
     latest = history[-1]
     assert latest['status'] == 'GRANTED'
     assert 'audit_hash' in latest
-    assert len(latest['audit_hash']) == 64 # SHA-256 hex digest length
+    assert len(latest['audit_hash']) == 64  # SHA-256 hex digest length
     assert latest['dpdp_act_compliant'] is True
 
 def test_dpdp_consent_revocation(kyc_engine):
     """Verify Section 6 DPDP consent withdrawal workflow"""
-    # First record consent
     kyc_engine.record_consent('K99_TEST', 'Test Firm Ltd')
-    
-    # Revoke consent
     revoke_res = kyc_engine.revoke_consent('K99_TEST', reason="Customer opt-out")
     assert revoke_res['status'] == 'SUCCESS'
-    
-    # Check history contains revocation
     history = kyc_engine.get_consent_history('K99_TEST')
     assert any(h.get('event') == 'CONSENT_REVOKED' for h in history)
 
@@ -130,29 +125,36 @@ def test_all_12_applicants_ground_truth_matrix(kyc_engine):
     """
     Automated diagnostic test of all 12 specimen applicants (K01-K12).
     Verifies 100% agreement with the hackathon ground truth answer key:
-      K01: REJECT (Cancelled GSTIN)
-      K02: PASS   (54 days old address proof)
-      K03: PASS   (Valid records)
-      K04: REJECT (Corrupt/blank GST certificate)
-      K05: REJECT (Missing Udyam certificate)
-      K06: PASS   (Valid records)
-      K07: PASS   (10 days old utility bill)
-      K08: PASS   (Valid records)
-      K09: PASS   (5 days old utility bill)
-      K10: PASS   (27 days old address proof)
-      K11: REJECT (Expired address proof - 257 days old)
-      K12: PASS   (Valid records)
+      K01: REJECT (Cancelled GSTIN, missing Udyam registration number)
+      K02: PASS   (54 days old address proof, valid records)
+      K03: PASS   (46 days old address proof, valid records)
+      K04: REJECT (Corrupt/blank GST certificate <50 chars)
+      K05: REJECT (Missing Udyam certificate file)
+      K06: REJECT (Extracted GSTIN 08YKZXS8189L1Z0 not found in national GST registry)
+      K07: REJECT (Legal entity mismatch: Shri Physio Clinic vs Neelgiri Physio Clinic)
+      K08: PASS   (50 days old address proof, valid records)
+      K09: PASS   (5 days old utility bill, valid records)
+      K10: PASS   (27 days old address proof, valid records)
+      K11: REJECT (Expired address proof - 257 days old > 90-day limit)
+      K12: PASS   (9 days old utility bill, valid records)
+
+    Ground Truth Breakdown: Exactly 6 PASS and 6 REJECT.
     """
     matrix = kyc_engine.evaluate_all_applicants()
     assert matrix['total_applicants'] == 12
     assert matrix['all_matched'] is True, f"Failed match: {[e for e in matrix['evaluations'] if not e['matched']]}"
-    assert matrix['passed_count'] == 8
-    assert matrix['rejected_count'] == 4
+    assert matrix['passed_count'] == 6
+    assert matrix['rejected_count'] == 6
     assert matrix['precision'] == 1.0
     assert matrix['recall'] == 1.0
 
-def test_corrupt_and_missing_document_detection(kyc_engine):
-    """Verify granular error identification for planted edge cases K04 and K05"""
+def test_planted_edge_cases_granular(kyc_engine):
+    """Verify granular error identification for planted defects: K01, K04, K05, K06, K07, K11"""
+    # K01: Cancelled GSTIN
+    res_k01 = kyc_engine.verify_applicant_by_code('K01', consent_granted=True)
+    assert res_k01['verdict'] == 'REJECT'
+    assert any("CANCELLED" in r or "Cancelled" in r for r in res_k01['reject_reasons'])
+
     # K04: Corrupt GST image
     res_k04 = kyc_engine.verify_applicant_by_code('K04', consent_granted=True)
     assert res_k04['verdict'] == 'REJECT'
@@ -162,3 +164,38 @@ def test_corrupt_and_missing_document_detection(kyc_engine):
     res_k05 = kyc_engine.verify_applicant_by_code('K05', consent_granted=True)
     assert res_k05['verdict'] == 'REJECT'
     assert any("Missing mandatory Udyam" in r for r in res_k05['reject_reasons'])
+
+    # K06: Fake GSTIN not found in national registry
+    res_k06 = kyc_engine.verify_applicant_by_code('K06', consent_granted=True)
+    assert res_k06['verdict'] == 'REJECT'
+    assert any("not found in national GST registry" in r for r in res_k06['reject_reasons'])
+
+    # K07: Legal entity mismatch
+    res_k07 = kyc_engine.verify_applicant_by_code('K07', consent_granted=True)
+    assert res_k07['verdict'] == 'REJECT'
+    assert any("Legal entity mismatch" in r for r in res_k07['reject_reasons'])
+
+    # K11: Stale utility bill > 90 days
+    res_k11 = kyc_engine.verify_applicant_by_code('K11', consent_granted=True)
+    assert res_k11['verdict'] == 'REJECT'
+    assert any("257 days old" in r for r in res_k11['reject_reasons'])
+
+def test_document_upload_and_verification(kyc_engine):
+    """Verify arbitrary document text upload and verification without code-specific assumptions"""
+    clean_upload = {
+        'gst_certificate': "Specimen: GST Registration Certificate Type of registration 19EOGXH4115YIZL Joseph Shah (Prop. Harmony Dental Care) Harmony Dental Care Proprietorship",
+        'udyam_certificate': "Specimen: Udyam Registration Certificate Udyam reg. number UDYAM-WB-OO- 5053330 Harmony Dental Care Services",
+        'address_proof': "Electricity Bill Billed to Harmony Dental Care Bill date 2026-06-01 Amount due 2000",
+        'signatory_id': "Specimen: Authorised Signatory ID Name Joseph Shah Designation Manager For business Harmony Dental Care ID no. SYN-lD-816907 Valid till 2028-09-10"
+    }
+    res = kyc_engine.verify_applicant_documents(clean_upload, consent_granted=True)
+    assert res['verdict'] == 'PASS'
+    assert res['extracted_fields']['gstin'] == '19EOGXH4115Y1ZL'
+    assert res['extracted_fields']['udyam_number'] == 'UDYAM-WB-00-5053330'
+
+    # Upload with tampered name
+    tampered_upload = dict(clean_upload)
+    tampered_upload['gst_certificate'] = "Specimen: GST Registration Certificate Type of registration 07CPCXN0398PIZT Neha Banerjee (Prop. Shri Physio Clinic) Neelgiri Physio Clinic Proprietorship"
+    res_tampered = kyc_engine.verify_applicant_documents(tampered_upload, consent_granted=True)
+    assert res_tampered['verdict'] == 'REJECT'
+    assert any("Legal entity mismatch" in r for r in res_tampered['reject_reasons'])

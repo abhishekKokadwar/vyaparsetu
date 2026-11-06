@@ -49,5 +49,8 @@ Desktop.ini
 $RECYCLE.BIN/
 .DS_Store
 
+# Temporary scratch
+scratch/
+
 deck/render/
 .playwright-mcp/

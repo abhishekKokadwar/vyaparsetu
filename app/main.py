@@ -66,6 +66,15 @@ class KYCVerifyRequest(BaseModel):
     applicant_code: str
     consent_granted: bool = True
 
+class KYCDocumentUploadRequest(BaseModel):
+    applicant_code: Optional[str] = "CUSTOM_UPLOAD"
+    business_name: Optional[str] = "Uploaded Business Entity"
+    address_proof_text: Optional[str] = None
+    gst_certificate_text: Optional[str] = None
+    udyam_certificate_text: Optional[str] = None
+    signatory_id_text: Optional[str] = None
+    consent_granted: bool = True
+
 class ConsentRecordRequest(BaseModel):
     applicant_code: str
     entity_name: str
@@ -165,6 +174,28 @@ def get_kyc_applicants():
 @app.post("/api/kyc/verify-applicant")
 def verify_kyc_applicant(req: KYCVerifyRequest):
     return kyc_engine.verify_applicant_by_code(req.applicant_code, consent_granted=req.consent_granted)
+
+@app.post("/api/kyc/upload-and-verify")
+def upload_and_verify_documents(req: KYCDocumentUploadRequest):
+    docs_map = {
+        'address_proof': req.address_proof_text or "",
+        'gst_certificate': req.gst_certificate_text or "",
+        'udyam_certificate': req.udyam_certificate_text or "",
+        'signatory_id': req.signatory_id_text or ""
+    }
+    file_presence = {
+        'has_address_proof': bool(req.address_proof_text and req.address_proof_text.strip()),
+        'has_gst_certificate': bool(req.gst_certificate_text and req.gst_certificate_text.strip()),
+        'has_udyam_certificate': bool(req.udyam_certificate_text and req.udyam_certificate_text.strip()),
+        'has_signatory_id': bool(req.signatory_id_text and req.signatory_id_text.strip()),
+    }
+    return kyc_engine.verify_applicant_documents(
+        docs_map=docs_map,
+        file_presence=file_presence,
+        applicant_code=req.applicant_code or "CUSTOM_UPLOAD",
+        default_business_name=req.business_name or "Uploaded Business Entity",
+        consent_granted=req.consent_granted
+    )
 
 @app.post("/api/kyc/consent")
 def record_kyc_consent(req: ConsentRecordRequest):

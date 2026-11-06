@@ -44,59 +44,71 @@ class AdvisorEngine:
 
     def parse_conversational_query(self, query: str, base_profile: Optional[dict] = None) -> dict:
         """
-        Parses free-form conversational text (in Hindi or English) to extract or refine
-        business attributes (business type, location tier, employees, sites, GSTIN, language).
+        Parses free-form conversational text (in Hindi, Marathi, Hinglish, or English)
+        to extract business attributes (business type, segment, city tier, employees, sites, GSTIN, language).
         """
         p = dict(base_profile or {})
         q_lower = query.lower().strip()
 
-        # Language detection (Devanagari script or Hinglish keywords)
-        if re.search(r'[\u0900-\u097F]', query) or any(w in q_lower for w in ['hindi', 'हिंदी', 'namaste', 'bhaiya', 'dukan', 'kirana', 'dost']):
-            p['preferred_language'] = 'hi'
+        # 1. Language detection (Marathi, Hindi, Hinglish, English)
+        marathi_markers = ['माझे', 'माझं', 'आहे', 'आहेत', 'पुण्यात', 'मुंबईत', 'कामगार', 'हवे', 'करायचे', 'दुकानदार']
+        hindi_devanagari = re.findall(r'[\u0900-\u097F]', query)
+
+        if any(w in query for w in marathi_markers):
+            p['preferred_language'] = 'mr'  # Marathi regional
+        elif bool(hindi_devanagari) or any(w in q_lower.split() for w in ['hai', 'hain', 'chahiye', 'karna', 'mera', 'meri', 'dukan', 'bhaiya', 'namaste', 'humara', 'humaari']):
+            p['preferred_language'] = 'hi'  # Hindi / Hinglish
         elif 'preferred_language' not in p:
             p['preferred_language'] = 'en'
 
-        # Business type detection (English & Devanagari Hindi) - Priority order: Multi-Site > Mfg > Prof > Micro
-        if any(w in q_lower for w in ['chain', 'franchise', 'branches', 'multi-site', 'showrooms', 'outlets', 'multiple stores', 'शाखाएं', 'दुकानें']):
+        # 2. Number of sites (handles "4 restaurants", "3 branch", "3-branch", "3 branches", "3 शाखाएं", "5 outlets", "2 stores")
+        site_match = re.search(r'(\d+)\s*[-]?\s*(?:branches|branch|sites|stores|locations|outlets|restaurants|clinics|centers|parlours|दुकानें|शाखाएं|शाखा)', q_lower)
+        if site_match:
+            p['num_sites'] = int(site_match.group(1))
+
+        # 3. Employee count (handles "15 teachers", "15 staff", "12 employees", "3 कामगार", "15 लोग", "5 workers", "8 doctors", "10 faculty")
+        emp_match = re.search(r'(\d+)\s*[-]?\s*(?:employees|staff|workers|people|log|members|teachers|faculty|doctors|nurses|helpers|counter|counters|कर्मचारी|लोग|कामगार|शिक्षक)', q_lower)
+        if emp_match:
+            p['employee_count'] = int(emp_match.group(1))
+
+        # 4. Business type & Segment detection (Priority: Multi-Site > Mfg > Prof/Education/Clinic > Salons/Food > Kirana)
+        if p.get('num_sites', 1) > 1 or any(w in q_lower for w in ['chain', 'franchise', 'branches', 'multi-site', 'showrooms', 'outlets', 'multiple stores', 'restaurants', 'शाखाएं', 'दुकानें']):
             p['business_type'] = 'Retail Chain / Multi-Site'
             p['segment'] = 'multi'
         elif any(w in q_lower for w in ['factory', 'plant', 'manufacturing', 'mfg', 'textile', 'machining', 'workshop', 'fabrication', 'packaging', 'industry', 'कारखाना', 'फैक्ट्री', 'उद्योग']):
             p['business_type'] = 'Manufacturing / Plant'
             p['segment'] = 'mfg'
-        elif any(w in q_lower for w in ['clinic', 'doctor', 'hospital', 'dental', 'pathology', 'lab', 'medical', 'chemist', 'pharmacy', 'क्लीनिक', 'अस्पताल', 'दवा']):
+        elif any(w in q_lower for w in ['clinic', 'doctor', 'hospital', 'dental', 'pathology', 'lab', 'medical', 'medical store', 'chemist', 'pharmacy', 'क्लीनिक', 'अस्पताल', 'दवा', 'मेडिकल', 'औषध']):
             p['business_type'] = 'Clinic / Healthcare / Pharmacy'
+            p['segment'] = 'prof'
+        elif any(w in q_lower for w in ['school', 'coaching', 'tuition', 'teachers', 'institute', 'academy', 'classes', 'college', 'स्कूल', 'कोचिंग']):
+            p['business_type'] = 'Coaching / Education Center'
             p['segment'] = 'prof'
         elif any(w in q_lower for w in ['ca', 'chartered', 'accountant', 'law', 'lawyer', 'legal', 'consultant', 'tax', 'advocate', 'वकील', 'सीए']):
             p['business_type'] = 'CA / Legal / Consulting Firm'
             p['segment'] = 'prof'
+        elif any(w in q_lower for w in ['beauty parlour', 'parlour', 'parlor', 'salon', 'saloon', 'spa', 'beauty', 'ब्यूटी पार्लर', 'सैलून']):
+            p['business_type'] = 'Salon / Beauty Parlour'
+            p['segment'] = 'micro'
+        elif any(w in q_lower for w in ['restaurant', 'cafe', 'bakery', 'dhaba', 'hotel', 'bhojanalaya', 'रेस्टोरेंट', 'होटल', 'हॉटेल']):
+            p['business_type'] = 'Restaurant / Cafe / Food'
+            p['segment'] = 'micro'
         elif any(w in q_lower for w in ['kirana', 'grocery', 'ration', 'dukan', 'store', 'retail', 'provision', 'bahi', 'किराना', 'दुकान', 'राशन']):
             p['business_type'] = 'Kirana / Retail Store'
             p['segment'] = 'micro'
 
-        # Number of sites (handles "3 branch", "3-branch", "3 branches", "3 शाखाएं")
-        site_match = re.search(r'(\d+)\s*[-]?\s*(?:branches|branch|sites|stores|locations|outlets|दुकानें|शाखाएं|शाखा)', q_lower)
-        if site_match:
-            p['num_sites'] = int(site_match.group(1))
-            if p['num_sites'] > 1 and p.get('segment') != 'mfg':
-                p['segment'] = 'multi'
-
-        # Employee count (handles "15 staff", "15-employees", "15 लोग")
-        emp_match = re.search(r'(\d+)\s*[-]?\s*(?:employees|staff|workers|people|log|members|कर्मचारी|लोग)', q_lower)
-        if emp_match:
-            p['employee_count'] = int(emp_match.group(1))
-
-        # City tier / location
-        tier1_cities = ['delhi', 'ncr', 'mumbai', 'bengaluru', 'bangalore', 'chennai', 'hyderabad', 'kolkata', 'pune', 'ahmedabad', 'दिल्ली', 'मुंबई', 'बेंगलुरु', 'चेन्नई', 'पुणे', 'कोलकाता']
+        # 5. City tier
+        tier1_cities = ['delhi', 'ncr', 'mumbai', 'bengaluru', 'bangalore', 'chennai', 'hyderabad', 'kolkata', 'pune', 'ahmedabad', 'दिल्ली', 'मुंबई', 'बेंगलुरु', 'चेन्नई', 'पुणे', 'कोलकाता', 'पुण्यात', 'मुंबईत']
         tier2_cities = ['jaipur', 'lucknow', 'indore', 'bhopal', 'patna', 'kanpur', 'nagpur', 'gwalior', 'coimbatore', 'tier 2', 'tier-2', 'small town', 'village', 'जयपुर', 'लखनऊ', 'इंदौर', 'भोपाल', 'ग्वालियर']
         if any(c in q_lower for c in tier1_cities) or 'tier 1' in q_lower or 'tier-1' in q_lower:
             p['city_tier'] = 1
         elif any(w in q_lower for w in tier2_cities):
             p['city_tier'] = 2
 
-        # GSTIN status
-        if any(w in q_lower for w in ['no gstin', 'without gst', 'no gst', 'gst nahi', 'gstin nahi', 'unregistered', 'gst नहीं', 'gstin नहीं', 'नहीं है', 'नही है']):
+        # 6. GSTIN status
+        if any(w in q_lower for w in ['no gstin', 'without gst', 'no gst', 'gst nahi', 'gstin nahi', 'unregistered', 'gst नाही', 'gst नहीं', 'gstin नहीं', 'नहीं है', 'नही है']):
             p['has_gstin'] = False
-        elif any(w in q_lower for w in ['with gst', 'have gstin', 'has gstin', 'gst registered', 'gst hai', 'gstin hai', 'gst है', 'gstin है']):
+        elif any(w in q_lower for w in ['with gst', 'have gst', 'we have gst', 'have gstin', 'has gstin', 'has gst', 'gst registered', 'gst hai', 'gstin hai', 'gst आहे', 'gst है', 'gstin है', 'yes gst']):
             p['has_gstin'] = True
 
         return p
@@ -165,7 +177,7 @@ class AdvisorEngine:
         sites = max(1, int(profile.get('num_sites', 1)))
         has_gstin = bool(profile.get('has_gstin', False))
         lang = str(profile.get('preferred_language', 'en')).strip().lower()
-        if lang not in ['en', 'hi']:
+        if lang not in ['en', 'hi', 'mr']:
             lang = 'en'
 
         # Infer segment if missing
@@ -459,9 +471,10 @@ class AdvisorEngine:
             'reasoning': reasoning_points_hi if lang == 'hi' else reasoning_points_en,
             'reasoning_en': reasoning_points_en,
             'reasoning_hi': reasoning_points_hi,
-            'pitch_narrative': narratives['narrative_hi'] if lang == 'hi' else narratives['narrative_en'],
+            'pitch_narrative': narratives['narrative_mr'] if lang == 'mr' else (narratives['narrative_hi'] if lang == 'hi' else narratives['narrative_en']),
             'pitch_narrative_en': narratives['narrative_en'],
             'pitch_narrative_hi': narratives['narrative_hi'],
+            'pitch_narrative_mr': narratives.get('narrative_mr', narratives['narrative_en']),
             'is_compliant': is_valid,
             'validation_errors': validation_errors,
             'adjustments_made': adjustments_made,
@@ -550,6 +563,11 @@ class AdvisorEngine:
                 f"'{bundle_hi}' आपको केवल ₹{m_cost:,}/माह में सुपरफ़ास्ट बिज़नेस कनेक्टिविटी, मोबाइल क्लाउड POS बिलिंग और 24/7 क्लाउड CCTV सुरक्षा देता है। "
                 f"अलग-अलग 3 वेंडरों के झंझट से मुक्ति पाएं और हर साल ₹{a_sav:,} की सीधी बचत करें।"
             )
+            pitch_mr = (
+                f"नमस्कार! आपल्या {business_type} साठी काउंटरवर अखंड इंटरनेट आणि डिजिटल पेमेंट अत्यंत आवश्यक आहे. "
+                f"'{bundle_hi}' आपल्याला दरमहा फक्त ₹{m_cost:,} मध्ये हाय-स्पीड बिज़नेस कनेक्टिव्हिटी, क्लाउड POS बिलिंग आणि 24/7 क्लाउड CCTV सुरक्षा देते. "
+                f"वेगवेगळ्या वेंडर्सच्या त्रासातून मुक्ती मिळवा आणि दरवर्षी ₹{a_sav:,} ची थेट बचत करा."
+            )
         elif segment == 'prof':
             pitch_en = (
                 f"For your {business_type}, data confidentiality, professional client communication, and reliable uptime are non-negotiable. "
@@ -560,6 +578,11 @@ class AdvisorEngine:
                 f"आपके {business_type} के लिए डेटा सुरक्षा, पेशेवर ईमेल और निर्बाध इंटरनेट सबसे जरूरी है। "
                 f"'{bundle_hi}' आपको ₹{m_cost:,}/माह में 300 Mbps बिज़नेस फ़ाइबर, सुरक्षित स्टैटिक IP, 1 TB ऑटोमैटिक क्लाउड बैकअप और अलग गेस्ट वाई-फ़ाई प्रदान करता है। "
                 f"लोकल वेंडरों की तुलना में हर साल ₹{a_sav:,} की बचत और 100% मानसिक शांति।"
+            )
+            pitch_mr = (
+                f"आपल्या {business_type} साठी डेटा सुरक्षा, व्यावसायिक ईमेल आणि अखंड इंटरनेट सर्वात महत्त्वाचे आहे. "
+                f"'{bundle_hi}' आपल्याला दरमहा ₹{m_cost:,} मध्ये 300 Mbps बिझनेस फायबर, सुरक्षित स्टॅटिक IP, 1 TB ऑटोमॅटिक क्लाउड बॅकअप आणि स्वतंत्र गेस्ट वाय-फाय देते. "
+                f"सालाना ₹{a_sav:,} ची बचत आणि संपूर्ण मनःशांती."
             )
         elif segment == 'multi':
             pitch_en = (
@@ -572,6 +595,10 @@ class AdvisorEngine:
                 f"'{bundle_hi}' केवल ₹{m_cost:,}/माह में आपकी सभी शाखाओं को जोड़े रखता है। "
                 f"अलग-अलग बिलों के झंझट से छुटकारा पाएं और सालाना ₹{a_sav:,} की बचत करें।"
             )
+            pitch_mr = (
+                f"आपल्या सर्व {sites} शाखांसाठी अखंड कनेक्टिव्हिटी, स्वयंचलित 4G/5G बॅकअप आणि सेंट्रलाइज्ड मोबाईल CCTV आता एकाच बिलात! "
+                f"'{bundle_hi}' दरमहा ₹{m_cost:,} मध्ये सर्व शाखा अखंड जोडते आणि दरवर्षी ₹{a_sav:,} ची थेट बचत करते."
+            )
         else: # mfg
             pitch_en = (
                 f"Industrial manufacturing demands zero network jitter, resilient cloud backups, and proactive machinery tracking. "
@@ -583,10 +610,16 @@ class AdvisorEngine:
                 f"'{bundle_hi}' आपको ₹{m_cost:,}/माह में एंटरप्राइज लीज्ड लाइन, नेक्स्ट-जेन फ़ायरवॉल और मशीन IoT सेंसर्स प्रदान करता है। "
                 f"फ़ैक्टरी ब्रेकडाउन को रोकें और सालाना ₹{a_sav:,} की बचत सुनिश्चित करें।"
             )
+            pitch_mr = (
+                f"औद्योगिक उत्पादन आणि कारखान्यासाठी 99.9% अपटाइम SLA आणि सायबर सुरक्षा आवश्यक आहे. "
+                f"'{bundle_hi}' आपल्याला दरमहा ₹{m_cost:,} मध्ये एंटरप्राइझ लीज्ड लाइन, नेक्स्ट-जनरेशन फायरवॉल आणि मशिन IoT सेन्सर्स देते. "
+                f"ब्रेकडाउन रोखा आणि दरवर्षी ₹{a_sav:,} ची बचत निश्चित करा."
+            )
 
         return {
             'narrative_en': pitch_en,
-            'narrative_hi': pitch_hi
+            'narrative_hi': pitch_hi,
+            'narrative_mr': pitch_mr
         }
 
     def evaluate_jury_scenarios(self) -> dict:

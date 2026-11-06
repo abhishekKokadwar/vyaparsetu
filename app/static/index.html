@@ -470,6 +470,64 @@
                 <span class="text-[11px] text-slate-500">Ref Date: <strong>2026-07-15</strong> (Must be &le;90 days)</span>
               </div>
             </div>
+
+            <!-- Live Document Upload & OCR Extraction Sandbox -->
+            <div class="mt-5 pt-4 border-t border-slate-200">
+              <div class="flex justify-between items-center mb-2.5">
+                <label class="font-bold text-slate-800 text-xs flex items-center space-x-1.5">
+                  <i data-lucide="file-up" class="w-4 h-4 text-airtel-red"></i>
+                  <span>Document Upload & Live OCR Extraction Sandbox</span>
+                </label>
+                <span class="text-[10px] bg-slate-100 text-slate-600 px-2 py-0.5 rounded font-mono">Drag & Drop / Select Files</span>
+              </div>
+              <p class="text-[11px] text-slate-500 mb-3">Upload your GST certificate, Udyam MSME, electricity bill, or signatory ID card to test live OCR extraction.</p>
+              
+              <!-- Quick Specimen Loader Buttons -->
+              <div class="flex flex-wrap gap-1.5 mb-3">
+                <button type="button" onclick="loadDocSpecimen('K02')" class="px-2.5 py-1 text-[11px] font-semibold bg-emerald-50 text-emerald-700 hover:bg-emerald-100 rounded-lg border border-emerald-200 transition">Sample K02 (Clean Pass)</button>
+                <button type="button" onclick="loadDocSpecimen('K06')" class="px-2.5 py-1 text-[11px] font-semibold bg-red-50 text-red-700 hover:bg-red-100 rounded-lg border border-red-200 transition">Sample K06 (Bogus GSTIN)</button>
+                <button type="button" onclick="loadDocSpecimen('K07')" class="px-2.5 py-1 text-[11px] font-semibold bg-red-50 text-red-700 hover:bg-red-100 rounded-lg border border-red-200 transition">Sample K07 (Name Mismatch)</button>
+                <button type="button" onclick="loadDocSpecimen('K11')" class="px-2.5 py-1 text-[11px] font-semibold bg-red-50 text-red-700 hover:bg-red-100 rounded-lg border border-red-200 transition">Sample K11 (257d Old Bill)</button>
+              </div>
+
+              <!-- Upload Drag & Drop Box -->
+              <div class="border-2 border-dashed border-slate-200 rounded-xl p-3.5 bg-slate-50/50 hover:bg-slate-50 transition text-center mb-3">
+                <input type="file" id="kyc-file-upload-input" multiple accept="image/*,.txt,.json,.pdf" onchange="handleFileUpload(event)" class="hidden">
+                <label for="kyc-file-upload-input" class="cursor-pointer block">
+                  <i data-lucide="upload-cloud" class="w-6 h-6 mx-auto text-slate-400 mb-1"></i>
+                  <span class="text-xs font-semibold text-slate-700 block">Click to upload document files or drag and drop</span>
+                  <span class="text-[10px] text-slate-400 block mt-0.5">PNG, JPG, PDF, TXT supported (Max 10MB)</span>
+                </label>
+                <div id="uploaded-files-list" class="mt-2 text-left text-[11px] space-y-1 hidden"></div>
+              </div>
+
+              <!-- Live Extracted Document Preview (Collapsible) -->
+              <details class="text-xs group border border-slate-200 rounded-xl p-2.5 bg-white">
+                <summary class="font-semibold text-slate-700 cursor-pointer flex justify-between items-center text-[11px]">
+                  <span>View / Edit Extracted Document OCR Text</span>
+                  <span class="text-[10px] text-slate-400 group-open:hidden">Click to expand</span>
+                </summary>
+                <div class="space-y-2 mt-2 pt-2 border-t border-slate-100">
+                  <div>
+                    <label class="text-[10px] font-bold text-slate-600 block">GST Certificate OCR Text:</label>
+                    <textarea id="ocr-gst-text" rows="2" class="w-full text-[10px] font-mono p-2 bg-slate-50 border border-slate-200 rounded-lg outline-none" placeholder="GST Certificate text..."></textarea>
+                  </div>
+                  <div>
+                    <label class="text-[10px] font-bold text-slate-600 block">Udyam Certificate OCR Text:</label>
+                    <textarea id="ocr-udyam-text" rows="2" class="w-full text-[10px] font-mono p-2 bg-slate-50 border border-slate-200 rounded-lg outline-none" placeholder="Udyam Certificate text..."></textarea>
+                  </div>
+                  <div>
+                    <label class="text-[10px] font-bold text-slate-600 block">Address Proof (Electricity Bill) OCR Text:</label>
+                    <textarea id="ocr-addr-text" rows="2" class="w-full text-[10px] font-mono p-2 bg-slate-50 border border-slate-200 rounded-lg outline-none" placeholder="Utility bill text..."></textarea>
+                  </div>
+                </div>
+              </details>
+
+              <button onclick="uploadAndVerifyKYCDocuments()" class="w-full mt-3 bg-airtel-red hover:bg-airtel-darkred text-white font-semibold py-2 rounded-xl text-xs flex items-center justify-center space-x-1.5 shadow-sm transition">
+                <i data-lucide="file-check" class="w-3.5 h-3.5 text-white"></i>
+                <span>Extract OCR & Verify Uploaded Documents</span>
+              </button>
+            </div>
           </div>
         </div>
 

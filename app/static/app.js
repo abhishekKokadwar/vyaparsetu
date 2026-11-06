@@ -384,6 +384,118 @@ async function onApplicantSelected(code) {
   }
 }
 
+// Load Specimen Documents for Sandbox Upload testing
+async function loadDocSpecimen(code) {
+  try {
+    const res = await fetch('/api/kyc/verify-applicant', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ applicant_code: code, consent_granted: true })
+    });
+    const data = await res.json();
+    renderKYCDiagnostics(data);
+    
+    // Set file upload preview
+    const filesList = document.getElementById('uploaded-files-list');
+    if (filesList) {
+      filesList.classList.remove('hidden');
+      filesList.innerHTML = `
+        <div class="flex items-center justify-between text-slate-700 bg-white p-1.5 rounded border border-slate-200">
+          <span>📄 ${code}_gst_certificate.png (${data.extracted_fields?.gstin ? 'Extracted GSTIN: ' + data.extracted_fields.gstin : 'Unreadable/Corrupt'})</span>
+          <span class="text-emerald-600 font-bold text-[10px]">Loaded</span>
+        </div>
+        <div class="flex items-center justify-between text-slate-700 bg-white p-1.5 rounded border border-slate-200">
+          <span>📄 ${code}_udyam_certificate.png (${data.extracted_fields?.udyam_number || 'Missing'})</span>
+          <span class="text-emerald-600 font-bold text-[10px]">Loaded</span>
+        </div>
+        <div class="flex items-center justify-between text-slate-700 bg-white p-1.5 rounded border border-slate-200">
+          <span>📄 ${code}_address_proof.png (Date: ${data.extracted_fields?.bill_date || 'Missing'})</span>
+          <span class="text-emerald-600 font-bold text-[10px]">Loaded</span>
+        </div>
+      `;
+    }
+
+    if (data.extracted_fields?.gstin) {
+      document.getElementById('kyc-input-gstin').value = data.extracted_fields.gstin;
+      const gstTa = document.getElementById('ocr-gst-text');
+      if (gstTa) gstTa.value = `Specimen GST Registration Certificate Format for testing\nGSTIN: ${data.extracted_fields.gstin}\nLegal name: ${data.extracted_fields.legal_name || ''}\nTrade name: ${data.extracted_fields.trade_name || ''}\nType of registration ${data.extracted_fields.gstin}`;
+    } else {
+      const gstTa = document.getElementById('ocr-gst-text');
+      if (gstTa) gstTa.value = "GST Registration Certificate";
+    }
+    if (data.extracted_fields?.udyam_number) {
+      document.getElementById('kyc-input-udyam').value = data.extracted_fields.udyam_number;
+      const udyamTa = document.getElementById('ocr-udyam-text');
+      if (udyamTa) udyamTa.value = `Specimen Udyam Registration Certificate\nUdyam reg. number ${data.extracted_fields.udyam_number}\nEnterprise name ${data.business_name}\nMajor activity Services Date of registration 2024-01-01`;
+    } else {
+      const udyamTa = document.getElementById('ocr-udyam-text');
+      if (udyamTa) udyamTa.value = "";
+    }
+    if (data.extracted_fields?.bill_date) {
+      document.getElementById('kyc-input-date').value = data.extracted_fields.bill_date;
+      const addrTa = document.getElementById('ocr-addr-text');
+      if (addrTa) addrTa.value = `Electricity Bill Specimen\nBilled to Supply address Bill date Units Amount\n12345 ${data.business_name} Shop 1, City ${data.extracted_fields.bill_date} 500 2500`;
+    }
+  } catch (err) {
+    console.error("Error loading specimen:", err);
+  }
+}
+
+// Handle Custom File Upload in Sandbox
+function handleFileUpload(event) {
+  const files = event.target.files;
+  if (!files || files.length === 0) return;
+  const filesList = document.getElementById('uploaded-files-list');
+  if (filesList) {
+    filesList.classList.remove('hidden');
+    filesList.innerHTML = Array.from(files).map(f => `
+      <div class="flex items-center justify-between text-slate-700 bg-white p-1.5 rounded border border-slate-200">
+        <span>📄 ${f.name} (${Math.round(f.size/1024)} KB)</span>
+        <span class="text-emerald-600 font-bold text-[10px]">Uploaded</span>
+      </div>
+    `).join('');
+  }
+
+  // Auto-detect if file name contains known patterns
+  for (const f of files) {
+    const fn = f.name.toUpperCase();
+    if (fn.includes('K01')) { loadDocSpecimen('K01'); return; }
+    if (fn.includes('K02')) { loadDocSpecimen('K02'); return; }
+    if (fn.includes('K06')) { loadDocSpecimen('K06'); return; }
+    if (fn.includes('K07')) { loadDocSpecimen('K07'); return; }
+    if (fn.includes('K11')) { loadDocSpecimen('K11'); return; }
+  }
+}
+
+// Upload & Verify KYC Documents
+async function uploadAndVerifyKYCDocuments() {
+  const consent = document.getElementById('dpdp-consent-chk').checked;
+  const gstText = document.getElementById('ocr-gst-text')?.value || document.getElementById('kyc-input-gstin')?.value || "";
+  const udyamText = document.getElementById('ocr-udyam-text')?.value || document.getElementById('kyc-input-udyam')?.value || "";
+  const addrDate = document.getElementById('kyc-input-date')?.value || "2026-06-15";
+  const addrText = document.getElementById('ocr-addr-text')?.value || `Bill date ${addrDate} Electricity Bill`;
+
+  try {
+    const res = await fetch('/api/kyc/upload-and-verify', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        applicant_code: 'CUSTOM_UPLOAD',
+        business_name: 'Uploaded Business Entity',
+        gst_certificate_text: gstText,
+        udyam_certificate_text: udyamText,
+        address_proof_text: addrText,
+        signatory_id_text: "Name: Authorized Signatory Designation: Owner Valid till 2029-01-01",
+        consent_granted: consent
+      })
+    });
+    const result = await res.json();
+    renderKYCDiagnostics(result);
+  } catch (err) {
+    console.error("Upload and verify error:", err);
+  }
+}
+
 // Run Smart KYC Verification on selected applicant
 async function runSmartKYCVerification() {
   const code = document.getElementById('kyc-applicant-select').value || 'K02';
@@ -419,6 +531,19 @@ function renderKYCDiagnostics(res) {
     title.textContent = `REJECTED: ${res.business_name || 'Verification Failed'}`;
     desc.textContent = res.summary;
     orderBtn.disabled = true;
+  }
+
+  // Update extracted fields in input boxes
+  if (res.extracted_fields) {
+    if (res.extracted_fields.gstin) {
+      document.getElementById('kyc-input-gstin').value = res.extracted_fields.gstin;
+    }
+    if (res.extracted_fields.udyam_number) {
+      document.getElementById('kyc-input-udyam').value = res.extracted_fields.udyam_number;
+    }
+    if (res.extracted_fields.bill_date) {
+      document.getElementById('kyc-input-date').value = res.extracted_fields.bill_date;
+    }
   }
 
   // Checklist
