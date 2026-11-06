@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>VyaparSetu · Interactive System & Architecture Diagrams</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&display=swap" rel="stylesheet">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <style>
+    body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: #0B1120; color: #F8FAFC; }
+    .diag-tab.active { background-color: #E40000; color: #FFFFFF; font-weight: 700; }
+  </style>
+</head>
+<body class="min-h-screen flex flex-col">
+
+  <!-- Header -->
+  <header class="bg-[#0F172A] border-b border-slate-800 px-6 py-4 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+    <div class="flex items-center space-x-3">
+      <a href="/" class="w-9 h-9 rounded-xl bg-gradient-to-tr from-red-700 to-red-600 flex items-center justify-center font-bold text-white shadow-md shadow-red-900/50">VS</a>
+      <div>
+        <h1 class="text-lg font-bold text-white flex items-center space-x-2">
+          <span>VyaparSetu · Architecture & Process Diagrams</span>
+          <span class="text-[10px] bg-red-900/50 text-red-400 border border-red-800 px-2 py-0.5 rounded-full font-mono">SVG 2.0</span>
+        </h1>
+        <p class="text-xs text-slate-400">Interactive diagrams for Airtel Sync 2026 (Enterprise Track A · Project Udyam Digital)</p>
+      </div>
+    </div>
+
+    <!-- Diagram Selector Tabs -->
+    <div class="flex items-center space-x-2 bg-slate-900 p-1 rounded-xl border border-slate-800 text-xs">
+      <button onclick="showDiagram('arch')" id="tab-arch" class="diag-tab active px-3.5 py-1.5 rounded-lg transition">System Architecture</button>
+      <button onclick="showDiagram('journey')" id="tab-journey" class="diag-tab px-3.5 py-1.5 rounded-lg text-slate-400 hover:text-white transition">Customer Journey</button>
+      <a href="/" class="px-3.5 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 font-semibold transition flex items-center space-x-1">
+        <span>Back to Prototype</span>
+        <i data-lucide="arrow-right" class="w-3.5 h-3.5"></i>
+      </a>
+    </div>
+  </header>
+
+  <!-- Main Canvas Container -->
+  <main class="flex-1 p-6 flex flex-col items-center justify-center">
+    <div class="max-w-6xl w-full bg-[#0F172A] border border-slate-800 rounded-2xl shadow-2xl overflow-hidden p-4 relative">
+      
+      <!-- Toolbar -->
+      <div class="flex justify-between items-center mb-3 px-2 text-xs text-slate-400">
+        <span id="diag-caption" class="font-semibold text-slate-300">System Architecture: Microservices, Registry Connectors & OSS/BSS Integration</span>
+        <div class="flex space-x-2">
+          <a id="download-btn" href="/static/diagrams/architecture_diagram.svg" download="VyaparSetu_Architecture.svg" class="px-3 py-1 bg-slate-800 hover:bg-slate-700 text-white rounded-lg transition flex items-center space-x-1">
+            <i data-lucide="download" class="w-3.5 h-3.5"></i>
+            <span>Download SVG</span>
+          </a>
+        </div>
+      </div>
+
+      <!-- Diagram Frames -->
+      <div class="w-full flex items-center justify-center min-h-[520px] bg-[#0A0F1D] rounded-xl border border-slate-800/80 p-2">
+        <img id="active-diagram-img" src="/static/diagrams/architecture_diagram.svg" alt="VyaparSetu Diagram" class="w-full max-h-[620px] object-contain rounded-lg">
+      </div>
+
+    </div>
+  </main>
+
+  <script>
+    function showDiagram(type) {
+      const img = document.getElementById('active-diagram-img');
+      const caption = document.getElementById('diag-caption');
+      const download = document.getElementById('download-btn');
+      document.querySelectorAll('.diag-tab').forEach(b => b.classList.remove('active'));
+
+      if (type === 'arch') {
+        img.src = '/static/diagrams/architecture_diagram.svg';
+        caption.textContent = 'System Architecture: Microservices, Registry Connectors & OSS/BSS Integration';
+        download.href = '/static/diagrams/architecture_diagram.svg';
+        download.download = 'VyaparSetu_Architecture.svg';
+        document.getElementById('tab-arch').classList.add('active');
+      } else {
+        img.src = '/static/diagrams/customer_journey_diagram.svg';
+        caption.textContent = 'Customer Journey: 4-Stage 10-Minute Onboarding Flow (Discovery -> Quote -> Smart KYC -> Fulfillment)';
+        download.href = '/static/diagrams/customer_journey_diagram.svg';
+        download.download = 'VyaparSetu_Customer_Journey.svg';
+        document.getElementById('tab-journey').classList.add('active');
+      }
+      if (window.lucide) lucide.createIcons();
+    }
+    if (window.lucide) lucide.createIcons();
+  </script>
+</body>
+</html>

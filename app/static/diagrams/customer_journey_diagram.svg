@@ -1,0 +1,90 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 480" width="100%" height="100%" style="background:#0F172A; font-family:'Plus Jakarta Sans', -apple-system, sans-serif;">
+  <!-- Title -->
+  <text x="50" y="55" fill="#E40000" font-size="13" font-weight="700" letter-spacing="2">VYAPARSETU CUSTOMER EXPERIENCE</text>
+  <text x="50" y="85" fill="#FFFFFF" font-size="22" font-weight="800">The 4-Stage 10-Minute Onboarding Journey</text>
+  <text x="50" y="110" fill="#94A3B8" font-size="13">Transforming 17.6 days of paper friction into an instant, self-serve digital experience</text>
+
+  <!-- Stage 1 -->
+  <g transform="translate(50, 145)">
+    <rect width="250" height="280" rx="16" fill="#1E293B" stroke="#334155" stroke-width="1.5"/>
+    <circle cx="45" cy="45" r="22" fill="#E40000" />
+    <text x="45" y="52" fill="#FFFFFF" font-size="14" font-weight="800" text-anchor="middle">01</text>
+    <text x="80" y="42" fill="#FF4D4D" font-size="11" font-weight="700">STAGE 1 · 2 MINS</text>
+    <text x="80" y="60" fill="#FFFFFF" font-size="14" font-weight="700">Conversational Advisor</text>
+    
+    <text x="25" y="105" fill="#CBD5E1" font-size="11">• Plain Hindi/English interaction</text>
+    <text x="25" y="130" fill="#CBD5E1" font-size="11">• 4 high-signal business questions</text>
+    <text x="25" y="155" fill="#CBD5E1" font-size="11">• Automatic bundle recommendation</text>
+    <text x="25" y="180" fill="#CBD5E1" font-size="11">• Plain-language 'Why' explanation</text>
+    <text x="25" y="205" fill="#CBD5E1" font-size="11">• Zero sales scheduling wait</text>
+    
+    <rect x="25" y="225" width="200" height="30" rx="8" fill="#E40000" opacity="0.2"/>
+    <text x="125" y="244" fill="#FF4D4D" font-size="10" font-weight="700" text-anchor="middle">Replaces 3-Day Sales Visit</text>
+  </g>
+
+  <!-- Arrow 1 -->
+  <path d="M 315 285 L 340 285" stroke="#E40000" stroke-width="3" stroke-linecap="round"/>
+  <polygon points="345,285 337,280 337,290" fill="#E40000" />
+
+  <!-- Stage 2 -->
+  <g transform="translate(350, 145)">
+    <rect width="250" height="280" rx="16" fill="#1E293B" stroke="#334155" stroke-width="1.5"/>
+    <circle cx="45" cy="45" r="22" fill="#38BDF8" />
+    <text x="45" y="52" fill="#0F172A" font-size="14" font-weight="800" text-anchor="middle">02</text>
+    <text x="80" y="42" fill="#38BDF8" font-size="11" font-weight="700">STAGE 2 · 2 MINS</text>
+    <text x="80" y="60" fill="#FFFFFF" font-size="14" font-weight="700">Transparent Quote</text>
+    
+    <text x="25" y="105" fill="#CBD5E1" font-size="11">• Single monthly recurring total</text>
+    <text x="25" y="130" fill="#CBD5E1" font-size="11">• Modular add-ons (CCTV, Wi-Fi 6)</text>
+    <text x="25" y="155" fill="#CBD5E1" font-size="11">• Real-time dependency solver</text>
+    <text x="25" y="180" fill="#CBD5E1" font-size="11">• ₹13,800/yr savings vs unorganized</text>
+    <text x="25" y="205" fill="#CBD5E1" font-size="11">• Single unified billing line</text>
+    
+    <rect x="25" y="225" width="200" height="30" rx="8" fill="#38BDF8" opacity="0.2"/>
+    <text x="125" y="244" fill="#38BDF8" font-size="10" font-weight="700" text-anchor="middle">Eliminates Complex PDFs</text>
+  </g>
+
+  <!-- Arrow 2 -->
+  <path d="M 615 285 L 640 285" stroke="#38BDF8" stroke-width="3" stroke-linecap="round"/>
+  <polygon points="645,285 637,280 637,290" fill="#38BDF8" />
+
+  <!-- Stage 3 -->
+  <g transform="translate(650, 145)">
+    <rect width="250" height="280" rx="16" fill="#1E293B" stroke="#334155" stroke-width="1.5"/>
+    <circle cx="45" cy="45" r="22" fill="#10B981" />
+    <text x="45" y="52" fill="#0F172A" font-size="14" font-weight="800" text-anchor="middle">03</text>
+    <text x="80" y="42" fill="#10B981" font-size="11" font-weight="700">STAGE 3 · 3 MINS</text>
+    <text x="80" y="60" fill="#FFFFFF" font-size="14" font-weight="700">Smart KYC & DPDP</text>
+    
+    <text x="25" y="105" fill="#CBD5E1" font-size="11">• 1-Click GSTIN &amp; Udyam lookups</text>
+    <text x="25" y="130" fill="#CBD5E1" font-size="11">• 90-day expiry check on proofs</text>
+    <text x="25" y="155" fill="#CBD5E1" font-size="11">• Catches cancelled &amp; corrupt docs</text>
+    <text x="25" y="180" fill="#CBD5E1" font-size="11">• DPDP Act 2023 consent capture</text>
+    <text x="25" y="205" fill="#CBD5E1" font-size="11">• Dynamic PAN masking in UI &amp; logs</text>
+    
+    <rect x="25" y="225" width="200" height="30" rx="8" fill="#10B981" opacity="0.2"/>
+    <text x="125" y="244" fill="#10B981" font-size="10" font-weight="700" text-anchor="middle">Zero Paper Submissions</text>
+  </g>
+
+  <!-- Arrow 3 -->
+  <path d="M 915 285 L 940 285" stroke="#10B981" stroke-width="3" stroke-linecap="round"/>
+  <polygon points="945,285 937,280 937,290" fill="#10B981" />
+
+  <!-- Stage 4 -->
+  <g transform="translate(950, 145)">
+    <rect width="200" height="280" rx="16" fill="#1E293B" stroke="#334155" stroke-width="1.5"/>
+    <circle cx="45" cy="45" r="22" fill="#A855F7" />
+    <text x="45" y="52" fill="#FFFFFF" font-size="14" font-weight="800" text-anchor="middle">04</text>
+    <text x="80" y="42" fill="#A855F7" font-size="11" font-weight="700">STAGE 4 · &lt;48 HRS</text>
+    <text x="80" y="60" fill="#FFFFFF" font-size="14" font-weight="700">Fulfillment</text>
+    
+    <text x="20" y="105" fill="#CBD5E1" font-size="11">• 5-Stage live order status</text>
+    <text x="20" y="130" fill="#CBD5E1" font-size="11">• Assigned technician PIN</text>
+    <text x="20" y="155" fill="#CBD5E1" font-size="11">• Router pre-configuration</text>
+    <text x="20" y="180" fill="#CBD5E1" font-size="11">• Rapid same-day/48h setup</text>
+    <text x="20" y="205" fill="#CBD5E1" font-size="11">• Deflects 90% status calls</text>
+    
+    <rect x="20" y="225" width="160" height="30" rx="8" fill="#A855F7" opacity="0.2"/>
+    <text x="100" y="244" fill="#C084FC" font-size="10" font-weight="700" text-anchor="middle">Activation in &lt;48 Hours</text>
+  </g>
+</svg>

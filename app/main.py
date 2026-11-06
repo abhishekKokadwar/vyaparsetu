@@ -147,6 +147,13 @@ static_dir = os.path.join(os.path.dirname(__file__), 'static')
 os.makedirs(static_dir, exist_ok=True)
 app.mount("/static", StaticFiles(directory=static_dir), name="static")
 
+@app.get("/diagrams")
+def serve_diagrams():
+    diag_file = os.path.join(static_dir, 'diagrams.html')
+    if os.path.exists(diag_file):
+        return FileResponse(diag_file)
+    return {"message": "Diagrams viewer not found."}
+
 @app.get("/")
 def serve_index():
     index_file = os.path.join(static_dir, 'index.html')
