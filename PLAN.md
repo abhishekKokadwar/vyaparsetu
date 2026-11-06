@@ -1,6 +1,7 @@
-# Project Udyam Digital - Execution Plan & Blueprint
-## Airtel Sync 2026 · Enterprise Track A
-**Prepared for Team Hacker_247 · November 2026**
+# VyaparSetu (व्यापारसेतु) · Execution Plan & Blueprint
+## Airtel Sync 2026 · Enterprise Track A (Project Udyam Digital)
+**Platform Name:** **VyaparSetu** (*The Digital Bridge for MSME Commerce*)  
+**Team:** Hacker_247 · November 2026  
 **Theme:** *Making small businesses go digital in one sitting*
 
 ---
@@ -166,3 +167,4 @@ gantt
 
 ---
 *Created for Airtel Sync 2026 Hackathon · Team Hacker_247*
+

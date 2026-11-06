@@ -1,7 +1,8 @@
-# Project Udyam Digital · Airtel Sync 2026 (Enterprise Track A)
+# VyaparSetu (व्यापारसेतु) · Airtel Sync 2026 (Enterprise Track A)
 
 > **"Making small businesses go digital in one sitting"**  
-> Submission by **Team Hacker_247** for **Airtel Sync 2026 - Digital Track**.
+> **VyaparSetu** — Next-Gen MSME Digital Acquisition & Onboarding Platform  
+> Official Submission by **Team Hacker_247** for **Airtel Sync 2026 - Digital Track**.
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
 [![Python 3.11+](https://img.shields.io/badge/Python-3.11+-brightgreen.svg)](https://www.python.org/)
@@ -66,3 +67,4 @@ India's 6 Crore+ Micro, Small, and Medium Enterprises (MSMEs) are increasingly a
 ---
 
 *Authored for the Airtel Sync 2026 Innovation Challenge.*
+

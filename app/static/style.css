@@ -1,0 +1,98 @@
+/* VyaparSetu Custom Styles */
+
+.nav-tab {
+  display: flex;
+  align-items: center;
+  padding: 0.5rem 0.85rem;
+  border-radius: 0.65rem;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: #475569;
+  transition: all 0.15s ease-in-out;
+}
+
+.nav-tab:hover {
+  background-color: #F1F5F9;
+  color: #0F172A;
+}
+
+.nav-tab.active {
+  background-color: #FFF1F1;
+  color: #E40000;
+  box-shadow: 0 1px 2px rgba(228, 0, 0, 0.08);
+}
+
+.tab-view {
+  display: none;
+}
+
+.tab-view.active {
+  display: block;
+}
+
+.cat-filter {
+  padding: 0.25rem 0.65rem;
+  border-radius: 0.5rem;
+  border: 1px solid #E2E8F0;
+  color: #64748B;
+  font-weight: 500;
+  transition: all 0.15s;
+}
+
+.cat-filter:hover {
+  border-color: #CBD5E1;
+  color: #1E293B;
+}
+
+.cat-filter.active {
+  background-color: #0F172A;
+  border-color: #0F172A;
+  color: #FFFFFF;
+  font-weight: 600;
+}
+
+/* Timeline Custom Styles */
+.timeline-dot {
+  width: 2.5rem;
+  height: 2.5rem;
+  border-radius: 9999px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 0.75rem;
+  z-index: 10;
+}
+
+.timeline-dot.completed {
+  background-color: #059669;
+  color: #FFFFFF;
+}
+
+.timeline-dot.in-progress {
+  background-color: #E40000;
+  color: #FFFFFF;
+  box-shadow: 0 0 0 4px #FEE2E2;
+}
+
+.timeline-dot.pending {
+  background-color: #F1F5F9;
+  border: 2px solid #CBD5E1;
+  color: #94A3B8;
+}
+
+/* Custom Scrollbars */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: #F8FAFC;
+}
+::-webkit-scrollbar-thumb {
+  background: #CBD5E1;
+  border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #94A3B8;
+}
