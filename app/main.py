@@ -1,10 +1,13 @@
-from fastapi import FastAPI, HTTPException, Query
+from fastapi import FastAPI, HTTPException, Query, UploadFile, File, Form
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
-from fastapi.responses import FileResponse
+from fastapi.responses import FileResponse, Response
 from pydantic import BaseModel
 from typing import List, Optional
 import os
+import shutil
+import tempfile
+import subprocess
 
 from app.catalog_engine import CatalogEngine
 from app.advisor_engine import AdvisorEngine
@@ -197,6 +200,95 @@ def upload_and_verify_documents(req: KYCDocumentUploadRequest):
         consent_granted=req.consent_granted
     )
 
+@app.post("/api/kyc/upload-files")
+async def upload_kyc_files(
+    files: List[UploadFile] = File(...),
+    consent_granted: bool = Form(True)
+):
+    """
+    Accepts real uploaded document files (.png, .jpg, .jpeg, .pdf, .txt),
+    extracts text dynamically using native Windows OCR (scripts/ocr_test.ps1),
+    auto-classifies document types, and runs dynamic Smart KYC verification.
+    """
+    temp_dir = tempfile.mkdtemp(prefix="vyaparsetu_ocr_")
+    docs_map = {'address_proof': '', 'gst_certificate': '', 'udyam_certificate': '', 'signatory_id': ''}
+    extracted_snippets = {}
+
+    try:
+        for file in files:
+            file_path = os.path.join(temp_dir, file.filename)
+            with open(file_path, "wb") as buffer:
+                shutil.copyfileobj(file.file, buffer)
+
+            # Extract text via Windows native OCR or direct read
+            ext = os.path.splitext(file.filename)[1].lower()
+            text = ""
+            if ext in ['.png', '.jpg', '.jpeg', '.bmp', '.webp']:
+                ocr_script = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'scripts', 'ocr_test.ps1'))
+                cmd = ['powershell', '-ExecutionPolicy', 'Bypass', '-File', ocr_script, '-ImagePath', os.path.abspath(file_path)]
+                try:
+                    res = subprocess.run(cmd, capture_output=True, text=True, timeout=15)
+                    text = res.stdout.strip()
+                except Exception:
+                    text = ""
+            elif ext in ['.txt', '.json']:
+                try:
+                    with open(file_path, 'r', encoding='utf-8') as f:
+                        text = f.read().strip()
+                except Exception:
+                    text = ""
+
+            # Auto-classify based on document text content
+            text_upper = text.upper()
+            doc_type = None
+            if "GST" in text_upper or "GSTIN" in text_upper or "REGISTRATION CERTIFICATE" in text_upper:
+                doc_type = 'gst_certificate'
+            elif "UDYAM" in text_upper or "MSME" in text_upper:
+                doc_type = 'udyam_certificate'
+            elif "ELECTRICITY" in text_upper or "BILL DATE" in text_upper or "CONSUMER" in text_upper or "SUPPLY ADDRESS" in text_upper:
+                doc_type = 'address_proof'
+            elif "SIGNATORY" in text_upper or "AUTHORISED" in text_upper or "DESIGNATION" in text_upper or "VALID TILL" in text_upper:
+                doc_type = 'signatory_id'
+            else:
+                fn_lower = file.filename.lower()
+                if 'gst' in fn_lower: doc_type = 'gst_certificate'
+                elif 'udyam' in fn_lower or 'msme' in fn_lower: doc_type = 'udyam_certificate'
+                elif 'addr' in fn_lower or 'bill' in fn_lower or 'elec' in fn_lower: doc_type = 'address_proof'
+                elif 'sig' in fn_lower or 'id' in fn_lower or 'pan' in fn_lower: doc_type = 'signatory_id'
+                else: doc_type = 'gst_certificate'
+
+            if doc_type:
+                docs_map[doc_type] = text
+                extracted_snippets[doc_type] = {
+                    'filename': file.filename,
+                    'chars_extracted': len(text),
+                    'preview': text[:200]
+                }
+
+        file_presence = {
+            'has_address_proof': bool(docs_map['address_proof']),
+            'has_gst_certificate': bool(docs_map['gst_certificate']),
+            'has_udyam_certificate': bool(docs_map['udyam_certificate']),
+            'has_signatory_id': bool(docs_map['signatory_id']),
+        }
+
+        res = kyc_engine.verify_applicant_documents(
+            docs_map=docs_map,
+            file_presence=file_presence,
+            applicant_code="CUSTOM_UPLOAD",
+            default_business_name="Uploaded Business Entity",
+            consent_granted=consent_granted
+        )
+
+        return {
+            'status': 'SUCCESS',
+            'files_received': len(files),
+            'extracted_snippets': extracted_snippets,
+            'verification': res
+        }
+    finally:
+        shutil.rmtree(temp_dir, ignore_errors=True)
+
 @app.post("/api/kyc/consent")
 def record_kyc_consent(req: ConsentRecordRequest):
     return kyc_engine.record_consent(req.applicant_code, req.entity_name, purpose=req.purpose)
@@ -302,6 +394,10 @@ def get_intelligence_summary():
 static_dir = os.path.join(os.path.dirname(__file__), 'static')
 os.makedirs(static_dir, exist_ok=True)
 app.mount("/static", StaticFiles(directory=static_dir), name="static")
+
+@app.get("/favicon.ico", include_in_schema=False)
+def serve_favicon():
+    return Response(content=b"", media_type="image/x-icon")
 
 @app.get("/diagrams")
 def serve_diagrams():

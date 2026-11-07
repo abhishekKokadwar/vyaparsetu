@@ -139,10 +139,17 @@ class PartnerService:
             drop = str(row.get('drop_reason', '')).lower()
             if 'wrong or invalid number' in drop:
                 return 10 # immediate penalty floor
-            elif 'not interested' in drop:
-                score = max(15, score - 20)
             elif 'out of service area' in drop:
                 return 12
+            elif 'not interested' in drop:
+                score = max(15, score - 20)
+            elif 'site not feasible' in drop:
+                # Infeasible for wired fibre; salvageable only via Airtel 5G AirFiber FWA
+                score = min(score, 52)
+            elif 'unreachable' in drop:
+                score = max(15, score - 15)
+            elif 'locked in' in drop:
+                score = max(15, score - 10)
 
             return min(98, max(10, score))
 
@@ -166,6 +173,19 @@ class PartnerService:
         for _, r in self.scored_leads.iterrows():
             lid = str(r['lead_id']).strip().upper()
             self._lead_index[lid] = r.to_dict()
+
+    @staticmethod
+    def mask_contact_name(name: str) -> str:
+        """Masks personal contact names for DPDP Act 2023 compliance: 'Neha Banerjee' -> 'Neha B.'"""
+        if not name or not str(name).strip():
+            return "Business Owner"
+        parts = str(name).strip().split()
+        if len(parts) == 1:
+            first = parts[0]
+            return f"{first[0]}***" if len(first) > 2 else first
+        first = parts[0]
+        last_initial = parts[-1][0].upper()
+        return f"{first} {last_initial}."
 
     def get_commission_estimate(self, segment: str, monthly_bundle_inr: int = 2500) -> dict:
         """
@@ -272,7 +292,8 @@ class PartnerService:
             lead_dict = {
                 'lead_id': r['lead_id'],
                 'business_name': r['business_name'],
-                'contact_name': r.get('contact_name', 'Business Owner'),
+                'contact_name': self.mask_contact_name(r.get('contact_name', 'Business Owner')),
+                'contact_name_masked': self.mask_contact_name(r.get('contact_name', 'Business Owner')),
                 'contact_role': r.get('contact_role', 'Owner'),
                 'segment': r['segment'],
                 'city': r['city'],

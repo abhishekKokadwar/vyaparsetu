@@ -131,10 +131,10 @@ Following Unstop's mandatory **7-slide PPT/PDF** requirement (`Hacker_247_ABVIII
 
 | Metric | Current Baseline (Empirical) | Project Udyam Digital Target | Business Impact |
 |---|---|---|---|
-| **Lead-to-Activation Conversion** | 7.36% (368 / 5,000) | **24.5%** | **3.3x increase** in activated MSMEs per 1,000 leads |
-| **Blended Customer Acquisition Cost (CAC)** | ₹15,053 / customer | **₹2,800** | **81% reduction** via self-serve digital onboarding |
-| **Lead-to-Activation Cycle Time** | 17.6 days | **< 48 hours** | Rapid fulfillment; 0 paperwork delays |
-| **Customer Status Chase Calls** | 3.0 calls / lead | **< 0.3 calls / lead** | Transparent order tracking eliminates status chases |
+| **Lead-to-Activation Conversion** | 7.36% (368 / 5,000) | **15.0%** | **2.0x increase** in activated MSMEs per 1,000 leads |
+| **Blended Customer Acquisition Cost (CAC)** | ₹15,053 / customer | **≤ ₹7,500** | **> 50% reduction** via self-serve digital onboarding |
+| **Lead-to-Activation Cycle Time** | 17.6 days | **≤ 5 Days** | Rapid fulfillment; 0 physical paperwork delays |
+| **Customer Status Chase Calls** | 3.0 calls / lead | **< 0.5 calls / lead** | Transparent milestone tracker eliminates status follow-ups |
 | **Net Promoter Score (NPS)** | 6.9 / 10 | **8.5+ / 10** | High satisfaction from transparent pricing & instant setup |
 
 ---

@@ -124,6 +124,13 @@ class RegistryService:
             }
 
         rec = self._gst_index.get(clean_gstin)
+        # Resilient OCR fallback: check ambiguous character swaps in last check slot ('0' vs 'O')
+        if not rec and len(clean_gstin) == 15:
+            if clean_gstin.endswith('0'):
+                rec = self._gst_index.get(clean_gstin[:-1] + 'O')
+            elif clean_gstin.endswith('O'):
+                rec = self._gst_index.get(clean_gstin[:-1] + '0')
+
         if not rec:
             return {
                 'found': False,

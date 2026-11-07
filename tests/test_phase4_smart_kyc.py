@@ -199,3 +199,34 @@ def test_document_upload_and_verification(kyc_engine):
     res_tampered = kyc_engine.verify_applicant_documents(tampered_upload, consent_granted=True)
     assert res_tampered['verdict'] == 'REJECT'
     assert any("Legal entity mismatch" in r for r in res_tampered['reject_reasons'])
+
+def test_all_registry_gstins_pass_through_normalizer():
+    """Verify that 100% of the 3,534 valid GSTINs in mock registry pass through normalizer unchanged"""
+    import os
+    import pandas as pd
+    csv_path = os.path.join(os.path.dirname(__file__), '..', 'udyam_digital_data', 'mock_gstin_registry.csv')
+    df = pd.read_csv(csv_path)
+    assert len(df) == 3534
+    for gstin in df['gstin']:
+        normalized = SmartKYCEngine.normalize_gstin_ocr(str(gstin))
+        assert normalized == gstin, f"Normalization modified valid GSTIN: {gstin} -> {normalized}"
+
+def test_expired_signatory_rejection(kyc_engine):
+    """Verify that an expired signatory identification document is actively rejected"""
+    expired_upload = {
+        'gst_certificate': "Specimen: GST Registration Certificate Type of registration 19EOGXH4115YIZL Joseph Shah (Prop. Harmony Dental Care) Harmony Dental Care Proprietorship",
+        'udyam_certificate': "Specimen: Udyam Registration Certificate Udyam reg. number UDYAM-WB-OO- 5053330 Harmony Dental Care Services",
+        'address_proof': "Electricity Bill Billed to Harmony Dental Care Bill date 2026-06-01 Amount due 2000",
+        'signatory_id': "Specimen: Authorised Signatory ID Name Joseph Shah Designation Manager For business Harmony Dental Care Valid till 2025-01-01"
+    }
+    res = kyc_engine.verify_applicant_documents(expired_upload, consent_granted=True)
+    assert res['verdict'] == 'REJECT'
+    assert any("expired" in r.lower() for r in res['reject_reasons'])
+
+def test_dpdp_affirmative_data_purge(kyc_engine):
+    """Verify Section 8 DPDP Act data purge after 30-day retention window"""
+    kyc_engine.record_consent('PURGE_TEST_01', 'Old Shop Enterprises')
+    purge_res = kyc_engine.purge_expired_data(as_of_date="2026-12-31")
+    assert purge_res['purged_count'] >= 1
+    assert any(r['applicant_code'] == 'PURGE_TEST_01' for r in purge_res['receipts'])
+

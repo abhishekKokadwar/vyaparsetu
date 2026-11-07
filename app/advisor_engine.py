@@ -3,6 +3,7 @@ import re
 import hashlib
 from typing import Dict, List, Optional, Any, Tuple
 from app.catalog_engine import CatalogEngine
+from app.llm_client import LLMAdvisorClient
 
 class AdvisorEngine:
     """
@@ -17,6 +18,7 @@ class AdvisorEngine:
     """
     def __init__(self, catalog: CatalogEngine):
         self.catalog = catalog
+        self.llm = LLMAdvisorClient()
         self._cache: Dict[str, dict] = {}
         self._cache_hits = 0
         self._total_requests = 0
@@ -46,28 +48,47 @@ class AdvisorEngine:
         """
         Parses free-form conversational text (in Hindi, Marathi, Hinglish, or English)
         to extract business attributes (business type, segment, city tier, employees, sites, GSTIN, language).
+        Uses GenAI LLM (OpenRouter) with instant fallback to deterministic rule parser.
         """
+        # 1. Attempt GenAI LLM extraction (fast OpenAI / OpenRouter)
+        try:
+            llm_res = self.llm.extract_profile(query, base_profile)
+            if llm_res and (llm_res.get('business_type') or llm_res.get('segment')):
+                return llm_res
+        except Exception:
+            pass
+
+        # 2. Resilient Deterministic Fallback Parser
         p = dict(base_profile or {})
         q_lower = query.lower().strip()
 
-        # 1. Language detection (Marathi, Hindi, Hinglish, English)
+        # 1. Language detection (Marathi, Hindi, Hinglish, Tamil, Punjabi, Telugu, English)
         marathi_markers = ['माझे', 'माझं', 'आहे', 'आहेत', 'पुण्यात', 'मुंबईत', 'कामगार', 'हवे', 'करायचे', 'दुकानदार']
         hindi_devanagari = re.findall(r'[\u0900-\u097F]', query)
+        tamil_chars = re.findall(r'[\u0B80-\u0BFF]', query)
+        punjabi_chars = re.findall(r'[\u0A00-\u0A7F]', query)
+        telugu_chars = re.findall(r'[\u0C00-\u0C7F]', query)
 
-        if any(w in query for w in marathi_markers):
+        if bool(tamil_chars) or any(w in q_lower for w in ['vanakkam', 'chennaiyil', 'kadai', 'ஊழியர்கள்']):
+            p['preferred_language'] = 'ta'
+        elif bool(punjabi_chars) or any(w in q_lower for w in ['sat sri akal', 'ludhiana', 'kamay']):
+            p['preferred_language'] = 'pa'
+        elif bool(telugu_chars):
+            p['preferred_language'] = 'te'
+        elif any(w in query for w in marathi_markers):
             p['preferred_language'] = 'mr'  # Marathi regional
         elif bool(hindi_devanagari) or any(w in q_lower.split() for w in ['hai', 'hain', 'chahiye', 'karna', 'mera', 'meri', 'dukan', 'bhaiya', 'namaste', 'humara', 'humaari']):
             p['preferred_language'] = 'hi'  # Hindi / Hinglish
         elif 'preferred_language' not in p:
             p['preferred_language'] = 'en'
 
-        # 2. Number of sites (handles "4 restaurants", "3 branch", "3-branch", "3 branches", "3 शाखाएं", "5 outlets", "2 stores")
-        site_match = re.search(r'(\d+)\s*[-]?\s*(?:branches|branch|sites|stores|locations|outlets|restaurants|clinics|centers|parlours|दुकानें|शाखाएं|शाखा)', q_lower)
+        # 2. Number of sites (handles "4 restaurants", "6 pharmacies", "3 branch", "3-branch", "3 branches", "3 शाखाएं", "5 outlets", "2 stores")
+        site_match = re.search(r'(\d+)\s*[-]?\s*(?:branches|branch|sites|stores|locations|outlets|restaurants|clinics|pharmacies|chemists|centers|parlours|दुकानें|शाखाएं|शाखा)', q_lower)
         if site_match:
             p['num_sites'] = int(site_match.group(1))
 
-        # 3. Employee count (handles "15 teachers", "15 staff", "12 employees", "3 कामगार", "15 लोग", "5 workers", "8 doctors", "10 faculty")
-        emp_match = re.search(r'(\d+)\s*[-]?\s*(?:employees|staff|workers|people|log|members|teachers|faculty|doctors|nurses|helpers|counter|counters|कर्मचारी|लोग|कामगार|शिक्षक)', q_lower)
+        # 3. Employee count (handles "12 lawyers", "15 teachers", "15 staff", "12 employees", "3 कामगार", "15 लोग", "5 workers", "8 doctors", "10 faculty")
+        emp_match = re.search(r'(\d+)\s*[-]?\s*(?:employees|staff|workers|people|log|members|teachers|faculty|doctors|nurses|lawyers|advocates|helpers|counter|counters|कर्मचारी|लोग|कामगार|शिक्षक|वकील|कामकाजी)', q_lower)
         if emp_match:
             p['employee_count'] = int(emp_match.group(1))
 
@@ -80,11 +101,15 @@ class AdvisorEngine:
             p['segment'] = 'mfg'
         elif any(w in q_lower for w in ['clinic', 'doctor', 'hospital', 'dental', 'pathology', 'lab', 'medical', 'medical store', 'chemist', 'pharmacy', 'क्लीनिक', 'अस्पताल', 'दवा', 'मेडिकल', 'औषध']):
             p['business_type'] = 'Clinic / Healthcare / Pharmacy'
-            p['segment'] = 'prof'
+            # Neighborhood retail pharmacy / medical store with single site belongs to micro
+            if any(w in q_lower for w in ['medical store', 'chemist', 'औषध दुकान', 'दुकान', 'pharmacy store']) and p.get('num_sites', 1) <= 1:
+                p['segment'] = 'micro'
+            else:
+                p['segment'] = 'prof'
         elif any(w in q_lower for w in ['school', 'coaching', 'tuition', 'teachers', 'institute', 'academy', 'classes', 'college', 'स्कूल', 'कोचिंग']):
             p['business_type'] = 'Coaching / Education Center'
             p['segment'] = 'prof'
-        elif any(w in q_lower for w in ['ca', 'chartered', 'accountant', 'law', 'lawyer', 'legal', 'consultant', 'tax', 'advocate', 'वकील', 'सीए']):
+        elif any(w in q_lower for w in ['ca', 'chartered', 'accountant', 'law', 'lawyer', 'lawyers', 'legal', 'consultant', 'tax', 'advocate', 'advocates', 'वकील', 'सीए']):
             p['business_type'] = 'CA / Legal / Consulting Firm'
             p['segment'] = 'prof'
         elif any(w in q_lower for w in ['beauty parlour', 'parlour', 'parlor', 'salon', 'saloon', 'spa', 'beauty', 'ब्यूटी पार्लर', 'सैलून']):
@@ -93,7 +118,7 @@ class AdvisorEngine:
         elif any(w in q_lower for w in ['restaurant', 'cafe', 'bakery', 'dhaba', 'hotel', 'bhojanalaya', 'रेस्टोरेंट', 'होटल', 'हॉटेल']):
             p['business_type'] = 'Restaurant / Cafe / Food'
             p['segment'] = 'micro'
-        elif any(w in q_lower for w in ['kirana', 'grocery', 'ration', 'dukan', 'store', 'retail', 'provision', 'bahi', 'किराना', 'दुकान', 'राशन']):
+        elif any(w in q_lower for w in ['kirana', 'grocery', 'ration', 'dukan', 'store', 'retail', 'provision', 'bahi', 'hardware', 'mobile repair', 'mobile shop', 'repair shop', 'किराना', 'दुकान', 'राशन', 'हार्डवेयर', 'मोबाइल']):
             p['business_type'] = 'Kirana / Retail Store'
             p['segment'] = 'micro'
 

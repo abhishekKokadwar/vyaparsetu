@@ -441,8 +441,8 @@ async function loadDocSpecimen(code) {
   }
 }
 
-// Handle Custom File Upload in Sandbox
-function handleFileUpload(event) {
+// Handle Real File Upload via FormData with Windows OCR
+async function handleFileUpload(event) {
   const files = event.target.files;
   if (!files || files.length === 0) return;
   const filesList = document.getElementById('uploaded-files-list');
@@ -451,19 +451,57 @@ function handleFileUpload(event) {
     filesList.innerHTML = Array.from(files).map(f => `
       <div class="flex items-center justify-between text-slate-700 bg-white p-1.5 rounded border border-slate-200">
         <span>📄 ${f.name} (${Math.round(f.size/1024)} KB)</span>
-        <span class="text-emerald-600 font-bold text-[10px]">Uploaded</span>
+        <span class="text-airtel-red font-bold text-[10px] animate-pulse">Running OCR...</span>
       </div>
     `).join('');
   }
 
-  // Auto-detect if file name contains known patterns
+  const consent = document.getElementById('dpdp-consent-chk')?.checked ?? true;
+  const formData = new FormData();
   for (const f of files) {
-    const fn = f.name.toUpperCase();
-    if (fn.includes('K01')) { loadDocSpecimen('K01'); return; }
-    if (fn.includes('K02')) { loadDocSpecimen('K02'); return; }
-    if (fn.includes('K06')) { loadDocSpecimen('K06'); return; }
-    if (fn.includes('K07')) { loadDocSpecimen('K07'); return; }
-    if (fn.includes('K11')) { loadDocSpecimen('K11'); return; }
+    formData.append('files', f);
+  }
+  formData.append('consent_granted', consent);
+
+  try {
+    const res = await fetch('/api/kyc/upload-files', {
+      method: 'POST',
+      body: formData
+    });
+    const data = await res.json();
+
+    if (filesList) {
+      filesList.innerHTML = Array.from(files).map(f => `
+        <div class="flex items-center justify-between text-slate-700 bg-white p-1.5 rounded border border-slate-200">
+          <span>📄 ${f.name} (${Math.round(f.size/1024)} KB)</span>
+          <span class="text-emerald-600 font-bold text-[10px]">OCR Extracted &amp; Verified</span>
+        </div>
+      `).join('');
+    }
+
+    if (data.extracted_snippets) {
+      if (data.extracted_snippets.gst_certificate) {
+        const gstTa = document.getElementById('ocr-gst-text');
+        if (gstTa) gstTa.value = data.extracted_snippets.gst_certificate.preview;
+      }
+      if (data.extracted_snippets.udyam_certificate) {
+        const udyamTa = document.getElementById('ocr-udyam-text');
+        if (udyamTa) udyamTa.value = data.extracted_snippets.udyam_certificate.preview;
+      }
+      if (data.extracted_snippets.address_proof) {
+        const addrTa = document.getElementById('ocr-addr-text');
+        if (addrTa) addrTa.value = data.extracted_snippets.address_proof.preview;
+      }
+    }
+
+    if (data.verification) {
+      renderKYCDiagnostics(data.verification);
+    }
+  } catch (err) {
+    console.error("File upload OCR error:", err);
+    if (filesList) {
+      filesList.innerHTML += `<div class="text-red-500 text-[10px] mt-1">OCR Upload error: ${err.message}</div>`;
+    }
   }
 }
 
@@ -737,7 +775,7 @@ function renderOrderTracker(order) {
   if (order.technician) {
     document.getElementById('trk-tech-name').textContent = order.technician.name;
     document.getElementById('trk-tech-slot').textContent = `Slot: ${order.technician.slot}`;
-    document.getElementById('trk-tech-pin').textContent = order.technician.pin;
+    document.getElementById('trk-tech-pin').textContent = order.technician.installation_pin || order.technician.pin || '8492';
     document.getElementById('trk-tech-call').href = `tel:${order.technician.phone}`;
   }
 
