@@ -18,7 +18,7 @@ flowchart TD
         P3 --> P4["Phase 4: Smart KYC & DPDP Compliance Infrastructure"]
         P4 --> P5["Phase 5: Self-Service Order Fulfillment & Live Tracker"]
         P5 --> P6["Phase 6: Channel Partner Portal & Lead Salvage Engine"]
-        P6 --> P7["Phase 7: End-to-End System Integration & 28-Endpoint API Gateway"]
+        P6 --> P7["Phase 7: End-to-End System Integration & 32-Endpoint API Gateway"]
     end
 
     subgraph Extended ["Planned Extension Architecture (Future Horizon)"]
