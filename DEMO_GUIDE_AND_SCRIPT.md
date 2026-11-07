@@ -181,3 +181,4 @@
 3. **Pacing:**
    - Total words in script: **~390 words**.
    - At a standard conversational pace of **130 words per minute**, 390 words fits comfortably into **2 minutes 50 seconds**, leaving 10 seconds of natural breathing room.
+

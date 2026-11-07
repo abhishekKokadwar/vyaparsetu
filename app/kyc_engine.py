@@ -112,45 +112,72 @@ class SmartKYCEngine:
 
     @classmethod
     def extract_gst_details(cls, text: str) -> dict:
-        """Extracts GSTIN, legal name, and trade name from GST certificate text"""
+        """Extracts GSTIN, legal name, and trade name from GST certificate text (Windows OCR or Gemini Vision)"""
         if not text or len(text.strip()) < 50:
             return {'valid_ocr': False, 'gstin': None, 'legal_name': None, 'trade_name': None}
 
-        idx = text.rfind("registration")
-        if idx == -1:
+        cand = None
+
+        # 1. Key-value style (Gemini Vision / Cloud VLM): e.g. 'GSTIN: 37IHKXV5167L1ZS' or 'GSTIN 37IHK...'
+        m = re.search(r'GSTIN\s*[:\-\s]\s*([0-9A-Za-z]{2,4}\s*[0-9A-Za-z]{10,14})', text, re.IGNORECASE)
+        if m:
+            c = m.group(1).replace(' ', '').strip()
+            if len(c) >= 14 and not c.lower().startswith(('legal', 'name', 'trade', 'reg')):
+                cand = c
+
+        # 2. Two-column table scan (Windows native OCR): GSTIN appears immediately after 'registration'
+        if not cand:
+            idx = text.rfind("registration")
+            if idx != -1:
+                after = text[idx + len("registration"):].strip()
+                tokens = after.split()
+                if tokens:
+                    c = tokens[0]
+                    if len(c) < 14 and len(tokens) > 1:
+                        c = c + tokens[1]
+                    if not c.lower().startswith(('regular', 'accel', 'composite')):
+                        cand = c
+
+        # 3. Direct regex match on standalone 15-char GSTIN candidate
+        if not cand:
+            m2 = re.search(r'\b([0-9O]{2}[A-Za-z0-9]{13})\b', text)
+            if m2:
+                cand = m2.group(1)
+
+        if not cand:
             return {'valid_ocr': False, 'gstin': None, 'legal_name': None, 'trade_name': None}
 
-        after = text[idx + len("registration"):].strip()
-        tokens = after.split()
-        if not tokens:
-            return {'valid_ocr': False, 'gstin': None, 'legal_name': None, 'trade_name': None}
-
-        cand = tokens[0]
-        # Handle space within state code e.g. '32T' + 'AXB5481UIZ1'
-        if len(cand) < 14 and len(tokens) > 1:
-            cand = cand + tokens[1]
         gstin = cls.normalize_gstin_ocr(cand)
 
-        # Extract legal name and trade name
-        prop_m = re.search(r'([A-Za-z\s]+?\s*\([Pp]rop\.?\s*([^)]+)\))', after)
+        # Extract legal name and trade name across full text (handles both Gemini key-value & Windows flow)
+        prop_m = re.search(r'([A-Za-z\s]+?\s*\([Pp]rop\.?\s*([^)]+)\))', text)
         legal_name = None
         trade_name = None
         if prop_m:
             legal_name = prop_m.group(1).strip()
-            # Clean leading token remnants if any
-            legal_name = re.sub(r'^[0-9A-Za-z]{3,5}\s+', '', legal_name).strip()
-            rem = after[prop_m.end():].strip()
+            legal_name = re.sub(r'^(?:legal\s*name\s*[:\-]?\s*)', '', legal_name, flags=re.I).strip()
+            toks = legal_name.split()
+            if toks and len(toks) > 1 and toks[0].lower() in cand.lower():
+                legal_name = ' '.join(toks[1:]).strip()
+            rem = text[prop_m.end():].strip()
             const_m = re.search(r'(Proprietorship|Partnership|Private Limited|Limited Liability)', rem)
             if const_m:
                 trade_name = rem[:const_m.start()].strip()
+                trade_name = re.sub(r'^trade\s*name\s*[:\-]?\s*', '', trade_name, flags=re.I).strip()
             else:
                 trade_name = prop_m.group(2).strip()
         else:
             # Check LLP or Pvt Ltd pattern
-            llp_m = re.search(r'([A-Za-z\s]+?(?:LLP|Pvt Ltd|Private Limited))\s+\1', after)
+            llp_m = re.search(r'([A-Za-z\s]+?(?:LLP|Pvt Ltd|Private Limited))\s+\1', text)
             if llp_m:
                 legal_name = llp_m.group(1).strip()
                 trade_name = legal_name
+            else:
+                # Standalone LLP / Pvt Ltd pattern e.g. 'Balaji Realty LLP' or 'Trinity Bake House Pvt Ltd'
+                entity_m = re.search(r'\b([A-Z][A-Za-z\s]+?(?:LLP|Pvt Ltd|Private Limited))\b', text)
+                if entity_m:
+                    legal_name = entity_m.group(1).strip()
+                    trade_name = legal_name
 
         # Reconcile single-character OCR scan drop if applicable
         # (e.g. K05 where '32TZAXB5481U1Z1' had 'Z' dropped by OCR scanner as '32T AXB5481UIZ1')
