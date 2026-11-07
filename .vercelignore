@@ -1,0 +1,15 @@
+.env
+.env.*
+.git
+.playwright-mcp
+__pycache__
+*.pptx
+*.pdf
+*.zip
+6ae1873397bc1_digital
+airtel_sync_case
+deck
+tests
+scripts
+template1.pptx
+template2.pptx
