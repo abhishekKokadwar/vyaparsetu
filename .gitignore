@@ -58,3 +58,4 @@ udyam_digital_data/persisted_orders.json
 
 .vercel
 .env*
+.codex/
