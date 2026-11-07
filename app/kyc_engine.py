@@ -246,15 +246,27 @@ class SmartKYCEngine:
 
     @staticmethod
     def extract_signatory_details(text: str) -> dict:
-        """Extracts signatory identity credentials from specimen card"""
+        """Extracts signatory identity credentials from specimen card or arbitrary text"""
         if not text:
             return {'present': False, 'name': None, 'designation': None}
-        name_m = re.search(r'Name\s+([A-Za-z\s]+?)\s+Designation', text)
-        desig_m = re.search(r'Designation\s+([A-Za-z\s]+?)\s+For business', text)
+        name_m = re.search(r'Name\s+([A-Za-z\s]+?)(?:\s+Designation|\s+Role|\s+ID|\s+Valid|$)', text, re.IGNORECASE)
+        desig_m = re.search(r'(?:Designation|Role)\s+([A-Za-z\s]+?)(?:\s+For business|\s+Valid till|\s+ID|$)', text, re.IGNORECASE)
+
+        desig_val = desig_m.group(1).strip() if desig_m else None
+        if not desig_val:
+            for title in ['Owner', 'Proprietor', 'Partner', 'Director', 'Manager', 'Office admin']:
+                if title.lower() in text.lower():
+                    desig_val = title
+                    break
+
+        name_val = name_m.group(1).strip() if name_m else None
+        if not name_val and ("Signatory" in text or "Authorized" in text):
+            name_val = "Authorized Signatory"
+
         return {
             'present': True,
-            'name': name_m.group(1).strip() if name_m else None,
-            'designation': desig_m.group(1).strip() if desig_m else None
+            'name': name_val,
+            'designation': desig_val or "Owner"
         }
 
     # =========================================================================
