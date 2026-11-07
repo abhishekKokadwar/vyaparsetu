@@ -139,13 +139,11 @@ class PartnerService:
             drop = str(row.get('drop_reason', '')).lower()
             if 'wrong or invalid number' in drop:
                 return 10 # immediate penalty floor
-            elif 'out of service area' in drop:
-                return 12
             elif 'not interested' in drop:
                 score = max(15, score - 20)
             elif 'site not feasible' in drop:
-                # Infeasible for wired fibre; salvageable only via Airtel 5G AirFiber FWA
-                score = min(score, 52)
+                # Infeasible for wired fibre; penalty cap at 40
+                score = min(score, 40)
             elif 'unreachable' in drop:
                 score = max(15, score - 15)
             elif 'locked in' in drop:
@@ -156,9 +154,10 @@ class PartnerService:
         leads['propensity_score'] = leads.apply(score_lead, axis=1)
         leads['drop_category'] = leads['drop_reason'].apply(self._categorize_drop_reason)
         
-        # Propensity tier
+        # Propensity tier: 80th percentile threshold so HIGH means top ~20%
+        q80 = float(leads['propensity_score'].quantile(0.80))
         def get_tier(score):
-            if score >= 70:
+            if score >= q80:
                 return 'HIGH'
             elif score >= 45:
                 return 'MEDIUM'
@@ -223,7 +222,7 @@ class PartnerService:
 
         lid = lead_data.get('lead_id', 'LEAD-001')
         b_name = lead_data.get('business_name', 'Your Business')
-        c_name = lead_data.get('contact_name', 'Business Owner')
+        c_name = self.mask_contact_name(lead_data.get('contact_name', 'Business Owner'))
         bundle_code = playbook['default_bundle']
         link = f"https://vyaparsetu.airtel.in/salvage/{lid}?bundle={bundle_code}"
 
@@ -329,7 +328,7 @@ class PartnerService:
         return {
             'lead_id': raw['lead_id'],
             'business_name': raw['business_name'],
-            'contact_name': raw.get('contact_name', 'Business Owner'),
+            'contact_name': self.mask_contact_name(raw.get('contact_name', 'Business Owner')),
             'contact_role': raw.get('contact_role', 'Owner'),
             'segment': raw['segment'],
             'city': raw['city'],
@@ -353,8 +352,9 @@ class PartnerService:
         and channel partner commission incentive pools.
         """
         total_dropped = len(self.scored_leads)
-        high_pool = self.scored_leads[self.scored_leads['propensity_score'] >= 70]
-        med_pool = self.scored_leads[(self.scored_leads['propensity_score'] >= 45) & (self.scored_leads['propensity_score'] < 70)]
+        q80 = float(self.scored_leads['propensity_score'].quantile(0.80))
+        high_pool = self.scored_leads[self.scored_leads['propensity_score'] >= q80]
+        med_pool = self.scored_leads[(self.scored_leads['propensity_score'] >= 45) & (self.scored_leads['propensity_score'] < q80)]
         low_pool = self.scored_leads[self.scored_leads['propensity_score'] < 45]
 
         n_high = len(high_pool)

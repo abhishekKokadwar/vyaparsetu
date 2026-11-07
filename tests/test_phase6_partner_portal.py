@@ -117,6 +117,7 @@ def test_macro_portfolio_salvage_stats(partner_service):
     stats = partner_service.get_partner_stats()
     assert stats['total_dropped_leads'] == 4632
     assert stats['high_propensity_count'] > 0
+    assert 18.0 <= stats['high_propensity_pct'] <= 22.0
     assert stats['medium_propensity_count'] > 0
     assert stats['projected_recoverable_subscribers'] > 0
     assert stats['projected_recoverable_arr_inr'] > 0
