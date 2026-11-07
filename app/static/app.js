@@ -120,8 +120,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   await loadKYCApplicants();
   await loadPartnerPortal();
   
-  // Run initial recommendation for default form values
-  submitAdvisorProfile();
+  // No recommendation until the customer has told us about the business.
   fetchOrderStatus('VS-2026-90412');
 
   // Handle URL hash routing
@@ -422,7 +421,19 @@ async function submitAdvisorProfile() {
   const employees = parseInt(document.getElementById('adv-employees').value);
   const sites = parseInt(document.getElementById('adv-sites').value);
   const hasGst = document.querySelector('input[name="adv-has-gst"]:checked').value === 'yes';
-  const spend = parseInt(document.getElementById('adv-current-spend').value);
+  const spend = parseInt(document.getElementById('adv-current-spend').value) || 0;
+
+  // Don't recommend anything until we actually know the business.
+  const errEl = document.getElementById('adv-form-error');
+  const problems = [];
+  if (!bizType) problems.push('business type');
+  if (!employees || employees < 1) problems.push('number of staff');
+  if (!sites || sites < 1) problems.push('number of sites');
+  if (errEl) {
+    errEl.classList.toggle('hidden', problems.length === 0);
+    errEl.textContent = problems.length ? `Please add the ${problems.join(' and ')} so we can recommend the right bundle.` : '';
+  }
+  if (problems.length) return;
 
   const payload = {
     business_type: bizType,
@@ -458,6 +469,10 @@ async function submitAdvisorProfile() {
 
 // Render Advisor Recommendation Result Card
 function renderAdvisorRecommendation(data) {
+  const emptyEl = document.getElementById('advisor-empty');
+  if (emptyEl) emptyEl.classList.add('hidden');
+  const contentEl0 = document.getElementById('advisor-content');
+  if (contentEl0) contentEl0.classList.remove('hidden');
   document.getElementById('rec-bundle-title').textContent = data.bundle_name;
   document.getElementById('rec-price').innerHTML = `₹${data.pricing.monthly_total_inr.toLocaleString('en-IN')}<span class="text-xs text-slate-500 font-normal"> /mo</span>`;
   document.getElementById('rec-contract').textContent = `${data.pricing.contract_lock_months} Months`;
