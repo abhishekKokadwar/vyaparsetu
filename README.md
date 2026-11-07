@@ -50,6 +50,29 @@ India's 6 Crore+ Micro, Small, and Medium Enterprises (MSMEs) are increasingly a
 
 ---
 
+## 🚀 Quickstart: Run Locally
+
+```bash
+# 1. Clone repository & install dependencies
+git clone https://github.com/abhishekKokadwar/vyaparsetu.git
+cd vyaparsetu
+py -m pip install -r requirements.txt
+
+# 2. Configure environment (optional: OpenRouter key for GenAI Advisor)
+# Add your key to .env:
+# OPENROUTER_API_KEY=your_openrouter_api_key
+# OPENROUTER_MODEL=openai/gpt-4o-mini
+
+# 3. Start prototype application
+py run.py
+# Navigate to http://localhost:8000
+
+# 4. Run automated test suite (isolated, deterministic & offline-safe)
+py -m pytest -q
+```
+
+---
+
 ## 🎯 Target Impact Metrics
 
 6-month targets against the Apr–Jun 2026 baseline (`smb_leads.csv`).

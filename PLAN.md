@@ -116,14 +116,14 @@ Following Unstop's mandatory **7-slide PPT/PDF** requirement (`Hacker_247_ABVIII
 
 | Slide | Topic | Content Summary |
 |---|---|---|
-| **Cover** | Title & Credentials | Project Udyam Digital · Team Hacker_247 · ABV-IIITM Gwalior |
-| **Slide 1** | **Problem Diagnosis & MSME Sizing** | Empirical baseline: 5,000 leads $\rightarrow$ 368 activations (7.36% conversion), ₹15,053 blended CAC, 17.6 days delay; 49% pure process friction. |
-| **Slide 2** | **Competitive Differentiation** | Benchmark against Jio Business, Tata Tele (TTBS), and local ISPs; Accel/Airtel's single-bill ecosystem. |
-| **Slide 3** | **Proposed Solution: VyaparSetu** | 10-minute self-serve mobile journey: Advisor, Quote Builder, Smart KYC, and Order Tracker. |
-| **Slide 4** | **Technical Architecture & Core Engine** | FastAPI backend (28 REST endpoints), deterministic catalogue rules, and DPDP compliance ledger. |
-| **Slide 5** | **Smart KYC & DPDP Compliance** | Real OCR field extraction, 90-day expiry enforcement, cross-document reconciliation, 6 PASS / 6 REJECT. |
-| **Slide 6** | **Channel Partner Coexistence Model** | 1,808 salvageable leads, ₹2.60 Cr recoverable ARR, 15% commission, automated WhatsApp win-back playbooks. |
-| **Slide 7** | **Business Impact & Unit Economics** | Conversion (7.36% $\rightarrow$ 24.5%), CAC (₹15,053 $\rightarrow$ ₹2,800), Cycle Time (17.6 days $\rightarrow$ <48 hrs), NPS (6.9 $\rightarrow$ 8.5+). |
+| **Cover** | **Title & Credentials** | Project Udyam Digital · Team Hacker_247 · ABV-IIITM Gwalior |
+| **Slide 1** | **Problem Diagnosis & MSME Sizing** | Empirical baseline: 5,000 leads $\rightarrow$ 368 activations (7.36% conversion), ₹15,053 blended CAC, 17.6 days delay; 49% pure process friction (2,290 leads). |
+| **Slide 2** | **Target Segments & Bundles** | Micro, Professional, Multi-Site & Mfg clusters; transparent bundling with single invoice and catalog rules. |
+| **Slide 3** | **Customer Journey: Single Sitting Onboarding** | 10-minute self-serve mobile flow: AI Advisor, Real-Time Quote, Instant KYC, and Live Order Tracker. |
+| **Slide 4** | **Technical Architecture & DPDP Privacy** | Modular FastAPI backend (32 REST endpoints), deterministic rule validation, OCR extraction, and DPDP 2023 audit ledger. |
+| **Slide 5** | **Competitive Differentiation** | Comparison against Jio Business, Tata Tele (TTBS), and unorganized local ISPs; Accel single-bill advantage. |
+| **Slide 6** | **Channel Partner Coexistence & Win-Back** | 932 high-propensity leads (top 20%), ₹1.91 Cr recoverable ARR, 15% revenue share, automated WhatsApp playbooks. |
+| **Slide 7** | **Business Impact & Unit Economics** | Conversion (7.36% $\rightarrow$ 15.0%), CAC (₹15,053 $\rightarrow$ ≤ ₹7,500), Cycle Time (17.6 d $\rightarrow$ ≤ 5 d), Churn (15.2% $\rightarrow$ < 10%), NPS baseline 6.9. |
 
 ---
 
@@ -135,7 +135,8 @@ Following Unstop's mandatory **7-slide PPT/PDF** requirement (`Hacker_247_ABVIII
 | **Blended Customer Acquisition Cost (CAC)** | ₹15,053 / customer | **≤ ₹7,500** | **> 50% reduction** via self-serve digital onboarding |
 | **Lead-to-Activation Cycle Time** | 17.6 days | **≤ 5 Days** | Rapid fulfillment; 0 physical paperwork delays |
 | **Customer Status Chase Calls** | 3.0 calls / lead | **< 0.5 calls / lead** | Transparent milestone tracker eliminates status follow-ups |
-| **Net Promoter Score (NPS)** | 6.9 / 10 | **8.5+ / 10** | High satisfaction from transparent pricing & instant setup |
+| **Annual Churn Rate** | 15.2% | **< 10.0%** | Unified monthly invoicing & proactive SLA tracking |
+| **Net Promoter Score (NPS)** | 6.9 / 10 (Baseline) | **> 8.0 / 10** | High satisfaction from transparent pricing & instant setup |
 
 ---
 *Created for Airtel Sync 2026 Hackathon · Team Hacker_247 · ABV-IIITM Gwalior*

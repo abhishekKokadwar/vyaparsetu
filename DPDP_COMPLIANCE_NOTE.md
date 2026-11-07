@@ -49,6 +49,7 @@ Small business owners frequently share highly sensitive financial and identity r
   1. Entity verification and legal name validation.
   2. Installation address feasibility check.
   3. Direct telecom billing contact authorization.
+* **Cloud OCR Sub-Processor Disclosure:** When running in cloud container environments (e.g., Linux/Vercel) without native Windows OCR runtimes, uploaded image buffers are transmitted over encrypted TLS 1.3 to the enterprise LLM API provider (OpenRouter / OpenAI) solely for automated character transcription. In strict compliance with Section 7, the provider acts purely as an ephemeral processing gateway—images are never stored, logged, or used for model training, and only the resulting text stream is consumed by VyaparSetu's verification engine before local buffer destruction.
 * **No secondary commercialization:** Information is cryptographically isolated and never shared with third-party advertisers, credit scoring aggregators, or external marketing brokers.
 
 #### Pillar 3: Data Minimisation & Identifier Masking (Section 8)

@@ -30,36 +30,36 @@
 ---
 
 #### Scene 2: The Conversational GenAI Advisor (0:30 – 1:05)
-* **Screen:** Switch to live Web UI (`http://localhost:8000`). Click language toggle to show English/हिंदी. Select *Clinic & Healthcare* (or click the *Dental Clinic* quick scenario button).
+* **Screen:** Switch to live Web UI (`http://localhost:8000`). Type or paste a colloquial message in Hindi/Hinglish or English: *"मेरी जयपुर में किराना दुकान है 2 लोग काम करते हैं"* or click a quick scenario button.
 * **Speaker:**
-  > *"Instead of waiting days for a field sales visit, the owner opens VyaparSetu on their phone in their preferred language. They answer 4 quick questions about their business type, staff count, and city tier.*  
-  > *Our GenAI Advisor instantly recommends an optimized bundle—here, the **Vyapar Professional Suite** with 300 Mbps Fibre, Static IP, Cloud Email, and 1TB Backup. Crucially, our deterministic rule engine enforces all 25 catalog constraints: city tiers, employee minimums, and connectivity dependencies, explaining 'Why this bundle fits your daily business' in plain Hindi or English."*
+  > *"Instead of waiting days for a field sales visit, the owner opens VyaparSetu on their phone and speaks or types in their daily vernacular—English, Hindi, Hinglish, Marathi, Tamil, or Punjabi.*  
+  > *Our GenAI Advisor extracts the business archetype, employee scale, and connectivity needs in real time. Crucially, the LLM never hallucinates pricing—our deterministic rule engine enforces all 25 catalog constraints: city tiers, employee minimums, and connectivity dependencies, explaining 'Why this bundle fits your daily business' in plain language."*
 
 ---
 
 #### Scene 3: Transparent Quote & Add-on Configurator (1:05 – 1:30)
 * **Screen:** Click on the *Quote & Bundle* tab. Show the catalog list. Toggle an add-on (e.g. Cloud CCTV or Wi-Fi 6). Watch the single monthly total and install days recalculate live.
 * **Speaker:**
-  > *"Small business owners hate surprise bills. The Quote Configurator provides 100% price transparency with zero hidden fees. The owner can toggle add-ons like Cloud CCTV or Guest Wi-Fi, and the system dynamically updates their single monthly bill—delivering ₹13,800 in annual savings compared to fragmented local vendors."*
+  > *"Small business owners hate surprise bills. The Quote Configurator provides 100% price transparency with zero hidden fees. The owner can toggle add-ons like Cloud CCTV or Guest Wi-Fi, and the system dynamically updates their single monthly bill—delivering ~28.6% in annual savings compared to fragmented local vendors."*
 
 ---
 
 #### Scene 4: Smart KYC & Live Planted Edge Cases (1:30 – 2:15) ⭐ *(Jury Climax)*
-* **Screen:** Switch to *Smart KYC* tab. Show the DPDP Act 2023 Consent Banner. Select **Applicant K11 (Trinity Bake House)** and click *Run Smart Verification*. Show rejection. Then select **Applicant K01 (Vindhya Tours)**. Show rejection. Finally select **Applicant K02 (Harmony Dental)**. Show PASS!
+* **Screen:** Switch to *Smart KYC* tab. Show the DPDP Act 2023 Consent Banner. Select **Applicant K11 (Trinity Bake House)** and click *Run Smart Verification*. Show rejection. Then select **Applicant K07** or drop the real 4 PNG files into the real upload box to show dynamic OCR catching the legal name mismatch (*Shri Physio Clinic* vs *Neelgiri Physio Clinic*). Finally select **Applicant K02 (Harmony Dental)**. Show PASS!
 * **Speaker:**
-  > *"Next is Smart KYC, fully compliant with the DPDP Act 2023. Notice our explicit consent banner and dynamic PAN masking.*  
+  > *"Next is Smart KYC, fully compliant with the DPDP Act 2023. Notice our explicit consent banner and dynamic PII masking.*  
   > *Watch how our engine handles the hackathon's planted edge cases:*  
-  > *First, we test **Applicant K11**: Our OCR date engine cross-checks the utility bill against the reference date of July 15, 2026. The bill is 257 days old—**instantly rejected** for violating the 90-day validity rule!*  
-  > *Next, **Applicant K01**: All documents look clean, but our sub-second mock GST registry lookup flags that GSTIN 37IHKXV5167L1ZS is **Cancelled**—instantly caught!*  
+  > *First, **Applicant K11**: Our OCR date engine cross-checks the utility bill against the reference date of July 15, 2026. The bill is 257 days old—**instantly rejected** for violating the 90-day validity rule!*  
+  > *Next, **Real Upload / Applicant K07**: When real certificates are uploaded, our OCR extracts text dynamically without filename reliance, flagging that the certificate entity 'Shri Physio Clinic' mismatches the registry legal name 'Neelgiri Physio Clinic'—catching certificate tampering!*  
   > *Finally, **Applicant K02**: Active GSTIN, verified Udyam certificate, fresh 54-day bill—**fully verified in 3 seconds**."*
 
 ---
 
 #### Scene 5: Order Tracker & Partner Coexistence (2:15 – 2:40)
-* **Screen:** Click *Confirm & Activate Service*. The screen smoothly transitions to the **Live Order Tracker**. Show the 5 visual milestones, technician assigned (Ramesh Kumar), and OTP pin. Then briefly show the **Partner Portal** tab with dropped leads.
+* **Screen:** Click *Confirm & Activate Service*. The screen smoothly transitions to the **Live Order Tracker**. Show the 6 visual milestones, technician assigned (Suresh Patel), and 4-digit installation PIN. Then switch to the **Partner Portal** tab with dropped leads.
 * **Speaker:**
-  > *"Once verified, the order is confirmed without human intervention. The owner tracks installation milestones in real-time on our Order Tracker—viewing their assigned engineer's name and visit slot, completely eliminating the 3 anxious chase calls.*  
-  > *And for local channel partners, our Partner Portal analyzes the 4,632 dropped leads in the dataset using AI Propensity Scoring and gives partners a ranked call list — every assisted close is QR-tagged, so they still earn their commission."*
+  > *"Once verified, the order is confirmed without human intervention. The owner tracks installation milestones in real-time on our Order Tracker—viewing their assigned engineer's name, visit slot, and 4-digit security PIN, completely eliminating the 3 anxious chase calls.*  
+  > *And for local channel partners, our Partner Portal analyzes the 4,632 dropped leads in the dataset. Using a top-20% propensity score threshold, it surfaces **932 high-propensity leads representing ₹1.91 Crore in recoverable ARR**, empowering partners with automated WhatsApp win-back playbooks and an attractive 15% revenue share (~₹28.6 Lakh pool)."*
 
 ---
 

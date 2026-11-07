@@ -8,11 +8,11 @@
 
 ## 🧭 Executive Overview of the Roadmap
 
-This roadmap outlines the complete end-to-end engineering and product lifecycle for **VyaparSetu**. It is structured into **7 Fully Built & Tested Core Phases** (verified across 58 automated unit, integration, and stress tests) followed by **4 Planned Extension Architecture Phases** (indic voice agents, WhatsApp headless flows, DigiLocker government gateways, and telco OSS/BSS core hooks).
+This roadmap outlines the complete end-to-end engineering and product lifecycle for **VyaparSetu**. It is structured into **7 Fully Built & Tested Core Phases** (verified across 69 automated unit, integration, and UI smoke tests) followed by **4 Planned Extension Architecture Phases** (indic voice agents, WhatsApp headless flows, DigiLocker government gateways, and telco OSS/BSS core hooks).
 
 ```mermaid
 flowchart TD
-    subgraph Core ["7 Fully Implemented & Tested Phases (v1.0.0 Release)"]
+    subgraph Core ["7 Fully Implemented & Tested Phases (Prototype v1.0 · Demo-Ready)"]
         P1["Phase 1: Data Intelligence & Funnel Root-Cause Modeling"] --> P2["Phase 2: Deterministic Catalog & Dynamic Pricing Engine"]
         P2 --> P3["Phase 3: Conversational GenAI Advisor (VyaparSaarthi)"]
         P3 --> P4["Phase 4: Smart KYC & DPDP Compliance Infrastructure"]
@@ -63,9 +63,9 @@ flowchart TD
 
 ### Phase 3: Conversational GenAI Advisor (VyaparSaarthi)
 * **Status:** ✅ **COMPLETED** (`tests/test_phase3_advisor_engine.py` · 11/11 tests passing)
-* **Objective:** Eliminate the 3–5 day sales discovery bottleneck with a multilingual conversational advisor.
+* **Objective:** Eliminate the 3–5 day sales discovery bottleneck with a multilingual conversational advisor (LLM extraction via OpenRouter with deterministic rule fallback; rules engine sets all prices).
 * **Key Deliverables:**
-  1. **Multilingual Query Parsing:** Natural language understanding in English, Hindi, Hinglish, and Marathi (e.g., *"4 restaurants in bangalore"*, *"beauty parlour hai"*, *"माझे पुण्यात मेडिकल स्टोअर आहे 3 कामगार आहेत"*, *"We have GST and 15 teachers"*).
+  1. **Multilingual Query Parsing:** Natural language understanding in English, Hindi, Hinglish, Marathi, Tamil, Punjabi, and Telugu (e.g., *"4 restaurants in bangalore"*, *"beauty parlour hai"*, *"माझे पुण्यात मेडिकल स्टोअर आहे 3 कामगार आहेत"*, *"We have GST and 15 teachers"*).
   2. **Archetype Bundles:**
      - *Kirana Booster Pack:* Biz Fibre 100/AirFiber + Cloud POS + Postpaid SIM + Cloud CCTV (~₹2,196/mo).
      - *Clinic & Healthcare Pro:* Biz Fibre 300 + Cloud Email + Cloud Backup 1TB + Guest Wi-Fi + Static IP (~₹3,097/mo for 4 staff).
@@ -76,7 +76,7 @@ flowchart TD
 ---
 
 ### Phase 4: Smart KYC Engine & DPDP Act 2023 Infrastructure
-* **Status:** ✅ **COMPLETED** (`tests/test_phase4_smart_kyc.py` · 11/11 tests passing)
+* **Status:** ✅ **COMPLETED** (`tests/test_phase4_smart_kyc.py` · 14/14 tests passing, `tests/test_upload_classification.py` · 3/3 tests passing)
 * **Objective:** Replace 10-day physical paperwork with 3-second automated verification compliant with DPDP Act 2023.
 * **Key Deliverables:**
   1. **National Registry Connectors:** Sub-millisecond lookups against 3,534 GST records and 2,723 MSME Udyam records.
@@ -89,7 +89,7 @@ flowchart TD
      - Flags **K07** for legal entity mismatch (`Prop. Shri Physio Clinic` on certificate vs `Prop. Neelgiri Physio Clinic` in registry).
      - Flags **K11** for expired address proof utility bill (257 days old > 90-day limit).
   3. **DPDP Act 2023 Compliance:** Explicit digital consent gate, SHA-256 cryptographic audit ledger, and PII masking (`37IHXXXXXX7L1ZS`).
-  4. **Document Upload Sandbox:** Real drag-and-drop document upload and OCR extraction endpoint (`POST /api/kyc/upload-and-verify`).
+  4. **Document Upload Sandbox:** Real drag-and-drop document upload and dynamic OCR extraction endpoint (`POST /api/kyc/upload-files`).
 
 ---
 
@@ -101,7 +101,7 @@ flowchart TD
      `Order Placed` $\rightarrow$ `Digital KYC Verified` $\rightarrow$ `Feasibility Passed` $\rightarrow$ `Field Engineer Assigned` $\rightarrow$ `Site Installation` $\rightarrow$ `Service Activated`.
   2. **Dynamic SLA Floor Enforcement:** Derived from product catalog; strictly enforces engineering feasibility (e.g. 21 days for Internet Leased Line).
   3. **Field Engineer Dispatch Card & 4-Digit PIN:** Live engineer details, badge ID, appointment slot, and tamper-proof activation PIN.
-  4. **Customer Self-Service:** Visit window rescheduling and order lookup by phone.
+  4. **Customer Self-Service:** Visit window rescheduling and order lookup by phone with local storage persistence.
 
 ---
 
@@ -109,11 +109,11 @@ flowchart TD
 * **Status:** ✅ **COMPLETED** (`tests/test_phase6_partner_portal.py` · 11/11 tests passing)
 * **Objective:** Turn channel conflict into a force multiplier and recover high-value dropped leads.
 * **Key Deliverables:**
-  1. **AI Propensity Scoring Engine:** Evaluates 4,632 dropped leads from `smb_leads.csv` across 6 dimensions with feasibility and unreachable friction caps.
+  1. **Propensity Scoring Engine:** Evaluates 4,632 dropped leads from `smb_leads.csv` across 6 dimensions with feasibility and unreachable friction caps.
   2. **Empirical Portfolio Numbers:**
-     - Isolates **1,463 high-propensity salvageable leads** (>70 score; 31.6% of dropped leads).
-     - Represents **₹2.24 Crore in recoverable annual recurring revenue (ARR)**.
-     - Allocates an attractive **15% channel partner commission** (~₹33.7 Lakh pool) for successful assisted activations.
+     - Isolates **932 high-propensity salvageable leads** (top 20% of dropped leads with score ≥80).
+     - Represents **₹1.91 Crore in recoverable annual recurring revenue (ARR)**.
+     - Allocates an attractive **15% channel partner commission** (~₹28.6 Lakh pool) for successful assisted activations.
   3. **Automated Win-Back Playbooks:** Generates localized bilingual WhatsApp pitches and 1-click salvage links with DPDP contact name and GSTIN masking.
 
 ---
@@ -122,7 +122,7 @@ flowchart TD
 * **Status:** ✅ **COMPLETED** (`tests/test_phase7_end_to_end_journey.py` · 5/5 tests passing, `tests/test_ui_smoke.py` · 2/2 tests passing)
 * **Objective:** Unify all platform components into a production-grade FastAPI gateway.
 * **Key Deliverables:**
-  1. **30 RESTful Endpoints:** Complete API surface under `/api` spanning Catalogue, Advisor, Registry, Smart KYC, Orders, and Partner Portal.
+  1. **32 RESTful Endpoints:** Complete API surface under `/api` spanning Catalogue, Advisor, Registry, Smart KYC, Orders, and Partner Portal.
   2. **OpenAPI 3.0 Documentation:** Interactive Swagger UI at `/docs` and ReDoc at `/redoc`.
   3. **Complete Customer Lifecycle Simulation:** End-to-end single-sitting customer acquisition test and partner salvage lifecycle test passing with 100% reliability.
 
@@ -175,12 +175,12 @@ flowchart TD
 |:---:|---|---|:---:|:---:|---|
 | **Phase 1** | Data Intelligence & Funnel Modeling | `tests/test_phase1_intelligence.py` | **COMPLETED** | **6 / 6 PASSED** | Diagnosed 92.6% drop causes, GSTIN significance & 4 MSME cohorts |
 | **Phase 2** | Deterministic Catalog & Pricing Engine | `tests/test_phase2_catalog_engine.py` | **COMPLETED** | **6 / 6 PASSED** | 25 products, directed dependency graph, ₹28.6% vendor savings model |
-| **Phase 3** | Conversational GenAI Advisor (VyaparSaarthi) | `tests/test_phase3_advisor_engine.py` | **COMPLETED** | **11 / 11 PASSED** | Multilingual English/Hindi/Marathi advisor, 15 jury scenarios |
-| **Phase 4** | Smart KYC & DPDP Compliance Infrastructure | `tests/test_phase4_smart_kyc.py` | **COMPLETED** | **14 / 14 PASSED** | Real Windows OCR extraction, K01–K12 edge cases (6 PASS / 6 REJECT), 30-day purge |
+| **Phase 3** | Conversational GenAI Advisor (VyaparSaarthi) | `tests/test_phase3_advisor_engine.py` | **COMPLETED** | **11 / 11 PASSED** | Multilingual LLM + rule-based advisor, 15 jury scenarios |
+| **Phase 4** | Smart KYC & DPDP Compliance Infrastructure | `tests/test_phase4_smart_kyc.py`, `tests/test_upload_classification.py` | **COMPLETED** | **17 / 17 PASSED** | Real Windows OCR extraction, K01–K12 edge cases (6 PASS / 6 REJECT), 30-day purge |
 | **Phase 5** | Self-Service Order Fulfillment Live Tracker | `tests/test_phase5_order_tracker.py` | **COMPLETED** | **11 / 11 PASSED** | 6-stage milestone tracker, catalog SLA floor, technician PIN |
-| **Phase 6** | Channel Partner Portal & Lead Salvage Engine | `tests/test_phase6_partner_portal.py` | **COMPLETED** | **11 / 11 PASSED** | 1,463 salvageable leads, ₹2.24 Cr ARR, 15% commission pool, playbooks |
-| **Phase 7** | End-to-End System Integration & UI Smoke Suite | `tests/test_phase7_end_to_end_journey.py`, `tests/test_ui_smoke.py` | **COMPLETED** | **7 / 7 PASSED** | Full customer lifecycle, 30 REST endpoints, Playwright headless smoke tests |
-| **Total** | **VyaparSetu Platform Release v1.0.0** | **8 Test Suites** | **✅ BUILT & TESTED** | **66 / 66 PASSED** | **100% Test Pass Rate** |
+| **Phase 6** | Channel Partner Portal & Lead Salvage Engine | `tests/test_phase6_partner_portal.py` | **COMPLETED** | **11 / 11 PASSED** | 932 salvageable leads (top 20%), ₹1.91 Cr ARR, 15% commission pool, playbooks |
+| **Phase 7** | End-to-End System Integration & UI Smoke Suite | `tests/test_phase7_end_to_end_journey.py`, `tests/test_ui_smoke.py` | **COMPLETED** | **7 / 7 PASSED** | Full customer lifecycle, 32 REST endpoints, Playwright headless smoke tests |
+| **Total** | **VyaparSetu Platform Release v1.0.0** | **9 Test Suites** | **Prototype v1.0 · demo-ready** | **69 / 69 PASSED** | **100% Test Pass Rate** |
 
 ---
 
