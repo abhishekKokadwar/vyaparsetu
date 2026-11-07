@@ -701,6 +701,10 @@ async function placeOrderAfterKYC() {
     });
     const order = await res.json();
     lastCreatedOrderId = order.order_id;
+    try {
+      localStorage.setItem('vs_last_order', JSON.stringify(order));
+      localStorage.setItem(`vs_order_${order.order_id}`, JSON.stringify(order));
+    } catch (e) {}
     document.getElementById('tracker-order-id').value = order.order_id;
     renderOrderTracker(order);
     switchTab('tracker');
@@ -714,21 +718,55 @@ async function fetchOrderStatus(orderId) {
   const oid = orderId || document.getElementById('tracker-order-id').value.trim();
   if (!oid) return;
 
+  const notFoundEl = document.getElementById('tracker-not-found-msg');
+  if (notFoundEl) notFoundEl.classList.add('hidden');
+
   try {
     const res = await fetch(`/api/orders/${oid}`);
-    if (!res.ok) {
-      alert("Order not found. Showing sample order VS-2026-90412.");
-      return fetchOrderStatus('VS-2026-90412');
+    if (res.ok) {
+      const order = await res.json();
+      try {
+        localStorage.setItem('vs_last_order', JSON.stringify(order));
+        localStorage.setItem(`vs_order_${order.order_id}`, JSON.stringify(order));
+      } catch (e) {}
+      renderOrderTracker(order);
+      return;
     }
-    const order = await res.json();
-    renderOrderTracker(order);
   } catch (err) {
     console.error("Tracking error:", err);
+  }
+
+  // Fallback to locally saved order if server restarted or on serverless cold instance
+  try {
+    const saved = localStorage.getItem(`vs_order_${oid}`) || localStorage.getItem('vs_last_order');
+    if (saved) {
+      const savedOrder = JSON.parse(saved);
+      if (savedOrder.order_id === oid || !orderId) {
+        renderOrderTracker(savedOrder, "Showing your saved order (synced locally)");
+        return;
+      }
+    }
+  } catch (e) {}
+
+  // Inline non-intrusive error notice (no popup alert)
+  if (notFoundEl) {
+    notFoundEl.textContent = `Order '${oid}' not found. Please verify the ID or create a new order via the KYC tab.`;
+    notFoundEl.classList.remove('hidden');
   }
 }
 
 // Render Live Order Tracker UI
-function renderOrderTracker(order) {
+function renderOrderTracker(order, note = null) {
+  const notFoundEl = document.getElementById('tracker-not-found-msg');
+  if (notFoundEl) {
+    if (note) {
+      notFoundEl.textContent = note;
+      notFoundEl.classList.remove('hidden');
+    } else {
+      notFoundEl.classList.add('hidden');
+    }
+  }
+
   document.getElementById('trk-order-num').textContent = order.order_id;
   document.getElementById('trk-biz-name').textContent = order.business_name;
   document.getElementById('trk-bundle').textContent = order.bundle_name;

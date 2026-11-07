@@ -1,5 +1,7 @@
 import uuid
 import re
+import os
+import json
 from datetime import datetime, timedelta, timezone
 from typing import Dict, List, Optional, Any
 from app.catalog_engine import CatalogEngine
@@ -65,7 +67,32 @@ class OrderService:
         self.catalog = catalog or CatalogEngine()
         self.orders: Dict[str, dict] = {}
         self.phone_index: Dict[str, List[str]] = {}
+        self._orders_file = os.path.join(os.path.dirname(__file__), '..', 'udyam_digital_data', 'persisted_orders.json')
         self._seed_sample_orders()
+        self._load_persisted_orders()
+
+    def _save_orders(self):
+        try:
+            os.makedirs(os.path.dirname(self._orders_file), exist_ok=True)
+            with open(self._orders_file, 'w', encoding='utf-8') as f:
+                json.dump(self.orders, f, indent=2)
+        except Exception:
+            pass
+
+    def _load_persisted_orders(self):
+        try:
+            if os.path.exists(self._orders_file):
+                with open(self._orders_file, 'r', encoding='utf-8') as f:
+                    data = json.load(f)
+                    if isinstance(data, dict):
+                        for oid, order in data.items():
+                            self.orders[oid] = order
+                            if 'contact_phone' in order:
+                                clean_phone = self._normalize_phone(order['contact_phone'])
+                                if oid not in self.phone_index.setdefault(clean_phone, []):
+                                    self.phone_index[clean_phone].append(oid)
+        except Exception:
+            pass
 
     def _normalize_phone(self, phone: str) -> str:
         clean = re.sub(r'[^0-9]', '', str(phone))
@@ -225,6 +252,7 @@ class OrderService:
         self.orders[order_num] = order
         clean_phone = self._normalize_phone(order['contact_phone'])
         self.phone_index.setdefault(clean_phone, []).append(order_num)
+        self._save_orders()
         return order
 
     def get_order(self, order_id: str) -> Optional[dict]:
@@ -281,6 +309,7 @@ class OrderService:
 
         order['stage_index'] = next_idx
         order['current_stage_code'] = next_stage['code']
+        self._save_orders()
 
         return {
             'status': 'SUCCESS',
@@ -313,6 +342,8 @@ class OrderService:
         for st in order['stages']:
             if st['code'] == 'TECHNICIAN_ASSIGNED':
                 st['detail'] = f"Engineer {order['technician']['name']} rescheduled visit to {new_slot}."
+
+        self._save_orders()
 
         return {
             'status': 'SUCCESS',

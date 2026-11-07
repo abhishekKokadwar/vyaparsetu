@@ -580,6 +580,8 @@
           </div>
         </div>
 
+        <div id="tracker-not-found-msg" class="hidden mt-4 bg-amber-50 border border-amber-200 text-amber-900 text-xs px-4 py-3 rounded-xl flex items-center justify-between"></div>
+
         <!-- Order Summary Card -->
         <div id="tracker-summary-card" class="mt-6 bg-slate-50 border border-slate-200 rounded-xl p-5 grid grid-cols-2 md:grid-cols-4 gap-4 text-xs">
           <div>
@@ -647,17 +649,17 @@
           </div>
           <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm">
             <span class="text-xs text-purple-700 font-medium">High Propensity Salvageable</span>
-            <div class="text-2xl font-extrabold text-purple-900 mt-1" id="ptnr-salvageable">1,463</div>
-            <span class="text-[11px] text-purple-600 font-semibold">&gt;70 AI Propensity Score</span>
+            <div class="text-2xl font-extrabold text-purple-900 mt-1" id="ptnr-salvageable">932</div>
+            <span class="text-[11px] text-purple-600 font-semibold">Top 20% Propensity Score (&ge;80)</span>
           </div>
           <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm">
             <span class="text-xs text-emerald-700 font-medium">Recoverable ARR Opportunity</span>
-            <div class="text-2xl font-extrabold text-emerald-900 mt-1" id="ptnr-arr">₹2.24 Cr</div>
+            <div class="text-2xl font-extrabold text-emerald-900 mt-1" id="ptnr-arr">₹1.91 Cr</div>
             <span class="text-[11px] text-emerald-600 font-semibold">At ₹2.5k avg bundle/mo</span>
           </div>
           <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm">
             <span class="text-xs text-amber-700 font-medium">Partner Commission Pool</span>
-            <div class="text-2xl font-extrabold text-amber-900 mt-1" id="ptnr-comm">₹33.7 Lakh</div>
+            <div class="text-2xl font-extrabold text-amber-900 mt-1" id="ptnr-comm">₹28.6 Lakh</div>
             <span class="text-[11px] text-amber-600 font-semibold">15% revenue share on assisted closes</span>
           </div>
         </div>
@@ -666,7 +668,7 @@
         <div class="bg-white rounded-2xl border border-slate-200 shadow-sm p-6">
           <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center pb-4 border-b border-slate-100 gap-3">
             <div>
-              <h2 class="text-lg font-bold text-slate-900">AI Propensity Recovery Queue</h2>
+              <h2 class="text-lg font-bold text-slate-900">Propensity Score Recovery Queue</h2>
               <p class="text-xs text-slate-500">Surface leads that dropped out due to visit scheduling or quote delays for 1-click partner assistance</p>
             </div>
             <div class="flex space-x-2 text-xs">
@@ -688,7 +690,7 @@
                   <th class="py-2.5 px-3">Segment & City</th>
                   <th class="py-2.5 px-3">Stage Reached</th>
                   <th class="py-2.5 px-3">Drop Reason</th>
-                  <th class="py-2.5 px-3 text-center">AI Propensity</th>
+                  <th class="py-2.5 px-3 text-center">Propensity Score</th>
                   <th class="py-2.5 px-3 text-right">Recommended Recovery Action</th>
                 </tr>
               </thead>
