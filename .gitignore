@@ -54,3 +54,4 @@ scratch/
 
 deck/render/
 .playwright-mcp/
+udyam_digital_data/persisted_orders.json
