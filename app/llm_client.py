@@ -30,28 +30,26 @@ DEFAULT_MODEL = os.environ.get("OPENROUTER_MODEL", "openai/gpt-4o-mini")
 REQUEST_TIMEOUT_SECONDS = 5.0
 
 SYSTEM_EXTRACTION_PROMPT = """You are VyaparSaarthi, Airtel's B2B AI Business Advisor for Indian MSMEs.
-Your role is to understand business owners communicating in English, Hindi, Hinglish, Marathi, Tamil, Telugu, Punjabi, Gujarati, etc., and extract their business parameters into a strict JSON object.
-
-Extract these exact fields:
+Extract business parameters from user inquiry in English, Hindi, Hinglish, Marathi, Tamil, Punjabi, Telugu, etc. into JSON:
 {
-  "business_type": string (e.g., "Kirana / Retail Store", "Clinic / Healthcare / Pharmacy", "CA / Legal / Consulting Firm", "Retail Chain / Multi-Site", "Manufacturing / Plant", "Salon / Beauty Parlour", "Coaching / Education Center", "Restaurant / Cafe / Food"),
-  "segment": string (strictly one of: "micro", "prof", "multi", "mfg"),
+  "business_type": string (e.g. "Kirana Store", "Dental Clinic", "Law Firm", "Garment Factory", "Retail Chain", "Gym"),
+  "segment": string ("micro", "prof", "multi", "mfg"),
   "employee_count": integer or null,
-  "num_sites": integer (default 1 if single location, >1 if chain/outlets mentioned),
+  "num_sites": integer (default 1),
   "city": string or null,
-  "city_tier": integer (1 for Metros: Delhi, NCR, Mumbai, Bengaluru, Pune, Hyderabad, Chennai, Kolkata; 2 for Tier 2/3: Jaipur, Lucknow, Indore, Bhopal, Nagpur, etc.),
+  "city_tier": 1 or 2 or null,
   "has_gstin": boolean or null,
-  "preferred_language": string ("en", "hi", "mr", "ta", "te", "pa", "gu", etc.),
-  "clarifying_question": string or null (one polite, empathetic question in the user's language if critical information like GSTIN or employee count is missing)
+  "preferred_language": string ("en", "hi", "mr", "ta", "te", "pa", "gu", "bn", "kn", "ml"),
+  "clarifying_question": string or null
 }
-
-Segment assignment rules:
-- num_sites > 1 or multiple branches/outlets/restaurants/chain -> "multi"
-- manufacturing/factory/plant/workshop/machining/textile/fabrication/packaging -> "mfg"
-- clinic/doctor/dental/hospital/medical/pharmacy/ca/law/consulting/coaching/school -> "prof" (unless single retail pharmacy/chemist shop -> "micro")
-- kirana/retail/store/mobile shop/hardware/salon/parlour/cafe/single restaurant -> "micro"
-
-Return ONLY pure JSON. No markdown code blocks, no preamble."""
+Rules:
+- Counters, tills, desks, chairs, machines, looms are NOT sites. num_sites counts separate physical locations/branches/outlets.
+- num_sites >= 2 or chain/branches -> "multi"
+- manufacturing/factory/plant/workshop/machining/textile/fabrication -> "mfg"
+- clinic/doctor/hospital/dental/ca/law firm/legal/coaching/school -> "prof" (single chemist/medical store -> "micro")
+- kirana/grocery/mobile shop/hardware/salon/bakery/gym/single shop -> "micro"
+- preferred_language: detect from script & words. Marathi uses Devanagari but words like आहे, माझे, मध्ये.
+Return ONLY valid JSON without markdown."""
 
 SYSTEM_PITCH_PROMPT = """You are VyaparSaarthi, Airtel's AI Business Advisor for Indian MSMEs.
 Write a warm, empathetic, 2-3 sentence personalized pitch explaining why the recommended bundle is the perfect fit for this business.
@@ -75,6 +73,9 @@ class LLMAdvisorClient:
         Uses LLM to parse natural language inquiry into structured business parameters.
         Returns None on any error or timeout (triggering immediate deterministic fallback).
         """
+        if os.environ.get("VYAPAR_LLM_DISABLED") == "1":
+            return None
+
         if not self.api_key or not query or not query.strip():
             return None
 
@@ -88,7 +89,7 @@ class LLMAdvisorClient:
                 {"role": "system", "content": SYSTEM_EXTRACTION_PROMPT},
                 {"role": "user", "content": f"User inquiry: {query}"}
             ],
-            "max_tokens": 400,
+            "max_tokens": 100,
             "temperature": 0.1
         }
 
@@ -139,7 +140,7 @@ class LLMAdvisorClient:
         Uses LLM to synthesize a high-empathy sales pitch in the customer's language.
         Returns None on timeout/error (falling back to template narrative).
         """
-        if not self.api_key:
+        if os.environ.get("VYAPAR_LLM_DISABLED") == "1" or not self.api_key:
             return None
 
         prompt_input = (
@@ -157,7 +158,7 @@ class LLMAdvisorClient:
                 {"role": "system", "content": SYSTEM_PITCH_PROMPT},
                 {"role": "user", "content": prompt_input}
             ],
-            "max_tokens": 300,
+            "max_tokens": 100,
             "temperature": 0.3
         }
 

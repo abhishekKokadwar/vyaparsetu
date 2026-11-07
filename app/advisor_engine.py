@@ -53,8 +53,35 @@ class AdvisorEngine:
         # 1. Attempt GenAI LLM extraction (fast OpenAI / OpenRouter)
         try:
             llm_res = self.llm.extract_profile(query, base_profile)
-            if llm_res and (llm_res.get('business_type') or llm_res.get('segment')):
-                return llm_res
+            if llm_res and isinstance(llm_res, dict):
+                seg = llm_res.get('segment')
+                if seg in {'micro', 'prof', 'multi', 'mfg'}:
+                    # Validate employee_count and num_sites
+                    for count_field in ['employee_count', 'num_sites']:
+                        val = llm_res.get(count_field)
+                        if val is not None:
+                            try:
+                                ival = int(val)
+                                if 1 <= ival <= 10000:
+                                    llm_res[count_field] = ival
+                                else:
+                                    llm_res[count_field] = None
+                            except (ValueError, TypeError):
+                                llm_res[count_field] = None
+
+                    # num_sites >= 2 is required for segment == "multi"
+                    sites = llm_res.get('num_sites') or 1
+                    if seg == 'multi' and sites < 2:
+                        llm_res['segment'] = 'micro'
+
+                    # Language allow-list
+                    allowed_langs = {'en', 'hi', 'mr', 'ta', 'te', 'pa', 'gu', 'bn', 'kn', 'ml'}
+                    lang = llm_res.get('preferred_language')
+                    if lang not in allowed_langs:
+                        llm_res['preferred_language'] = 'en'
+
+                    llm_res['_source'] = 'llm'
+                    return llm_res
         except Exception:
             pass
 
@@ -63,7 +90,7 @@ class AdvisorEngine:
         q_lower = query.lower().strip()
 
         # 1. Language detection (Marathi, Hindi, Hinglish, Tamil, Punjabi, Telugu, English)
-        marathi_markers = ['माझे', 'माझं', 'आहे', 'आहेत', 'पुण्यात', 'मुंबईत', 'कामगार', 'हवे', 'करायचे', 'दुकानदार']
+        marathi_markers = ['माझे', 'माझं', 'आहे', 'आहेत', 'पुण्यात', 'मुंबईत', 'कामगार', 'हवे', 'करायचे', 'दुकानदार', 'मध्ये']
         hindi_devanagari = re.findall(r'[\u0900-\u097F]', query)
         tamil_chars = re.findall(r'[\u0B80-\u0BFF]', query)
         punjabi_chars = re.findall(r'[\u0A00-\u0A7F]', query)
@@ -86,11 +113,15 @@ class AdvisorEngine:
         site_match = re.search(r'(\d+)\s*[-]?\s*(?:branches|branch|sites|stores|locations|outlets|restaurants|clinics|pharmacies|chemists|centers|parlours|दुकानें|शाखाएं|शाखा)', q_lower)
         if site_match:
             p['num_sites'] = int(site_match.group(1))
+        elif 'num_sites' not in p:
+            p['num_sites'] = 1
 
         # 3. Employee count (handles "12 lawyers", "15 teachers", "15 staff", "12 employees", "3 कामगार", "15 लोग", "5 workers", "8 doctors", "10 faculty")
-        emp_match = re.search(r'(\d+)\s*[-]?\s*(?:employees|staff|workers|people|log|members|teachers|faculty|doctors|nurses|lawyers|advocates|helpers|counter|counters|कर्मचारी|लोग|कामगार|शिक्षक|वकील|कामकाजी)', q_lower)
+        emp_match = re.search(r'(\d+)\s*[-]?\s*(?:employees|staff|workers|people|log|members|teachers|faculty|doctors|nurses|lawyers|advocates|helpers|कर्मचारी|लोग|कामगार|शिक्षक|वकील|कामकाजी)', q_lower)
         if emp_match:
             p['employee_count'] = int(emp_match.group(1))
+        elif any(w in q_lower for w in ['akela', 'akele', 'अकेला', 'alone', 'single person', 'self employed']):
+            p['employee_count'] = 1
 
         # 4. Business type & Segment detection (Priority: Multi-Site > Mfg > Prof/Education/Clinic > Salons/Food > Kirana)
         if p.get('num_sites', 1) > 1 or any(w in q_lower for w in ['chain', 'franchise', 'branches', 'multi-site', 'showrooms', 'outlets', 'multiple stores', 'restaurants', 'शाखाएं', 'दुकानें']):
@@ -101,8 +132,8 @@ class AdvisorEngine:
             p['segment'] = 'mfg'
         elif any(w in q_lower for w in ['clinic', 'doctor', 'hospital', 'dental', 'pathology', 'lab', 'medical', 'medical store', 'chemist', 'pharmacy', 'क्लीनिक', 'अस्पताल', 'दवा', 'मेडिकल', 'औषध']):
             p['business_type'] = 'Clinic / Healthcare / Pharmacy'
-            # Neighborhood retail pharmacy / medical store with single site belongs to micro
-            if any(w in q_lower for w in ['medical store', 'chemist', 'औषध दुकान', 'दुकान', 'pharmacy store']) and p.get('num_sites', 1) <= 1:
+            # Neighborhood retail pharmacy / medical store with single site & <=2 staff belongs to micro
+            if any(w in q_lower for w in ['medical store', 'chemist', 'औषध दुकान', 'दुकान', 'pharmacy store', 'स्टोअर', 'मेडिकल स्टोअर', 'दवा दुकान']) and p.get('num_sites', 1) <= 1 and p.get('employee_count', 1) < 3:
                 p['segment'] = 'micro'
             else:
                 p['segment'] = 'prof'
@@ -115,10 +146,10 @@ class AdvisorEngine:
         elif any(w in q_lower for w in ['beauty parlour', 'parlour', 'parlor', 'salon', 'saloon', 'spa', 'beauty', 'ब्यूटी पार्लर', 'सैलून']):
             p['business_type'] = 'Salon / Beauty Parlour'
             p['segment'] = 'micro'
-        elif any(w in q_lower for w in ['restaurant', 'cafe', 'bakery', 'dhaba', 'hotel', 'bhojanalaya', 'रेस्टोरेंट', 'होटल', 'हॉटेल']):
+        elif any(w in q_lower for w in ['restaurant', 'cafe', 'bakery', 'dhaba', 'hotel', 'bhojanalaya', 'रेस्टोरेंट', 'होटल', 'हॉटेल', 'ਬੇਕਰੀ', 'बेकरी']):
             p['business_type'] = 'Restaurant / Cafe / Food'
             p['segment'] = 'micro'
-        elif any(w in q_lower for w in ['kirana', 'grocery', 'ration', 'dukan', 'store', 'retail', 'provision', 'bahi', 'hardware', 'mobile repair', 'mobile shop', 'repair shop', 'किराना', 'दुकान', 'राशन', 'हार्डवेयर', 'मोबाइल']):
+        elif any(w in q_lower for w in ['kirana', 'grocery', 'ration', 'dukan', 'store', 'retail', 'provision', 'bahi', 'hardware', 'mobile repair', 'mobile shop', 'repair shop', 'किराना', 'दुकान', 'राशन', 'हार्डवेयर', 'मोबाइल', 'மளிகை', 'கடை']):
             p['business_type'] = 'Kirana / Retail Store'
             p['segment'] = 'micro'
 
@@ -136,6 +167,7 @@ class AdvisorEngine:
         elif any(w in q_lower for w in ['with gst', 'have gst', 'we have gst', 'have gstin', 'has gstin', 'has gst', 'gst registered', 'gst hai', 'gstin hai', 'gst आहे', 'gst है', 'gstin है', 'yes gst']):
             p['has_gstin'] = True
 
+        p['_source'] = 'rules'
         return p
 
     def detect_clarifications(self, profile: dict) -> List[dict]:
