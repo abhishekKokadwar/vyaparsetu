@@ -7,7 +7,8 @@ let productQuantities = {}; // advisor-chosen quantities, so the quote matches t
 let activeCategoryFilter = 'all';
 let currentRecommendation = null;
 let currentApplicant = null;
-let lastCreatedOrderId = 'VS-2026-90412';
+let lastCreatedOrderId = null;
+const SAMPLE_ORDER_ID = 'VS-2026-90412';
 let partnerLeads = [];
 let chatProfile = null;
 
@@ -121,7 +122,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   await loadPartnerPortal();
   
   // No recommendation until the customer has told us about the business.
-  fetchOrderStatus('VS-2026-90412');
+  renderOrderHistory();
 
   // Handle URL hash routing
   if (location.hash) {
@@ -1040,49 +1041,109 @@ async function placeOrderAfterKYC() {
 }
 
 // Fetch Order Status for Live Order Tracker
-async function fetchOrderStatus(orderId) {
-  const oid = orderId || document.getElementById('tracker-order-id').value.trim();
-  if (!oid) return;
+const digits10 = v => String(v || '').replace(/\D/g, '').slice(-10);
 
-  const notFoundEl = document.getElementById('tracker-not-found-msg');
-  if (notFoundEl) notFoundEl.classList.add('hidden');
+function trackerMessage(msg) {
+  const el = document.getElementById('tracker-not-found-msg');
+  if (!el) return;
+  el.textContent = msg || '';
+  el.classList.toggle('hidden', !msg);
+}
+
+function openSampleOrder() {
+  document.getElementById('tracker-order-id').value = SAMPLE_ORDER_ID;
+  document.getElementById('tracker-phone').value = '';
+  fetchOrderStatus(SAMPLE_ORDER_ID, '');
+}
+
+function showTrackerHome() {
+  document.getElementById('tracker-order-view').classList.add('hidden');
+  document.getElementById('tracker-empty').classList.remove('hidden');
+  trackerMessage('');
+  renderOrderHistory();
+}
+
+function savedOrders() {
+  const out = [];
+  try {
+    for (let i = 0; i < localStorage.length; i++) {
+      const key = localStorage.key(i);
+      if (key && key.startsWith('vs_order_')) out.push(JSON.parse(localStorage.getItem(key)));
+    }
+  } catch (e) {}
+  return out.filter(o => o && o.order_id && o.order_id !== SAMPLE_ORDER_ID)
+            .sort((a, b) => String(b.created_at).localeCompare(String(a.created_at)));
+}
+
+function renderOrderHistory() {
+  const box = document.getElementById('tracker-history');
+  if (!box) return;
+  const orders = savedOrders();
+  if (!orders.length) {
+    box.innerHTML = `<div class="px-4 py-8 text-center">
+      <p class="text-sm font-semibold text-slate-800">No orders yet</p>
+      <p class="text-sm text-slate-600 mt-1">Orders you place appear here. Start with the Advisor, then complete KYC.</p>
+      <button type="button" onclick="switchTab('advisor')" class="btn-secondary mt-3">Go to Advisor</button>
+    </div>`;
+    return;
+  }
+  box.innerHTML = orders.map(o => `
+    <button type="button" data-oid="${escapeHtml(o.order_id)}" class="w-full text-left px-4 py-3 min-h-[44px] hover:bg-slate-50 flex items-center justify-between gap-3">
+      <span class="min-w-0">
+        <span class="block text-sm font-semibold text-slate-900 truncate">${escapeHtml(o.business_name || 'Order')}</span>
+        <span class="block text-sm text-slate-600 font-mono">${escapeHtml(o.order_id)} · ${escapeHtml(o.bundle_name || '')}</span>
+      </span>
+      <span class="text-sm font-semibold text-slate-700 shrink-0">${escapeHtml((o.current_stage_code || '').replace(/_/g, ' ').toLowerCase())}</span>
+    </button>`).join('');
+  box.querySelectorAll('button[data-oid]').forEach(b => b.addEventListener('click', () => {
+    const o = orders.find(x => x.order_id === b.dataset.oid);
+    document.getElementById('tracker-order-id').value = o.order_id;
+    document.getElementById('tracker-phone').value = digits10(o.contact_phone);
+    fetchOrderStatus(o.order_id, o.contact_phone);
+  }));
+}
+
+async function fetchOrderStatus(orderId, phone) {
+  const oid = (orderId || document.getElementById('tracker-order-id').value).trim().toUpperCase();
+  const ph = phone !== undefined ? phone : document.getElementById('tracker-phone').value;
+  if (!oid) { trackerMessage('Enter your order number.'); return; }
+  const isSample = oid === SAMPLE_ORDER_ID;
+  if (!isSample && digits10(ph).length < 10) {
+    trackerMessage('Enter the 10-digit mobile number registered on this order.');
+    return;
+  }
+  trackerMessage('');
 
   try {
-    const res = await fetch(`/api/orders/${oid}`);
+    const res = await fetch(`/api/orders/${encodeURIComponent(oid)}?phone=${encodeURIComponent(digits10(ph))}`);
     if (res.ok) {
       const order = await res.json();
-      try {
-        localStorage.setItem('vs_last_order', JSON.stringify(order));
-        localStorage.setItem(`vs_order_${order.order_id}`, JSON.stringify(order));
-      } catch (e) {}
+      if (!isSample) {
+        try { localStorage.setItem(`vs_order_${order.order_id}`, JSON.stringify(order)); } catch (e) {}
+      }
       renderOrderTracker(order);
       return;
     }
   } catch (err) {
-    console.error("Tracking error:", err);
+    console.error('Tracking error:', err);
   }
 
-  // Fallback to locally saved order if server restarted or on serverless cold instance
+  // Serverless cold start: fall back to a copy saved on this device, only if the mobile number matches too.
   try {
-    const saved = localStorage.getItem(`vs_order_${oid}`) || localStorage.getItem('vs_last_order');
-    if (saved) {
-      const savedOrder = JSON.parse(saved);
-      if (savedOrder.order_id === oid || !orderId) {
-        renderOrderTracker(savedOrder, "Showing your saved order (synced locally)");
-        return;
-      }
+    const saved = JSON.parse(localStorage.getItem(`vs_order_${oid}`) || 'null');
+    if (saved && digits10(saved.contact_phone) === digits10(ph)) {
+      renderOrderTracker(saved, 'Showing the copy saved on this device.');
+      return;
     }
   } catch (e) {}
-
-  // Inline non-intrusive error notice (no popup alert)
-  if (notFoundEl) {
-    notFoundEl.textContent = `Order '${oid}' not found. Please verify the ID or create a new order via the KYC tab.`;
-    notFoundEl.classList.remove('hidden');
-  }
+  trackerMessage('No order found for that order number and mobile number. Check both and try again.');
 }
 
-// Render Live Order Tracker UI
 function renderOrderTracker(order, note = null) {
+  document.getElementById('tracker-order-view').classList.remove('hidden');
+  document.getElementById('tracker-empty').classList.add('hidden');
+  const sampleBadge = document.getElementById('tracker-sample-badge');
+  if (sampleBadge) sampleBadge.classList.toggle('hidden', order.order_id !== SAMPLE_ORDER_ID);
   const notFoundEl = document.getElementById('tracker-not-found-msg');
   if (notFoundEl) {
     if (note) {

@@ -570,20 +570,42 @@
     <section id="view-tracker" class="tab-view" role="tabpanel" aria-labelledby="tab-btn-tracker" tabindex="-1">
       <div class="max-w-6xl mx-auto bg-white rounded-2xl border border-slate-200 shadow-sm p-6 sm:p-8">
         
-        <!-- Search Order Bar -->
-        <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center pb-6 border-b border-slate-100 gap-4">
+        <!-- Lookup -->
+        <div class="flex flex-col gap-4 pb-6 border-b border-slate-100">
           <div>
-            <span class="text-xs font-bold text-airtel-red uppercase tracking-wider">Self-Service Status View</span>
-            <h2 class="text-xl font-bold text-slate-900 mt-0.5">Live Order Tracker</h2>
-            <p class="text-xs text-slate-500">Track technician dispatch, feasibility & activation without calling customer care</p>
+            <span class="eyebrow">Self-service status</span>
+            <h2 class="text-xl font-bold text-slate-900 mt-1">Order Tracker</h2>
+            <p class="text-sm text-slate-600">Track feasibility, technician dispatch and activation without calling customer care.</p>
           </div>
-          <div class="flex space-x-2 w-full sm:w-auto">
-            <input type="text" id="tracker-order-id" value="VS-2026-90412" placeholder="Order ID (e.g. VS-2026-90412)" class="bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-base md:text-sm font-mono uppercase tracking-wide min-w-0 flex-1 focus:bg-white focus:ring-2 focus:ring-airtel-red outline-none">
-            <button type="button" onclick="fetchOrderStatus()" class="bg-slate-900 hover:bg-slate-800 text-white text-sm font-semibold px-4 py-2 rounded-xl transition min-h-[44px] shrink-0">Track</button>
-          </div>
+          <form id="tracker-form" onsubmit="event.preventDefault(); fetchOrderStatus();" class="grid grid-cols-1 sm:grid-cols-[1fr_1fr_auto] gap-3 items-end">
+            <div>
+              <label class="field-label" for="tracker-order-id">Order number</label>
+              <input type="text" id="tracker-order-id" class="field font-mono uppercase tracking-wide" placeholder="VS-2026-XXXXX" autocomplete="off">
+            </div>
+            <div>
+              <label class="field-label" for="tracker-phone">Registered mobile number</label>
+              <input type="tel" id="tracker-phone" class="field" placeholder="10-digit mobile" inputmode="numeric" autocomplete="tel">
+            </div>
+            <button type="submit" class="btn-primary">Track order</button>
+          </form>
+          <p class="help">Use the order number from your confirmation and the mobile number given at KYC.
+            <button type="button" onclick="openSampleOrder()" class="underline font-semibold text-slate-700 hover:text-slate-900">View a sample order</button>
+          </p>
         </div>
 
-        <div id="tracker-not-found-msg" class="hidden mt-4 bg-amber-50 border border-amber-200 text-amber-900 text-xs px-4 py-3 rounded-xl flex items-center justify-between"></div>
+        <div id="tracker-not-found-msg" class="hidden mt-4 bg-amber-50 border border-amber-200 text-amber-900 text-sm px-4 py-3 rounded-lg" role="alert"></div>
+
+        <!-- Empty state + order history (this device) -->
+        <div id="tracker-empty" class="pt-6">
+          <h3 class="section-h">Your orders on this device</h3>
+          <div id="tracker-history" class="divide-y divide-slate-100 border border-slate-200 rounded-lg overflow-hidden"></div>
+        </div>
+
+        <div id="tracker-order-view" class="hidden">
+          <button type="button" onclick="showTrackerHome()" class="mt-4 text-sm font-semibold text-slate-600 hover:text-slate-900 inline-flex items-center gap-1 min-h-[44px]">
+            <i data-lucide="arrow-left" class="w-4 h-4" aria-hidden="true"></i>All orders
+          </button>
+          <p id="tracker-sample-badge" class="hidden mt-1 text-sm bg-slate-100 text-slate-700 rounded-lg px-3 py-2">Sample order with illustrative data. It does not belong to a real customer.</p>
 
         <!-- Order Summary Card -->
         <div id="tracker-summary-card" class="mt-6 bg-slate-50 border border-slate-200 rounded-xl p-5 grid grid-cols-2 md:grid-cols-4 gap-4 text-xs">
@@ -637,6 +659,7 @@
           </div>
         </div>
 
+        </div><!-- /tracker-order-view -->
       </div>
     </section>
 

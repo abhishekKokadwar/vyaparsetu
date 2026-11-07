@@ -470,9 +470,18 @@ def evaluate_all_kyc_applicants():
 def create_order(req: OrderCreateRequest):
     return order_service.create_order(req.model_dump())
 
+SAMPLE_ORDER_ID = "VS-2026-90412"
+
 @app.get("/api/orders/{order_id}")
-def get_order_tracking(order_id: str):
+def get_order_tracking(order_id: str, phone: Optional[str] = None):
     res = order_service.get_order(order_id)
+    # The tracker shows a technician name and verification PIN, so a real order needs the registered
+    # mobile number. Same 404 for "no such order" and "wrong number" so order ids cannot be probed.
+    if res and order_id.upper() != SAMPLE_ORDER_ID:
+        given = "".join(c for c in (phone or "") if c.isdigit())[-10:]
+        actual = "".join(c for c in str(res.get("contact_phone", "")) if c.isdigit())[-10:]
+        if len(given) < 10 or given != actual:
+            res = None
     if not res:
         raise HTTPException(status_code=404, detail="Order not found")
     return res
