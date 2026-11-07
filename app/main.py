@@ -3,11 +3,12 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import FileResponse, Response
 from pydantic import BaseModel
-from typing import List, Optional
+from typing import List, Optional, Tuple
 import os
 import shutil
 import tempfile
 import subprocess
+import uuid
 
 from app.catalog_engine import CatalogEngine
 from app.advisor_engine import AdvisorEngine
@@ -200,69 +201,191 @@ def upload_and_verify_documents(req: KYCDocumentUploadRequest):
         consent_granted=req.consent_granted
     )
 
+def classify_document(text: str, filename: str) -> str:
+    """
+    Auto-classifies document type based on OCR text content first (most specific to least),
+    falling back to filename keywords, and never defaulting to gst_certificate.
+    Returns: 'udyam_certificate' | 'gst_certificate' | 'address_proof' | 'signatory_id' | 'unclassified'
+    """
+    text_upper = (text or "").upper()
+    # 1. Udyam Registration Certificate (must precede GST because Udyam contains 'Registration Certificate')
+    if "UDYAM REG" in text_upper or "UDYAM-" in text_upper:
+        return "udyam_certificate"
+    # 2. GST Registration Certificate
+    if "GSTIN" in text_upper or "GST REGISTRATION" in text_upper:
+        return "gst_certificate"
+    # 3. Address Proof (Utility / Electricity Bill)
+    if "ELECTRICITY BILL" in text_upper or "BILL DATE" in text_upper or "CONSUMER NO" in text_upper or "SUPPLY ADDRESS" in text_upper:
+        return "address_proof"
+    # 4. Authorized Signatory Credential Card
+    if "SIGNATORY" in text_upper or "VALID TILL" in text_upper or "DESIGNATION" in text_upper:
+        return "signatory_id"
+
+    # Filename fallback
+    fn_lower = (filename or "").lower()
+    if "udyam" in fn_lower or "msme" in fn_lower:
+        return "udyam_certificate"
+    if "gst" in fn_lower:
+        return "gst_certificate"
+    if "elec" in fn_lower or "bill" in fn_lower or "addr" in fn_lower:
+        return "address_proof"
+    if "sig" in fn_lower or "id" in fn_lower or "pan" in fn_lower:
+        return "signatory_id"
+
+    return "unclassified"
+
+
+def extract_text_from_file(file_path: str, ext: str, file_bytes: bytes, original_filename: str) -> Tuple[str, str]:
+    """
+    Extracts text from an uploaded document using:
+    - Native UTF-8 decode for text/json
+    - Native Windows OCR when running on Windows (unless OCR_BACKEND=llm)
+    - GenAI Vision OCR fallback for Linux/Vercel environments
+    Returns: (extracted_text, backend_name)
+    """
+    if ext in ['.txt', '.json']:
+        try:
+            with open(file_path, 'r', encoding='utf-8') as f:
+                return f.read().strip(), "text"
+        except Exception:
+            return "", "none"
+
+    if ext in ['.png', '.jpg', '.jpeg', '.bmp', '.webp']:
+        # Windows Native Runtime OCR
+        if os.name == "nt" and os.environ.get("OCR_BACKEND") != "llm":
+            ocr_script = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'scripts', 'ocr_test.ps1'))
+            cmd = ['powershell', '-ExecutionPolicy', 'Bypass', '-File', ocr_script, '-ImagePath', os.path.abspath(file_path)]
+            try:
+                res = subprocess.run(cmd, capture_output=True, text=True, timeout=15)
+                text = res.stdout.strip()
+                if text:
+                    return text, "windows"
+            except Exception:
+                pass
+
+        # LLM Vision OCR Fallback (Linux / Vercel cloud)
+        mime_map = {
+            '.png': 'image/png',
+            '.jpg': 'image/jpeg',
+            '.jpeg': 'image/jpeg',
+            '.webp': 'image/webp',
+            '.bmp': 'image/bmp'
+        }
+        mime = mime_map.get(ext, 'image/png')
+        ocr_text = advisor_engine.llm.ocr_image(file_bytes, mime=mime)
+        if ocr_text:
+            return ocr_text.strip(), "llm"
+
+    return "", "none"
+
+
 @app.post("/api/kyc/upload-files")
 async def upload_kyc_files(
     files: List[UploadFile] = File(...),
     consent_granted: bool = Form(True)
 ):
     """
-    Accepts real uploaded document files (.png, .jpg, .jpeg, .pdf, .txt),
-    extracts text dynamically using native Windows OCR (scripts/ocr_test.ps1),
-    auto-classifies document types, and runs dynamic Smart KYC verification.
+    Accepts real uploaded document files (.png, .jpg, .jpeg, .webp, .txt),
+    extracts text dynamically using native Windows OCR or Cloud LLM Vision OCR,
+    auto-classifies document types with strict conflict resolution (no overwrites),
+    and executes dynamic Smart KYC verification.
     """
+    if len(files) > 8:
+        raise HTTPException(status_code=400, detail="Maximum 8 files per upload request.")
+
     temp_dir = tempfile.mkdtemp(prefix="vyaparsetu_ocr_")
     docs_map = {'address_proof': '', 'gst_certificate': '', 'udyam_certificate': '', 'signatory_id': ''}
     extracted_snippets = {}
+    warnings = []
+    unclassified_files = []
+    backends_used = set()
 
     try:
+        # First pass: validate extensions and sizes, save securely using UUIDs
+        processed_files = []
+        max_size = 5 * 1024 * 1024  # 5 MB
+
         for file in files:
-            file_path = os.path.join(temp_dir, file.filename)
-            with open(file_path, "wb") as buffer:
-                shutil.copyfileobj(file.file, buffer)
+            orig_name = file.filename or "unknown"
+            ext = os.path.splitext(orig_name)[1].lower()
 
-            # Extract text via Windows native OCR or direct read
-            ext = os.path.splitext(file.filename)[1].lower()
-            text = ""
-            if ext in ['.png', '.jpg', '.jpeg', '.bmp', '.webp']:
-                ocr_script = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'scripts', 'ocr_test.ps1'))
-                cmd = ['powershell', '-ExecutionPolicy', 'Bypass', '-File', ocr_script, '-ImagePath', os.path.abspath(file_path)]
-                try:
-                    res = subprocess.run(cmd, capture_output=True, text=True, timeout=15)
-                    text = res.stdout.strip()
-                except Exception:
-                    text = ""
-            elif ext in ['.txt', '.json']:
-                try:
-                    with open(file_path, 'r', encoding='utf-8') as f:
-                        text = f.read().strip()
-                except Exception:
-                    text = ""
+            if ext == ".pdf":
+                raise HTTPException(status_code=400, detail="PDF format is not supported yet. Please upload PNG, JPG, or WEBP image files.")
 
-            # Auto-classify based on document text content
-            text_upper = text.upper()
-            doc_type = None
-            if "GST" in text_upper or "GSTIN" in text_upper or "REGISTRATION CERTIFICATE" in text_upper:
-                doc_type = 'gst_certificate'
-            elif "UDYAM" in text_upper or "MSME" in text_upper:
-                doc_type = 'udyam_certificate'
-            elif "ELECTRICITY" in text_upper or "BILL DATE" in text_upper or "CONSUMER" in text_upper or "SUPPLY ADDRESS" in text_upper:
-                doc_type = 'address_proof'
-            elif "SIGNATORY" in text_upper or "AUTHORISED" in text_upper or "DESIGNATION" in text_upper or "VALID TILL" in text_upper:
-                doc_type = 'signatory_id'
+            if ext not in {'.png', '.jpg', '.jpeg', '.webp', '.txt', '.json'}:
+                raise HTTPException(status_code=400, detail=f"Unsupported file type: {ext}. Allowed: .png, .jpg, .jpeg, .webp, .txt")
+
+            # Read stream in 64 KB chunks, enforce 5 MB cap
+            chunks = []
+            total_size = 0
+            while True:
+                chunk = await file.read(64 * 1024)
+                if not chunk:
+                    break
+                total_size += len(chunk)
+                if total_size > max_size:
+                    raise HTTPException(status_code=413, detail=f"File '{orig_name}' exceeds 5 MB limit.")
+                chunks.append(chunk)
+
+            file_bytes = b"".join(chunks)
+
+            # Secure path traversal prevention: save using UUID
+            safe_name = f"{uuid.uuid4().hex}{ext}"
+            file_path = os.path.join(temp_dir, safe_name)
+            with open(file_path, "wb") as f:
+                f.write(file_bytes)
+
+            processed_files.append((orig_name, ext, file_path, file_bytes))
+
+        # Second pass: OCR text extraction and classification
+        for orig_name, ext, file_path, file_bytes in processed_files:
+            text, backend = extract_text_from_file(file_path, ext, file_bytes, orig_name)
+            if backend != "none":
+                backends_used.add(backend)
+
+            if not text:
+                warnings.append(f"Could not read text from {orig_name}")
+                unclassified_files.append(orig_name)
+                extracted_snippets[f"unreadable_{len(unclassified_files)}"] = {
+                    'filename': orig_name,
+                    'chars_extracted': 0,
+                    'preview': '',
+                    'ocr_backend': backend
+                }
+                continue
+
+            doc_type = classify_document(text, orig_name)
+
+            if doc_type in docs_map:
+                if docs_map[doc_type]:
+                    # Slot already occupied - DO NOT overwrite existing document
+                    existing_fn = extracted_snippets[doc_type]['filename']
+                    warnings.append(f"Two files look like {doc_type}: {existing_fn}, {orig_name}")
+                    unclassified_files.append(orig_name)
+                    extracted_snippets[f"duplicate_{orig_name}"] = {
+                        'filename': orig_name,
+                        'chars_extracted': len(text),
+                        'preview': text[:200],
+                        'ocr_backend': backend,
+                        'assigned_type': 'unclassified (duplicate)'
+                    }
+                else:
+                    docs_map[doc_type] = text
+                    extracted_snippets[doc_type] = {
+                        'filename': orig_name,
+                        'chars_extracted': len(text),
+                        'preview': text[:200],
+                        'ocr_backend': backend,
+                        'assigned_type': doc_type
+                    }
             else:
-                fn_lower = file.filename.lower()
-                if 'gst' in fn_lower: doc_type = 'gst_certificate'
-                elif 'udyam' in fn_lower or 'msme' in fn_lower: doc_type = 'udyam_certificate'
-                elif 'addr' in fn_lower or 'bill' in fn_lower or 'elec' in fn_lower: doc_type = 'address_proof'
-                elif 'sig' in fn_lower or 'id' in fn_lower or 'pan' in fn_lower: doc_type = 'signatory_id'
-                else: doc_type = 'gst_certificate'
-
-            if doc_type:
-                docs_map[doc_type] = text
-                extracted_snippets[doc_type] = {
-                    'filename': file.filename,
+                unclassified_files.append(orig_name)
+                extracted_snippets[f"unclassified_{orig_name}"] = {
+                    'filename': orig_name,
                     'chars_extracted': len(text),
-                    'preview': text[:200]
+                    'preview': text[:200],
+                    'ocr_backend': backend,
+                    'assigned_type': 'unclassified'
                 }
 
         file_presence = {
@@ -280,9 +403,13 @@ async def upload_kyc_files(
             consent_granted=consent_granted
         )
 
+        effective_backend = "windows" if "windows" in backends_used else ("llm" if "llm" in backends_used else "text")
+
         return {
             'status': 'SUCCESS',
             'files_received': len(files),
+            'ocr_backend': effective_backend,
+            'warnings': warnings,
             'extracted_snippets': extracted_snippets,
             'verification': res
         }

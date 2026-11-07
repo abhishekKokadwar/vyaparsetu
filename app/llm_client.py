@@ -179,3 +179,54 @@ class LLMAdvisorClient:
                 return pitch
         except Exception:
             return None
+
+    def ocr_image(self, image_bytes: bytes, mime: str = "image/png") -> Optional[str]:
+        """
+        Uses LLM vision input via OpenRouter to transcribe document images in the cloud (Linux/Vercel).
+        Returns raw transcribed text, or None on failure/disabled.
+        """
+        if os.environ.get("VYAPAR_LLM_DISABLED") == "1" or not self.api_key:
+            return None
+
+        import base64
+        b64_img = base64.b64encode(image_bytes).decode('utf-8')
+        data_uri = f"data:{mime};base64,{b64_img}"
+
+        payload = {
+            "model": self.model,
+            "messages": [
+                {
+                    "role": "user",
+                    "content": [
+                        {
+                            "type": "text",
+                            "text": "Transcribe all text in this document exactly as printed, in reading order. Output only the text, no commentary."
+                        },
+                        {
+                            "type": "image_url",
+                            "image_url": {"url": data_uri}
+                        }
+                    ]
+                }
+            ],
+            "max_tokens": 1000,
+            "temperature": 0.0
+        }
+
+        try:
+            req = urllib.request.Request(
+                OPENROUTER_URL,
+                data=json.dumps(payload).encode('utf-8'),
+                headers={
+                    "Authorization": f"Bearer {self.api_key}",
+                    "Content-Type": "application/json",
+                    "HTTP-Referer": "https://vyaparsetu.airtel.in",
+                    "X-Title": "Airtel VyaparSetu"
+                }
+            )
+            with urllib.request.urlopen(req, timeout=15) as resp:
+                data = json.loads(resp.read().decode('utf-8'))
+                text = data['choices'][0]['message']['content'].strip()
+                return text
+        except Exception:
+            return None
