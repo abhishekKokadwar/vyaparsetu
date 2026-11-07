@@ -49,8 +49,9 @@ def main():
         print("[2/8] Testing Advisor & Quote pricing sync across 4 business personas...")
         scenarios = ["kirana_no_gst", "clinic_pro", "multi_store", "small_mfg"]
         for sc in scenarios:
-            page.evaluate(f"loadScenario('{sc}')")
-            page.wait_for_timeout(600)
+            with page.expect_response(lambda res: "/api/advisor/recommend" in res.url, timeout=15000):
+                page.evaluate(f"loadScenario('{sc}')")
+            page.wait_for_timeout(400)
             rec_price_raw = page.locator("#rec-price").inner_text()
             rec_price = clean_currency(rec_price_raw)
             # Switch to Quote tab
@@ -72,13 +73,15 @@ def main():
         page.check("#dpdp-consent-chk")
         page.wait_for_timeout(300)
         for app_code in PASS_APPLICANTS:
-            page.select_option("#kyc-applicant-select", app_code)
-            page.wait_for_timeout(400)
+            with page.expect_response(lambda res: "/api/kyc/verify-applicant" in res.url, timeout=15000):
+                page.select_option("#kyc-applicant-select", app_code)
+            page.wait_for_timeout(300)
             title = page.locator("#kyc-verdict-title").inner_text()
             assert "VERIFIED" in title or "PASS" in title, f"{app_code} expected PASS, got {title}"
         for app_code in REJECT_APPLICANTS:
-            page.select_option("#kyc-applicant-select", app_code)
-            page.wait_for_timeout(400)
+            with page.expect_response(lambda res: "/api/kyc/verify-applicant" in res.url, timeout=15000):
+                page.select_option("#kyc-applicant-select", app_code)
+            page.wait_for_timeout(300)
             title = page.locator("#kyc-verdict-title").inner_text()
             assert "REJECTED" in title, f"{app_code} expected REJECTED, got {title}"
         print("      PASS: All 12 KYC sample applicants verified correctly (6 PASS / 6 REJECT).")
@@ -112,11 +115,13 @@ def main():
 
         # 5. Place Order for K02 & Verify Live Tracker
         print("[5/8] Testing order creation from verified applicant K02...")
-        page.select_option("#kyc-applicant-select", "K02")
-        page.wait_for_timeout(500)
+        with page.expect_response(lambda res: "/api/kyc/verify-applicant" in res.url, timeout=15000):
+            page.select_option("#kyc-applicant-select", "K02")
+        page.wait_for_timeout(300)
         # Click place order button
-        page.evaluate("placeOrderAfterKYC()")
-        page.wait_for_timeout(800)
+        with page.expect_response(lambda res: "/api/orders/create" in res.url, timeout=15000):
+            page.evaluate("placeOrderAfterKYC()")
+        page.wait_for_timeout(400)
         assert page.locator("#trk-order-num").is_visible()
         trk_num = page.locator("#trk-order-num").inner_text()
         assert trk_num.startswith("VS-2026-"), f"Expected VS-2026- order ID, got {trk_num}"
@@ -126,7 +131,7 @@ def main():
         # 6. Partner Portal Verification
         print("[6/8] Testing Channel Partner Portal live numbers & recovery queue...")
         page.click("#tab-btn-partner")
-        page.wait_for_timeout(800)
+        page.wait_for_timeout(400)
         salvageable_text = page.locator("#ptnr-salvageable").inner_text()
         assert "932" in salvageable_text, f"Expected 932 high propensity leads, got {salvageable_text}"
         rows = page.locator("#ptnr-leads-table tr")
