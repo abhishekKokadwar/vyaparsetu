@@ -39,76 +39,66 @@
   <link rel="stylesheet" href="/static/style.css">
   <script src="/static/vendor/lucide.min.js"></script>
 </head>
-<body class="bg-[#EDF0F5] text-slate-800 antialiased min-h-screen flex flex-col font-sans">
+<body class="bg-[#EDF0F5] text-slate-800 antialiased font-sans lg:h-screen lg:overflow-hidden">
   <a href="#main" class="sr-only focus:not-sr-only focus:fixed focus:top-2 focus:left-2 focus:z-[100] bg-white px-3 py-2 rounded-lg text-sm font-semibold shadow-md min-h-[44px] flex items-center">Skip to content</a>
+  <div class="min-h-screen lg:min-h-0 lg:h-screen flex">
 
-  <!-- Top Announcement Bar -->
-  <div class="bg-airtel-dark text-white text-xs py-0 sm:py-1.5 px-4 min-h-[44px] flex justify-between items-center border-b border-slate-700 gap-3">
-    <div class="flex items-center space-x-2">
-      <span class="bg-airtel-red text-white px-2 py-0.5 rounded text-xs font-bold tracking-wide uppercase">Hackathon Prototype</span>
-      <span class="text-slate-300 hidden md:inline">Airtel Sync 2026 · Enterprise Track A: Project Udyam Digital</span>
-    </div>
-    <div class="flex items-center space-x-4">
-      <span class="text-slate-400 hidden sm:inline">Team: <strong class="text-white">Hacker_247</strong></span>
-      <a href="/diagrams" target="_blank" class="text-slate-300 hover:text-white transition hidden sm:flex items-center space-x-1 min-h-[44px]">
-        <i data-lucide="network" class="w-3 h-3 text-airtel-red"></i>
-        <span>SVG Diagrams</span>
-      </a>
-      <a href="https://github.com/abhishekKokadwar/vyaparsetu" target="_blank" class="text-slate-300 hover:text-white transition flex items-center space-x-1 min-h-[44px]">
-        <span>GitHub Repo</span>
-        <i data-lucide="external-link" class="w-3 h-3"></i>
-      </a>
-    </div>
-  </div>
-
-  <!-- Header & Navigation -->
-  <header class="bg-white border-b border-slate-200 sticky top-0 z-50 shadow-sm">
-    <div class="max-w-[1760px] mx-auto px-4 sm:px-6 lg:px-10 flex justify-between items-center h-16">
-      <!-- Brand Logo -->
-      <div class="flex items-center space-x-3 cursor-pointer" onclick="switchTab('advisor')">
-        <img src="/static/logo-mark.png" alt="VyaparSetu logo" width="40" height="40" class="w-10 h-10 object-contain">
-        <div>
-          <div class="flex items-center space-x-2">
-            <h1 class="text-xl font-bold tracking-tight text-slate-900">Vyapar<span style="color:#B3262D">Setu</span></h1>
-            <span class="text-xs font-semibold text-slate-700 bg-slate-100 px-2 py-0.5 rounded-full hidden sm:inline">व्यापारसेतु</span>
-          </div>
-          <p class="text-xs text-slate-500 font-medium hidden sm:block">Digital in One Sitting · Accel Business MSME Suite</p>
-        </div>
+  <!-- Sidebar (desktop) -->
+  <aside class="hidden lg:flex w-[15.5rem] shrink-0 flex-col bg-white border-r border-slate-200">
+    <div class="h-16 px-5 flex items-center gap-3 border-b border-slate-100 cursor-pointer" onclick="switchTab('advisor')">
+      <img src="/static/logo-mark.png" alt="VyaparSetu logo" width="36" height="36" class="w-9 h-9 object-contain">
+      <div class="leading-tight">
+        <h1 class="text-[1.1rem] font-extrabold tracking-tight text-slate-900">Vyapar<span style="color:#B3262D">Setu</span></h1>
+        <p class="text-[0.8rem] text-slate-500 font-medium">व्यापारसेतु · MSME Suite</p>
       </div>
-
-      <!-- Navigation Tabs -->
-      <nav role="tablist" aria-label="Onboarding steps" class="hidden md:flex items-center gap-1">
+    </div>
+    <nav role="tablist" aria-label="Onboarding steps" class="flex-1 overflow-y-auto px-3 py-4 flex flex-col gap-1">
+      <p class="nav-label">Onboarding</p>
         <button onclick="switchTab('advisor')" id="tab-btn-advisor" type="button" role="tab" data-tab="advisor" aria-controls="view-advisor" aria-selected="true" class="nav-tab active">
-          <i data-lucide="compass" class="w-4 h-4 mr-2"></i>
-          <span>1. GenAI Advisor</span>
+          <i data-lucide="compass" class="w-4 h-4"></i><span class="flex-1 text-left">GenAI Advisor</span><span class="nav-step">1</span>
         </button>
         <button onclick="switchTab('quote')" id="tab-btn-quote" type="button" role="tab" data-tab="quote" aria-controls="view-quote" aria-selected="false" class="nav-tab">
-          <i data-lucide="layers" class="w-4 h-4 mr-2"></i>
-          <span>2. Quote & Bundle</span>
+          <i data-lucide="layers" class="w-4 h-4"></i><span class="flex-1 text-left">Quote &amp; Bundle</span><span class="nav-step">2</span>
         </button>
         <button onclick="switchTab('kyc')" id="tab-btn-kyc" type="button" role="tab" data-tab="kyc" aria-controls="view-kyc" aria-selected="false" class="nav-tab">
-          <i data-lucide="shield-check" class="w-4 h-4 mr-2"></i>
-          <span>3. Smart KYC</span>
+          <i data-lucide="shield-check" class="w-4 h-4"></i><span class="flex-1 text-left">Smart KYC</span><span class="nav-step">3</span>
         </button>
         <button onclick="switchTab('tracker')" id="tab-btn-tracker" type="button" role="tab" data-tab="tracker" aria-controls="view-tracker" aria-selected="false" class="nav-tab">
-          <i data-lucide="map-pin" class="w-4 h-4 mr-2"></i>
-          <span>4. Order Tracker</span>
+          <i data-lucide="map-pin" class="w-4 h-4"></i><span class="flex-1 text-left">Order Tracker</span><span class="nav-step">4</span>
         </button>
-        <span class="w-px h-6 bg-slate-200 mx-1" aria-hidden="true"></span>
+      <p class="nav-label mt-4">Channel</p>
         <button onclick="switchTab('partner')" id="tab-btn-partner" type="button" role="tab" data-tab="partner" aria-controls="view-partner" aria-selected="false" class="nav-tab">
-          <i data-lucide="users" class="w-4 h-4 mr-2"></i>
-          <span>Partner Portal</span>
+          <i data-lucide="users" class="w-4 h-4"></i><span class="flex-1 text-left">Partner Portal</span>
         </button>
-      </nav>
+    </nav>
+    <div class="px-5 py-4 border-t border-slate-100 text-[0.8rem] text-slate-500 space-y-1.5">
+      <div class="flex items-center gap-2"><span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>Prototype · Airtel Sync 2026</div>
+      <div>Team <strong class="text-slate-800">Hacker_247</strong> · ABV-IIITM</div>
+      <div class="flex gap-3 pt-1">
+        <a href="/diagrams" target="_blank" class="text-slate-600 hover:text-slate-900 underline-offset-2 hover:underline">Diagrams</a>
+        <a href="https://github.com/abhishekKokadwar/vyaparsetu" target="_blank" class="text-slate-600 hover:text-slate-900 underline-offset-2 hover:underline">GitHub</a>
+      </div>
+    </div>
+  </aside>
 
-      <!-- Language & CTA -->
-      <div class="flex items-center space-x-3">
-        <!-- Language Switcher -->
+  <div class="flex-1 min-w-0 flex flex-col lg:h-screen">
+  <!-- Top bar -->
+  <header class="bg-white border-b border-slate-200 sticky lg:static top-0 z-50 shrink-0">
+    <div class="px-4 sm:px-6 lg:px-8 flex justify-between items-center h-14 lg:h-16 gap-3">
+      <div class="flex items-center gap-3 lg:hidden cursor-pointer" onclick="switchTab('advisor')">
+        <img src="/static/logo-mark.png" alt="VyaparSetu logo" width="32" height="32" class="w-8 h-8 object-contain">
+        <h1 class="text-lg font-extrabold tracking-tight text-slate-900">Vyapar<span style="color:#B3262D">Setu</span></h1>
+      </div>
+      <div class="hidden lg:block min-w-0">
+        <p class="text-[0.8rem] font-semibold uppercase tracking-wider text-slate-500">Airtel Sync 2026 · Enterprise Track A</p>
+        <p class="text-sm font-bold text-slate-900 truncate">Project Udyam Digital — Digital in One Sitting</p>
+      </div>
+      <div class="flex items-center gap-3">
         <div class="inline-flex rounded-xl border border-slate-200 p-0.5 bg-slate-50">
           <button id="lang-en" type="button" onclick="setLanguage('en')" class="px-3 py-2 min-h-[44px] text-xs font-bold rounded-lg bg-white shadow-sm text-slate-800 flex items-center justify-center">EN</button>
           <button id="lang-hi" type="button" onclick="setLanguage('hi')" class="px-3 py-2 min-h-[44px] text-xs font-bold rounded-lg text-slate-600 hover:text-slate-800 flex items-center justify-center">हिंदी</button>
         </div>
-        <button onclick="switchTab('kyc')" class="hidden sm:flex bg-airtel-red hover:bg-airtel-darkred text-white text-xs font-semibold px-4 py-2 rounded-lg shadow-sm transition items-center space-x-1.5">
+        <button onclick="switchTab('kyc')" class="hidden sm:flex bg-airtel-red hover:bg-airtel-darkred text-white text-xs font-semibold px-4 py-2.5 min-h-[44px] rounded-lg shadow-sm transition items-center space-x-1.5">
           <span>Start KYC</span>
           <i data-lucide="arrow-right" class="w-3.5 h-3.5"></i>
         </button>
@@ -116,8 +106,8 @@
     </div>
   </header>
 
-  <!-- Mobile Sub-nav -->
-  <nav id="mobile-subnav" role="tablist" aria-label="Onboarding steps" class="md:hidden bg-white border-b border-slate-200 flex overflow-x-auto px-4 py-2 gap-1.5 text-xs">
+  <!-- Mobile / tablet sub-nav -->
+  <nav id="mobile-subnav" role="tablist" aria-label="Onboarding steps" class="lg:hidden bg-white border-b border-slate-200 flex overflow-x-auto px-4 py-2 gap-1.5 text-xs shrink-0">
     <button type="button" role="tab" data-tab="advisor" aria-controls="view-advisor" aria-selected="true" onclick="switchTab('advisor')" class="sub-tab active">1. Advisor</button>
     <button type="button" role="tab" data-tab="quote" aria-controls="view-quote" aria-selected="false" onclick="switchTab('quote')" class="sub-tab">2. Quote</button>
     <button type="button" role="tab" data-tab="kyc" aria-controls="view-kyc" aria-selected="false" onclick="switchTab('kyc')" class="sub-tab">3. KYC</button>
@@ -127,7 +117,7 @@
   </nav>
 
   <!-- Main Content Body -->
-  <main id="main" class="flex-1 max-w-[1760px] w-full mx-auto px-4 sm:px-6 lg:px-10 py-6">
+  <main id="main" class="flex-1 min-h-0 w-full px-4 sm:px-6 lg:px-8 py-4 lg:py-5 lg:overflow-y-auto">
 
     <!-- ==================== TAB 1: GENAI ADVISOR ==================== -->
     <section id="view-advisor" class="tab-view active" role="tabpanel" aria-labelledby="tab-btn-advisor" tabindex="-1">
@@ -291,6 +281,14 @@
                 </div>
               </div>
 
+              <!-- KPI strip -->
+              <div class="grid grid-cols-2 xl:grid-cols-4 gap-3 mb-5">
+                <div class="kpi"><p class="kpi-l">Monthly recurring</p><p class="kpi-v" id="kpi-monthly">—</p></div>
+                <div class="kpi"><p class="kpi-l">One-time setup</p><p class="kpi-v" id="kpi-setup">—</p></div>
+                <div class="kpi"><p class="kpi-l">Saved vs. local vendors</p><p class="kpi-v text-ok" id="kpi-save">—</p></div>
+                <div class="kpi"><p class="kpi-l">Install SLA</p><p class="kpi-v" id="kpi-sla">—</p></div>
+              </div>
+
               <!-- Why this Bundle fits your business (Plain-language explanation) -->
               <div class="mb-5">
                 <h4 class="text-xs font-bold text-slate-700 uppercase tracking-wider mb-2 flex items-center space-x-1.5">
@@ -323,7 +321,7 @@
               </div>
 
               <!-- Bottom Action Bar -->
-              <div class="mt-auto pt-4 border-t border-slate-100 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+              <div class="mt-auto pt-4 border-t border-slate-100 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:whitespace-nowrap">
                 <div>
                   <span class="text-xs text-slate-500">Contract: <strong id="rec-contract" class="text-slate-800">12 Months</strong></span>
                   <span class="mx-2 text-slate-300">·</span>
@@ -750,19 +748,8 @@
 
   </main>
 
-  <!-- Footer -->
-  <footer class="bg-white border-t border-slate-200 py-4 mt-auto text-xs text-slate-500">
-    <div class="max-w-[1760px] mx-auto px-4 flex flex-col sm:flex-row justify-between items-center gap-2">
-      <div class="flex items-center space-x-2">
-        <span class="font-bold text-slate-900">VyaparSetu (व्यापारसेतु)</span>
-        <span>·</span>
-        <span>Airtel Sync 2026 Enterprise Track A</span>
-      </div>
-      <div>
-        <span>Designed for 6 Crore+ Indian MSMEs · Paperless KYC · Live order tracking</span>
-      </div>
-    </div>
-  </footer>
+  </div><!-- /content column -->
+  </div><!-- /app shell -->
 
   <script src="/static/app.js"></script>
 </body>

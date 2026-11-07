@@ -13,14 +13,10 @@ html { touch-action: manipulation; }           /* removes 300 ms tap delay */
 img, svg, table { max-width: 100%; }
 
 .nav-tab {
-  display: flex;
-  align-items: center;
-  padding: 0.5rem 0.85rem;
-  border-radius: 0.65rem;
-  font-size: 0.8rem;
-  font-weight: 600;
-  color: #475569;
-  transition: all 0.15s ease-in-out;
+  display: flex; align-items: center; gap: 0.7rem; width: 100%;
+  min-height: 44px; padding: 0 0.8rem; border-radius: 0.6rem;
+  font-size: 0.875rem; font-weight: 600; color: #475569;
+  transition: background-color .15s, color .15s;
 }
 
 .nav-tab:hover {
@@ -148,10 +144,20 @@ img, svg, table { max-width: 100%; }
 }
 
 
-/* ---- Layout polish: fill large screens, calmer surfaces ---- */
-@media (min-width: 1536px) { html { font-size: 17px; } }
-@media (min-width: 1920px) { html { font-size: 17.5px; } }
-.tab-view.active { min-height: calc(100vh - 11rem); }
-.tab-view.active > .grid { align-items: stretch; }
-main section > .grid > * { min-width: 0; }
-header { box-shadow: 0 1px 0 #DCE2EC; }
+.nav-tab:hover { background-color: #F1F5F9; color: #0F172A; }
+.nav-tab.active { background-color: var(--brand); color: #fff; box-shadow: 0 1px 2px rgba(11,23,48,.25); }
+.nav-tab.active:hover { background-color: var(--brand-strong); color: #fff; }
+.nav-step { font-size: .8rem; font-weight: 700; opacity: .6; font-variant-numeric: tabular-nums; }
+.nav-label { padding: 0 .8rem .25rem; font-size: .8rem; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; color: #64748B; }
+
+/* ---- App shell: on desktop the page never scrolls, each panel does ---- */
+@media (min-width: 1024px) {
+  .tab-view.active { height: 100%; }
+  .tab-view.active > .grid { height: 100%; gap: 1rem; }
+  .tab-view.active > .grid > * { min-height: 0; overflow-y: auto; }
+  .tab-view .p-6 { padding: 1.1rem 1.25rem; }
+}
+
+.kpi { background: #fff; border: 1px solid var(--line); border-radius: .75rem; padding: .7rem .9rem; }
+.kpi-l { font-size: .75rem; font-weight: 600; color: #64748B; }
+.kpi-v { margin-top: .15rem; font-size: 1.25rem; font-weight: 800; color: var(--ink); font-variant-numeric: tabular-nums; }

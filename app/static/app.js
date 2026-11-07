@@ -147,7 +147,7 @@ function switchTab(tabName) {
     history.replaceState(null, '', `#${tabName}`);
   }
   const mainEl = document.querySelector('main');
-  if (mainEl) mainEl.scrollIntoView({ block: 'start' });
+  if (mainEl) { mainEl.scrollTop = 0; mainEl.scrollIntoView({ block: 'start' }); }
   if (window.lucide) lucide.createIcons();
 }
 
@@ -462,6 +462,12 @@ function renderAdvisorRecommendation(data) {
   document.getElementById('rec-price').innerHTML = `₹${data.pricing.monthly_total_inr.toLocaleString('en-IN')}<span class="text-xs text-slate-500 font-normal"> /mo</span>`;
   document.getElementById('rec-contract').textContent = `${data.pricing.contract_lock_months} Months`;
   document.getElementById('rec-install').textContent = `${data.pricing.estimated_install_sla_days} Days`;
+  const inr = n => '₹' + Number(n || 0).toLocaleString('en-IN');
+  const vb = data.pricing.vendor_savings_benchmark || {};
+  document.getElementById('kpi-monthly').textContent = inr(data.pricing.monthly_total_inr);
+  document.getElementById('kpi-setup').textContent = inr(data.pricing.one_time_setup_total_inr);
+  document.getElementById('kpi-save').textContent = vb.annual_savings_inr ? `${inr(vb.annual_savings_inr)} / yr` : '—';
+  document.getElementById('kpi-sla').textContent = `${data.pricing.estimated_install_sla_days} days`;
 
   // Reasoning points - strip emoji, use check-circle-2 icon
   const listEl = document.getElementById('rec-reasoning-list');
