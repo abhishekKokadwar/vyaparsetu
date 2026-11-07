@@ -29,7 +29,7 @@ OPENROUTER_URL = "https://openrouter.ai/api/v1/chat/completions"
 DEFAULT_MODEL = os.environ.get("OPENROUTER_MODEL", "openai/gpt-4o-mini")
 GEMINI_URL = "https://generativelanguage.googleapis.com/v1beta/openai/chat/completions"
 # Free-tier Gemini models; the second is used when the first returns 503 (overloaded).
-GEMINI_MODELS = os.environ.get("GEMINI_MODELS", "gemini-3.5-flash-lite,gemini-flash-lite-latest").split(",")
+GEMINI_MODELS = os.environ.get("GEMINI_MODELS", "gemini-3.5-flash-lite,gemini-flash-lite-latest,gemini-3.5-flash").split(",")
 REQUEST_TIMEOUT_SECONDS = 10.0
 
 
