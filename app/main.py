@@ -556,7 +556,7 @@ app.mount("/static", StaticFiles(directory=static_dir), name="static")
 
 @app.get("/favicon.ico", include_in_schema=False)
 def serve_favicon():
-    return Response(content=b"", media_type="image/x-icon")
+    return FileResponse(os.path.join(static_dir, "favicon.ico"), media_type="image/x-icon")
 
 @app.get("/diagrams")
 def serve_diagrams():
