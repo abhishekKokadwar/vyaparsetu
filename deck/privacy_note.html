@@ -1,0 +1,52 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><title>VyaparSetu - Data Privacy and Security Note</title>
+<style>
+@page { size: A4; margin: 13mm 15mm; }
+* { box-sizing: border-box; }
+body { font-family: "Segoe UI", Arial, sans-serif; font-size: 9.4pt; line-height: 1.38; color: #1e293b; margin: 0; }
+h1 { font-size: 15pt; margin: 0; color: #0b1730; }
+.sub { color: #475569; font-size: 8.8pt; margin: 2px 0 8px; }
+h2 { font-size: 10pt; margin: 9px 0 3px; color: #14285f; text-transform: uppercase; letter-spacing: .04em; border-bottom: 1px solid #cbd5e1; padding-bottom: 2px; }
+ul { margin: 2px 0; padding-left: 15px; }
+li { margin: 2px 0; }
+b { color: #0b1730; }
+.note { background: #f1f5f9; border-left: 3px solid #1e3a8a; padding: 4px 8px; margin: 6px 0; }
+table { width: 100%; border-collapse: collapse; margin-top: 3px; }
+td, th { border: 1px solid #cbd5e1; padding: 3px 6px; vertical-align: top; text-align: left; font-size: 8.9pt; }
+th { background: #eef2fb; }
+.foot { margin-top: 7px; color: #64748b; font-size: 8pt; }
+</style></head><body>
+<h1>VyaparSetu: Data Privacy &amp; Security Note</h1>
+<div class="sub">Airtel Sync 2026 · Enterprise Track A (Project Udyam Digital) · Team Hacker_247, ABV-IIITM Gwalior · Digital Personal Data Protection Act, 2023</div>
+
+<h2>What we collect, and why</h2>
+<p style="margin:2px 0">Business and owner name, mobile number, city, GSTIN, Udyam number, address-proof date and signatory-ID name/validity. <b>Only</b> to verify the business, check serviceability and create the order. All hackathon data is synthetic and the registries are mock files.</p>
+
+<h2>Built and verified in the prototype</h2>
+<table>
+<tr><th style="width:24%">Principle</th><th>What the running system does</th></tr>
+<tr><td><b>Consent</b> (s.5-6)</td><td>Upload and verification stay locked until the owner ticks a plain-language consent. Every grant, revocation and purge is appended to a ledger with consent ID, timestamp, purpose, retention period and a SHA-256 audit hash, stored in Neon Postgres.</td></tr>
+<tr><td><b>Withdrawal</b></td><td>A revoke call halts processing at once and a purge job issues deletion receipts (also written to the ledger).</td></tr>
+<tr><td><b>Minimisation</b> (s.8)</td><td>Documents are read in memory and are never written to disk or the database. We keep extracted fields and the verdict only. 4 MB cap per file, PDFs rejected. GSTINs are masked (PAN part hidden) in responses and reasons.</td></tr>
+<tr><td><b>Purpose limitation</b> (s.7)</td><td>Data feeds only the KYC rules, serviceability and the order. No marketing use and no sharing outside the processors below.</td></tr>
+<tr><td><b>Access to orders</b></td><td>The tracker needs the order number <i>and</i> the registered mobile. The server gives one identical "not found" for a wrong number or an unknown order, so ids cannot be probed.</td></tr>
+</table>
+
+<h2>Sub-processors (disclosed)</h2>
+<ul>
+<li><b>Google Gemini API</b>: reads document images (text transcription) and understands the advisor's free-text, over TLS. Images are sent only for that call and not stored by us. The free tier is used for the prototype; production should use a zero-data-retention agreement or an on-premise OCR model.</li>
+<li><b>Neon Postgres</b> (orders, consent ledger) and <b>Vercel</b> (hosting). Both encrypt in transit; Neon also encrypts storage at rest.</li>
+</ul>
+
+<h2>Known limits and the production plan (not yet built)</h2>
+<ul>
+<li><b>No customer login.</b> Production: mobile OTP sessions in place of order number + mobile.</li>
+<li><b>Partner portal is open demo data.</b> Production: SSO and role-based access; partners see status only, never raw documents.</li>
+<li><b>Purge is a callable job, not yet scheduled.</b> Production: automatic deletion 30 days after activation, keeping only the hash and registry transaction ID.</li>
+<li><b>Field-level encryption</b> of mobile numbers and ledger entries, log scrubbing of identifiers, and a breach-notification runbook are planned.</li>
+<li><b>Signatory ID:</b> never request or store a full Aadhaar number. Production should use a DigiLocker consent flow instead of image upload.</li>
+<li>Data-principal rights screens (access, correction, grievance officer) are required by the Act and are on the roadmap.</li>
+</ul>
+<div class="note">We state the limits openly: the controls above marked "built" were exercised by tests and live checks; the rest is design intent, not a claim.</div>
+<div class="foot">VyaparSetu · github.com/abhishekKokadwar/vyaparsetu · Live prototype: vyaparsetu-airtel.vercel.app</div>
+</body></html>

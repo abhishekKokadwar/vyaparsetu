@@ -10,6 +10,18 @@
 
 ---
 
+## For judges: quick start
+
+| What | Where |
+|---|---|
+| Live prototype | https://vyaparsetu-airtel.vercel.app |
+| Business case (7 slides) | `Hacker_247_ABVIIITMGwalior.pptx` / `.pdf` |
+| Architecture diagram | slide 4 of the deck, and `/diagrams` in the running app |
+| 1-page privacy note | `Hacker_247_Privacy_Note.pdf` |
+| Run locally | `pip install -r requirements.txt` then `python run.py` (open http://localhost:8000) |
+
+**What is real and what is mocked.** Advisor, pricing rules, KYC rules, order tracker and partner back office run for real. The GSTIN and Udyam registries are the hackathon's mock CSVs. In the KYC tab, the K01-K12 buttons run the rules on pre-extracted text; the upload box runs real OCR (Gemini on the live site, Windows OCR locally) on the specimen PNGs. PDFs are not supported. Orders and the DPDP consent ledger persist in Neon Postgres. There is no customer login yet (tracker uses order number + registered mobile) and the partner portal is open demo data. See the privacy note for the honest list.
+
 ## 📌 Executive Summary
 
 India's 6 Crore+ Micro, Small, and Medium Enterprises (MSMEs) are increasingly adopting digital tools (UPI/POS, WhatsApp Business, cloud email, CCTV). However, Accel Business (Airtel Enterprise) currently suffers from a **7.36% funnel conversion**, **₹15,053 CAC**, **17.6-day onboarding cycles**, and **3.0 status chase calls** per customer due to legacy field-sales processes and complex documentation.
