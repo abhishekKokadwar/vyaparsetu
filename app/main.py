@@ -1,7 +1,9 @@
-from fastapi import FastAPI, HTTPException, Query, UploadFile, File, Form
+from fastapi import FastAPI, HTTPException, Query, UploadFile, File, Form, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import FileResponse, Response
+from starlette.concurrency import run_in_threadpool
+from concurrent.futures import ThreadPoolExecutor
 from pydantic import BaseModel
 from typing import List, Optional, Tuple
 import os
@@ -18,6 +20,8 @@ from app.order_service import OrderService
 from app.partner_service import PartnerService
 from app.data_intelligence import DataIntelligenceEngine
 
+_OCR_POOL = ThreadPoolExecutor(max_workers=4)   # one slot per KYC document (max 4 per applicant)
+
 app = FastAPI(
     title="VyaparSetu Platform API",
     description="Next-Gen MSME Digital Acquisition & Onboarding Platform (Airtel Sync 2026 - Enterprise Track A)",
@@ -31,6 +35,25 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+
+@app.middleware("http")
+async def add_security_headers(request: Request, call_next):
+    response = await call_next(request)
+    response.headers["X-Content-Type-Options"] = "nosniff"
+    response.headers["X-Frame-Options"] = "SAMEORIGIN"
+    response.headers["X-XSS-Protection"] = "1; mode=block"
+    response.headers["Referrer-Policy"] = "strict-origin-when-cross-origin"
+    response.headers["Permissions-Policy"] = "camera=(), microphone=(), geolocation=()"
+    response.headers["Content-Security-Policy"] = (
+        "default-src 'self' https: data: blob: 'unsafe-inline' 'unsafe-eval'; "
+        "img-src 'self' https: data: blob:; "
+        "font-src 'self' https: data:; "
+        "style-src 'self' https: 'unsafe-inline'; "
+        "script-src 'self' https: 'unsafe-inline' 'unsafe-eval'; "
+        "connect-src 'self' https: wss:;"
+    )
+    return response
 
 # Initialize engines
 catalog_engine = CatalogEngine()
@@ -275,6 +298,7 @@ def extract_text_from_file(file_path: str, ext: str, file_bytes: bytes, original
         ocr_text = advisor_engine.llm.ocr_image(file_bytes, mime=mime)
         if ocr_text:
             return ocr_text.strip(), "llm"
+        return "", "error"   # every reader failed (not the same as a blank page)
 
     return "", "none"
 
@@ -338,9 +362,16 @@ async def upload_kyc_files(
             processed_files.append((orig_name, ext, file_path, file_bytes))
 
         # Second pass: OCR text extraction and classification
-        for orig_name, ext, file_path, file_bytes in processed_files:
-            text, backend = extract_text_from_file(file_path, ext, file_bytes, orig_name)
-            if backend != "none":
+        # Read all files in parallel (cloud OCR is ~3-5 s per image; sequential would breach Vercel's 60 s cap)
+        ocr_results = await run_in_threadpool(
+            lambda: list(_OCR_POOL.map(lambda pf: extract_text_from_file(pf[2], pf[1], pf[3], pf[0]), processed_files))
+        )
+        # Our reader being down must not turn into a REJECT for a valid customer
+        if any(b == "error" for _, b in ocr_results):
+            raise HTTPException(status_code=503, detail="The document reader is busy right now. Please try again in a few seconds.")
+
+        for (orig_name, ext, file_path, file_bytes), (text, backend) in zip(processed_files, ocr_results):
+            if backend not in ("none", "error"):
                 backends_used.add(backend)
 
             if not text:
@@ -474,13 +505,14 @@ def get_order_notifications(order_id: str):
 
 @app.get("/api/partner/leads")
 def get_partner_leads(
+    request: Request,
     limit: int = 15,
     offset: int = 0,
     segment: Optional[str] = None,
     city_tier: Optional[int] = None,
     min_score: Optional[int] = None,
     drop_category: Optional[str] = None,
-    propensity_tier: Optional[str] = None
+    propensity_tier: Optional[str] = None,
 ):
     leads = partner_service.get_dropped_leads(
         limit=limit,

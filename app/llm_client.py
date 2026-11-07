@@ -85,6 +85,7 @@ class LLMAdvisorClient:
         self.api_key = self.providers[0][1] if self.providers else ""
         self.model = self.providers[0][2] if self.providers else ""
         self._cache: Dict[str, dict] = {}
+        self._ocr_cache: Dict[str, str] = {}
 
     def _chat(self, messages: list, max_tokens: int, temperature: float, timeout: float) -> Optional[str]:
         """Tries each provider/model in order; returns the first non-empty reply text, else None."""
@@ -182,27 +183,47 @@ class LLMAdvisorClient:
         """
         Uses LLM vision input (Gemini / OpenRouter) to transcribe document images in the cloud (Linux/Vercel).
         Returns raw transcribed text, or None on failure/disabled.
+        Uses SHA-256 fingerprint caching and retry backoff to survive rate limits and 503 busy spikes.
         """
         if os.environ.get("VYAPAR_LLM_DISABLED") == "1" or not self.api_key:
             return None
 
+        # Check in-memory hash cache first
+        cache_key = hashlib.sha256(image_bytes).hexdigest()
+        if hasattr(self, '_ocr_cache') and cache_key in self._ocr_cache:
+            return self._ocr_cache[cache_key]
+
         import base64
+        import time
         b64_img = base64.b64encode(image_bytes).decode('utf-8')
         data_uri = f"data:{mime};base64,{b64_img}"
 
         messages = [
-                {
-                    "role": "user",
-                    "content": [
-                        {
-                            "type": "text",
-                            "text": "Transcribe all text in this document exactly as printed, in reading order. Output only the text, no commentary."
-                        },
-                        {
-                            "type": "image_url",
-                            "image_url": {"url": data_uri}
-                        }
-                    ]
-                }
+            {
+                "role": "user",
+                "content": [
+                    {
+                        "type": "text",
+                        "text": "Transcribe all text in this document exactly as printed, in reading order. Output only the text, no commentary."
+                    },
+                    {
+                        "type": "image_url",
+                        "image_url": {"url": data_uri}
+                    }
+                ]
+            }
         ]
-        return self._chat(messages, max_tokens=2000, temperature=0.0, timeout=20)
+
+        result = None
+        for attempt in range(3):
+            result = self._chat(messages, max_tokens=2000, temperature=0.0, timeout=20)
+            if result:
+                break
+            time.sleep(0.6 * (attempt + 1))
+
+        if result:
+            if not hasattr(self, '_ocr_cache'):
+                self._ocr_cache = {}
+            self._ocr_cache[cache_key] = result
+
+        return result

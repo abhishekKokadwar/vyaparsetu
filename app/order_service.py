@@ -6,6 +6,8 @@ from datetime import datetime, timedelta, timezone
 from typing import Dict, List, Optional, Any
 from app.catalog_engine import CatalogEngine
 
+from app import neon
+
 # Milestone definitions in strict progression
 MILESTONE_STAGES = [
     {
@@ -71,7 +73,7 @@ class OrderService:
         self._seed_sample_orders()
         self._load_persisted_orders()
 
-    def _save_orders(self):
+    def _save_orders(self, specific_order: Optional[dict] = None):
         try:
             os.makedirs(os.path.dirname(self._orders_file), exist_ok=True)
             with open(self._orders_file, 'w', encoding='utf-8') as f:
@@ -79,20 +81,61 @@ class OrderService:
         except Exception:
             pass
 
-    def _load_persisted_orders(self):
         try:
-            if os.path.exists(self._orders_file):
-                with open(self._orders_file, 'r', encoding='utf-8') as f:
-                    data = json.load(f)
-                    if isinstance(data, dict):
-                        for oid, order in data.items():
-                            self.orders[oid] = order
-                            if 'contact_phone' in order:
-                                clean_phone = self._normalize_phone(order['contact_phone'])
-                                if oid not in self.phone_index.setdefault(clean_phone, []):
-                                    self.phone_index[clean_phone].append(oid)
+            with open('/tmp/persisted_orders.json', 'w', encoding='utf-8') as f:
+                json.dump(self.orders, f, indent=2)
         except Exception:
             pass
+
+        if specific_order:
+            self._save_to_neon(specific_order)
+
+    def _save_to_neon(self, order: dict):
+        neon.query(
+            "insert into vyaparsetu_orders (order_id, contact_phone, order_data) values ($1, $2, $3::jsonb) "
+            "on conflict (order_id) do update set order_data = excluded.order_data, updated_at = now()",
+            [str(order.get('order_id', '')), str(order.get('contact_phone', '')), json.dumps(order)],
+        )
+    def _fetch_persisted_order(self, order_id: str) -> Optional[dict]:
+        clean_id = order_id.strip().upper()
+        # 1. Check /tmp fallback (Linux/Vercel)
+        tmp_file = "/tmp/persisted_orders.json"
+        if os.path.exists(tmp_file):
+            try:
+                with open(tmp_file, "r", encoding="utf-8") as f:
+                    data = json.load(f)
+                    if isinstance(data, dict) and clean_id in data:
+                        self.orders[clean_id] = data[clean_id]
+                        return data[clean_id]
+            except Exception:
+                pass
+
+        # 2. Check Neon Cloud Database
+        rows = neon.query("select order_data from vyaparsetu_orders where order_id = $1", [clean_id])
+        if rows:
+            order = rows[0]['order_data']
+            self.orders[clean_id] = order
+            clean_phone = self._normalize_phone(order.get('contact_phone', ''))
+            if clean_id not in self.phone_index.setdefault(clean_phone, []):
+                self.phone_index[clean_phone].append(clean_id)
+            return order
+        return None
+
+    def _load_persisted_orders(self):
+        for filepath in [self._orders_file, '/tmp/persisted_orders.json']:
+            try:
+                if os.path.exists(filepath):
+                    with open(filepath, 'r', encoding='utf-8') as f:
+                        data = json.load(f)
+                        if isinstance(data, dict):
+                            for oid, order in data.items():
+                                self.orders[oid] = order
+                                if 'contact_phone' in order:
+                                    clean_phone = self._normalize_phone(order['contact_phone'])
+                                    if oid not in self.phone_index.setdefault(clean_phone, []):
+                                        self.phone_index[clean_phone].append(oid)
+            except Exception:
+                pass
 
     def _normalize_phone(self, phone: str) -> str:
         clean = re.sub(r'[^0-9]', '', str(phone))
@@ -252,13 +295,15 @@ class OrderService:
         self.orders[order_num] = order
         clean_phone = self._normalize_phone(order['contact_phone'])
         self.phone_index.setdefault(clean_phone, []).append(order_num)
-        self._save_orders()
+        self._save_orders(specific_order=order)
         return order
 
     def get_order(self, order_id: str) -> Optional[dict]:
         """Retrieves order with real-time countdown telemetry"""
         clean_id = order_id.strip().upper() if order_id else ""
         order = self.orders.get(clean_id)
+        if not order:
+            order = self._fetch_persisted_order(clean_id)
         if not order:
             return None
 
@@ -279,7 +324,7 @@ class OrderService:
         Requires valid 4-digit installation_pin to activate service (final stage).
         """
         clean_id = order_id.strip().upper()
-        order = self.orders.get(clean_id)
+        order = self.orders.get(clean_id) or self._fetch_persisted_order(clean_id)
         if not order:
             return {'status': 'ERROR', 'message': f"Order '{order_id}' not found."}
 
@@ -309,7 +354,7 @@ class OrderService:
 
         order['stage_index'] = next_idx
         order['current_stage_code'] = next_stage['code']
-        self._save_orders()
+        self._save_orders(specific_order=order)
 
         return {
             'status': 'SUCCESS',
@@ -326,7 +371,7 @@ class OrderService:
         Dynamically recalculates estimated activation date.
         """
         clean_id = order_id.strip().upper()
-        order = self.orders.get(clean_id)
+        order = self.orders.get(clean_id) or self._fetch_persisted_order(clean_id)
         if not order:
             return {'status': 'ERROR', 'message': f"Order '{order_id}' not found."}
 
@@ -343,7 +388,7 @@ class OrderService:
             if st['code'] == 'TECHNICIAN_ASSIGNED':
                 st['detail'] = f"Engineer {order['technician']['name']} rescheduled visit to {new_slot}."
 
-        self._save_orders()
+        self._save_orders(specific_order=order)
 
         return {
             'status': 'SUCCESS',

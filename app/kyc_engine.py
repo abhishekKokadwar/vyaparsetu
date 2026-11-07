@@ -1,5 +1,6 @@
 import os
 import json
+from app import neon
 import re
 import uuid
 import hashlib
@@ -150,10 +151,16 @@ class SmartKYCEngine:
         gstin = cls.normalize_gstin_ocr(cand)
 
         # Extract legal name and trade name across full text (handles both Gemini key-value & Windows flow)
-        prop_m = re.search(r'([A-Za-z\s]+?\s*\([Pp]rop\.?\s*([^)]+)\))', text)
         legal_name = None
         trade_name = None
-        if prop_m:
+        # Labelled layout (cloud VLM): "Legal name\n<value>\nTrade name\n<value>" - take the value lines as-is
+        lab_legal = re.search(r'Legal name\s*:?\s*\n\s*([^\n]+)', text, re.I)
+        prop_m = None if lab_legal else re.search(r'([A-Za-z\s]+?\s*\([Pp]rop\.?\s*([^)]+)\))', text)
+        if lab_legal:
+            legal_name = lab_legal.group(1).strip()
+            lab_trade = re.search(r'Trade name\s*:?\s*\n\s*([^\n]+)', text, re.I)
+            trade_name = lab_trade.group(1).strip() if lab_trade else legal_name
+        elif prop_m:
             legal_name = prop_m.group(1).strip()
             legal_name = re.sub(r'^(?:legal\s*name\s*[:\-]?\s*)', '', legal_name, flags=re.I).strip()
             toks = legal_name.split()
@@ -295,7 +302,20 @@ class SmartKYCEngine:
 
         self._consent_ledger[applicant_code] = record
         self._consent_history.append(record)
+        self._persist_consent_event(applicant_code, 'GRANTED', record)
         return record
+
+    def _persist_consent_event(self, applicant_code: str, kind: str, payload: dict) -> None:
+        """Append-only DPDP audit trail; survives serverless restarts. Best-effort (no-op without a DB)."""
+        neon.query("insert into vyaparsetu_consents (applicant_code, kind, payload) values ($1, $2, $3::jsonb)",
+                   [applicant_code, kind, json.dumps(payload)])
+
+    def _load_consent(self, applicant_code: str) -> None:
+        """Rehydrate the latest consent for an applicant if it was granted on another instance."""
+        rows = neon.query("select kind, payload from vyaparsetu_consents where applicant_code = $1 order by id desc limit 1",
+                          [applicant_code])
+        if rows and rows[0]['kind'] == 'GRANTED':
+            self._consent_ledger[applicant_code] = rows[0]['payload']
 
     def purge_expired_data(self, as_of_date: Optional[str] = None) -> dict:
         """
@@ -318,6 +338,7 @@ class SmartKYCEngine:
                 purged_records.append(receipt)
                 self._consent_ledger[code]['status'] = 'PURGED'
                 self._consent_history.append(receipt)
+                self._persist_consent_event(code, 'PURGED', receipt)
         return {
             'as_of_date': current_date_str,
             'purged_count': len(purged_records),
@@ -329,6 +350,8 @@ class SmartKYCEngine:
         Processes affirmative consent revocation under Section 6 of DPDP Act 2023.
         Immediately halts processing and marks uploaded files for scheduled purge.
         """
+        if applicant_code not in self._consent_ledger:
+            self._load_consent(applicant_code)
         if applicant_code not in self._consent_ledger:
             return {'status': 'ERROR', 'message': f"No active consent found for applicant {applicant_code}"}
 
@@ -345,6 +368,7 @@ class SmartKYCEngine:
             'action_taken': 'KYC pipeline halted; applicant documents scheduled for secure permanent purge.'
         }
         self._consent_history.append(revoke_event)
+        self._persist_consent_event(applicant_code, 'REVOKED', revoke_event)
         return {
             'status': 'SUCCESS',
             'applicant_code': applicant_code,
@@ -353,7 +377,12 @@ class SmartKYCEngine:
         }
 
     def get_consent_history(self, applicant_code: Optional[str] = None) -> List[dict]:
-        """Returns tamper-evident audit history of consent events"""
+        """Returns tamper-evident audit history of consent events (Neon Postgres when configured, else memory)"""
+        rows = (neon.query("select payload from vyaparsetu_consents where applicant_code = $1 order by id", [applicant_code])
+                if applicant_code else
+                neon.query("select payload from vyaparsetu_consents order by id desc limit 200"))
+        if rows is not None:
+            return [r['payload'] for r in rows]
         if applicant_code:
             return [h for h in self._consent_history if h.get('applicant_code') == applicant_code]
         return list(self._consent_history)
