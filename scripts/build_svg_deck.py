@@ -36,6 +36,17 @@ for i in range(3, N + 1):            # template ships 2 slides; clone the conten
 for i, s in enumerate(prs.slides, 1):
     s.shapes.add_picture(str(OUT / f'overlay{i}.png'), 0, 0, W, H)
 
+# Slides are images, so add invisible clickable boxes over the cover's link lines.
+# Coordinates are the 1920x1080 overlay space used in deck/index.html.
+from pptx.enum.shapes import MSO_SHAPE
+def link_box(slide, x, y, w, h, url):
+    k = W / 1920
+    b = slide.shapes.add_shape(MSO_SHAPE.RECTANGLE, int(x * k), int(y * k), int(w * k), int(h * k))
+    b.fill.background(); b.line.fill.background(); b.shadow.inherit = False
+    b.click_action.hyperlink.address = url
+link_box(prs.slides[0], 150, 1016 - 30, 640, 40, 'https://vyaparsetu247.vercel.app')
+link_box(prs.slides[0], 600, 972 - 26, 360, 36, 'https://github.com/abhishekKokadwar/vyaparsetu')
+
 pptx = ROOT / f'{NAME}.pptx'
 prs.save(pptx)
 print('saved', pptx)
