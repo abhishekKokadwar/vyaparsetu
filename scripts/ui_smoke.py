@@ -69,6 +69,8 @@ def main():
         print("[3/8] Testing Smart KYC registry verification across K01-K12...")
         page.click("#tab-btn-kyc")
         page.wait_for_timeout(500)
+        page.check("#dpdp-consent-chk")
+        page.wait_for_timeout(300)
         for app_code in PASS_APPLICANTS:
             page.select_option("#kyc-applicant-select", app_code)
             page.wait_for_timeout(400)

@@ -58,6 +58,8 @@ Extract business parameters from user inquiry in English, Hindi, Hinglish, Marat
   "clarifying_question": string or null
 }
 Rules:
+- People words (लोग, कर्मचारी, staff, workers, employees, helpers, lawyers) -> employee_count, NEVER num_sites.
+- Negations (नहीं, nahi, no, without, not registered) next to GST -> has_gstin false.
 - Counters, tills, desks, chairs, machines, looms are NOT sites. num_sites counts separate physical locations/branches/outlets.
 - num_sites >= 2 or chain/branches -> "multi"
 - manufacturing/factory/plant/workshop/machining/textile/fabrication -> "mfg"

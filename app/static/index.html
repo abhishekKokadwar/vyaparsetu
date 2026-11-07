@@ -20,7 +20,11 @@
               dark: '#111827',
               gray: '#4B5563',
               border: '#E5E7EB'
-            }
+            },
+            info: { DEFAULT: '#0369A1', soft: '#F0F9FF' },
+            ok:   { DEFAULT: '#047857', soft: '#ECFDF5' },
+            warn: { DEFAULT: '#B45309', soft: '#FFFBEB' },
+            err:  { DEFAULT: '#B91C1C', soft: '#FEF2F2' }
           },
           fontFamily: {
             sans: ['Plus Jakarta Sans', 'Noto Sans Devanagari', 'sans-serif']
@@ -33,20 +37,21 @@
   <script src="/static/vendor/lucide.min.js"></script>
 </head>
 <body class="bg-[#F8FAFC] text-slate-800 antialiased min-h-screen flex flex-col font-sans">
+  <a href="#main" class="sr-only focus:not-sr-only focus:fixed focus:top-2 focus:left-2 focus:z-[100] bg-white px-3 py-2 rounded-lg text-sm font-semibold shadow-md min-h-[44px] flex items-center">Skip to content</a>
 
   <!-- Top Announcement Bar -->
-  <div class="bg-airtel-dark text-white text-xs py-1.5 px-4 flex justify-between items-center border-b border-slate-700">
+  <div class="bg-airtel-dark text-white text-xs py-0 sm:py-1.5 px-4 min-h-[44px] flex justify-between items-center border-b border-slate-700 gap-3">
     <div class="flex items-center space-x-2">
-      <span class="bg-airtel-red text-white px-2 py-0.5 rounded text-[10px] font-bold tracking-wide uppercase">Hackathon Prototype</span>
-      <span class="text-slate-300">Airtel Sync 2026 · Enterprise Track A: Project Udyam Digital</span>
+      <span class="bg-airtel-red text-white px-2 py-0.5 rounded text-xs font-bold tracking-wide uppercase">Hackathon Prototype</span>
+      <span class="text-slate-300 hidden md:inline">Airtel Sync 2026 · Enterprise Track A: Project Udyam Digital</span>
     </div>
     <div class="flex items-center space-x-4">
-      <span class="text-slate-400">Team: <strong class="text-white">Hacker_247</strong></span>
-      <a href="/diagrams" target="_blank" class="text-slate-300 hover:text-white transition flex items-center space-x-1">
+      <span class="text-slate-400 hidden sm:inline">Team: <strong class="text-white">Hacker_247</strong></span>
+      <a href="/diagrams" target="_blank" class="text-slate-300 hover:text-white transition hidden sm:flex items-center space-x-1 min-h-[44px]">
         <i data-lucide="network" class="w-3 h-3 text-airtel-red"></i>
         <span>SVG Diagrams</span>
       </a>
-      <a href="https://github.com/abhishekKokadwar/vyaparsetu" target="_blank" class="text-airtel-red hover:text-white transition flex items-center space-x-1">
+      <a href="https://github.com/abhishekKokadwar/vyaparsetu" target="_blank" class="text-red-300 hover:text-white transition flex items-center space-x-1 min-h-[44px]">
         <span>GitHub Repo</span>
         <i data-lucide="external-link" class="w-3 h-3"></i>
       </a>
@@ -58,51 +63,52 @@
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex justify-between items-center h-16">
       <!-- Brand Logo -->
       <div class="flex items-center space-x-3 cursor-pointer" onclick="switchTab('advisor')">
-        <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-airtel-darkred to-airtel-red flex items-center justify-center shadow-md shadow-red-200">
+        <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-airtel-darkred to-airtel-red flex items-center justify-center shadow-md">
           <span class="text-white font-extrabold text-xl tracking-tight">VS</span>
         </div>
         <div>
           <div class="flex items-center space-x-2">
             <h1 class="text-xl font-bold tracking-tight text-slate-900">Vyapar<span class="text-airtel-red">Setu</span></h1>
-            <span class="text-[11px] font-semibold text-slate-500 bg-slate-100 px-2 py-0.5 rounded-full">व्यापारसेतु</span>
+            <span class="text-xs font-semibold text-slate-700 bg-slate-100 px-2 py-0.5 rounded-full hidden sm:inline">व्यापारसेतु</span>
           </div>
-          <p class="text-[11px] text-slate-500 font-medium">Digital in One Sitting · Accel Business MSME Suite</p>
+          <p class="text-xs text-slate-500 font-medium hidden sm:block">Digital in One Sitting · Accel Business MSME Suite</p>
         </div>
       </div>
 
       <!-- Navigation Tabs -->
-      <nav class="hidden md:flex space-x-1">
-        <button onclick="switchTab('advisor')" id="tab-btn-advisor" class="nav-tab active">
+      <nav role="tablist" aria-label="Onboarding steps" class="hidden md:flex items-center gap-1">
+        <button onclick="switchTab('advisor')" id="tab-btn-advisor" type="button" role="tab" data-tab="advisor" aria-controls="view-advisor" aria-selected="true" class="nav-tab active">
           <i data-lucide="compass" class="w-4 h-4 mr-2"></i>
           <span>1. GenAI Advisor</span>
         </button>
-        <button onclick="switchTab('quote')" id="tab-btn-quote" class="nav-tab">
+        <button onclick="switchTab('quote')" id="tab-btn-quote" type="button" role="tab" data-tab="quote" aria-controls="view-quote" aria-selected="false" class="nav-tab">
           <i data-lucide="layers" class="w-4 h-4 mr-2"></i>
           <span>2. Quote & Bundle</span>
         </button>
-        <button onclick="switchTab('kyc')" id="tab-btn-kyc" class="nav-tab">
+        <button onclick="switchTab('kyc')" id="tab-btn-kyc" type="button" role="tab" data-tab="kyc" aria-controls="view-kyc" aria-selected="false" class="nav-tab">
           <i data-lucide="shield-check" class="w-4 h-4 mr-2"></i>
           <span>3. Smart KYC</span>
         </button>
-        <button onclick="switchTab('tracker')" id="tab-btn-tracker" class="nav-tab">
+        <button onclick="switchTab('tracker')" id="tab-btn-tracker" type="button" role="tab" data-tab="tracker" aria-controls="view-tracker" aria-selected="false" class="nav-tab">
           <i data-lucide="map-pin" class="w-4 h-4 mr-2"></i>
           <span>4. Order Tracker</span>
         </button>
-        <button onclick="switchTab('partner')" id="tab-btn-partner" class="nav-tab text-purple-700 bg-purple-50 hover:bg-purple-100">
+        <span class="w-px h-6 bg-slate-200 mx-1" aria-hidden="true"></span>
+        <button onclick="switchTab('partner')" id="tab-btn-partner" type="button" role="tab" data-tab="partner" aria-controls="view-partner" aria-selected="false" class="nav-tab">
           <i data-lucide="users" class="w-4 h-4 mr-2"></i>
-          <span>5. Partner Portal</span>
+          <span>Partner Portal</span>
         </button>
       </nav>
 
       <!-- Language & CTA -->
       <div class="flex items-center space-x-3">
         <!-- Language Switcher -->
-        <div class="inline-flex rounded-lg border border-slate-200 p-0.5 bg-slate-50">
-          <button id="lang-en" onclick="setLanguage('en')" class="px-2.5 py-1 text-xs font-bold rounded-md bg-white shadow-sm text-slate-800">EN</button>
-          <button id="lang-hi" onclick="setLanguage('hi')" class="px-2.5 py-1 text-xs font-bold rounded-md text-slate-500 hover:text-slate-800">हिंदी</button>
+        <div class="inline-flex rounded-xl border border-slate-200 p-0.5 bg-slate-50">
+          <button id="lang-en" type="button" onclick="setLanguage('en')" class="px-3 py-2 min-h-[44px] text-xs font-bold rounded-lg bg-white shadow-sm text-slate-800 flex items-center justify-center">EN</button>
+          <button id="lang-hi" type="button" onclick="setLanguage('hi')" class="px-3 py-2 min-h-[44px] text-xs font-bold rounded-lg text-slate-600 hover:text-slate-800 flex items-center justify-center">हिंदी</button>
         </div>
-        <button onclick="switchTab('kyc')" class="bg-airtel-red hover:bg-airtel-darkred text-white text-xs font-semibold px-4 py-2 rounded-lg shadow-sm shadow-red-200 transition flex items-center space-x-1.5">
-          <span>Instant Checkout</span>
+        <button onclick="switchTab('kyc')" class="hidden sm:flex bg-airtel-red hover:bg-airtel-darkred text-white text-xs font-semibold px-4 py-2 rounded-lg shadow-sm transition items-center space-x-1.5">
+          <span>Start KYC</span>
           <i data-lucide="arrow-right" class="w-3.5 h-3.5"></i>
         </button>
       </div>
@@ -110,19 +116,20 @@
   </header>
 
   <!-- Mobile Sub-nav -->
-  <div class="md:hidden bg-white border-b border-slate-200 flex overflow-x-auto px-4 py-2 space-x-2 text-xs">
-    <button onclick="switchTab('advisor')" class="px-3 py-1.5 rounded-md font-semibold bg-red-50 text-airtel-red whitespace-nowrap">1. Advisor</button>
-    <button onclick="switchTab('quote')" class="px-3 py-1.5 rounded-md font-semibold text-slate-600 whitespace-nowrap">2. Quote</button>
-    <button onclick="switchTab('kyc')" class="px-3 py-1.5 rounded-md font-semibold text-slate-600 whitespace-nowrap">3. Smart KYC</button>
-    <button onclick="switchTab('tracker')" class="px-3 py-1.5 rounded-md font-semibold text-slate-600 whitespace-nowrap">4. Tracker</button>
-    <button onclick="switchTab('partner')" class="px-3 py-1.5 rounded-md font-semibold text-purple-700 bg-purple-50 whitespace-nowrap">5. Partner</button>
-  </div>
+  <nav id="mobile-subnav" role="tablist" aria-label="Onboarding steps" class="md:hidden bg-white border-b border-slate-200 flex overflow-x-auto px-4 py-2 gap-1.5 text-xs">
+    <button type="button" role="tab" data-tab="advisor" aria-controls="view-advisor" aria-selected="true" onclick="switchTab('advisor')" class="sub-tab active">1. Advisor</button>
+    <button type="button" role="tab" data-tab="quote" aria-controls="view-quote" aria-selected="false" onclick="switchTab('quote')" class="sub-tab">2. Quote</button>
+    <button type="button" role="tab" data-tab="kyc" aria-controls="view-kyc" aria-selected="false" onclick="switchTab('kyc')" class="sub-tab">3. KYC</button>
+    <button type="button" role="tab" data-tab="tracker" aria-controls="view-tracker" aria-selected="false" onclick="switchTab('tracker')" class="sub-tab">4. Tracker</button>
+    <span class="w-px h-6 bg-slate-200 mx-0.5 self-center" aria-hidden="true"></span>
+    <button type="button" role="tab" data-tab="partner" aria-controls="view-partner" aria-selected="false" onclick="switchTab('partner')" class="sub-tab">Partner</button>
+  </nav>
 
   <!-- Main Content Body -->
-  <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6">
+  <main id="main" class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6">
 
     <!-- ==================== TAB 1: GENAI ADVISOR ==================== -->
-    <section id="view-advisor" class="tab-view active">
+    <section id="view-advisor" class="tab-view active" role="tabpanel" aria-labelledby="tab-btn-advisor" tabindex="-1">
       <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
         
         <!-- Left: Needs Discovery Questionnaire -->
@@ -137,11 +144,36 @@
             </div>
           </div>
 
+          <!-- G1: Talk to the AI advisor -->
+          <div class="mb-5">
+            <label for="adv-chat-input" class="block text-sm font-semibold text-slate-900 mb-1">
+              Tell us about your business, in your own words
+            </label>
+            <p id="adv-chat-help" class="text-xs text-slate-500 mb-2">
+              English, हिंदी, मराठी, தமிழ், ਪੰਜਾਬੀ… e.g. “मेरी जयपुर में किराना दुकान है, 2 लोग, GST नहीं है”
+            </p>
+            <div class="flex gap-2">
+              <textarea id="adv-chat-input" rows="2" aria-describedby="adv-chat-help"
+                placeholder="Type or paste your business details in any language..."
+                class="flex-1 min-w-0 bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-base md:text-sm focus:bg-white outline-none"
+                onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();sendAdvisorChat();}"></textarea>
+              <button id="adv-chat-send" type="button" onclick="sendAdvisorChat()" aria-label="Ask the AI advisor"
+                class="shrink-0 min-h-[44px] min-w-[44px] px-4 bg-airtel-red hover:bg-airtel-darkred text-white rounded-xl flex items-center justify-center gap-2 text-sm font-semibold transition">
+                <i data-lucide="send" class="w-4 h-4" aria-hidden="true"></i><span class="hidden sm:inline">Ask</span>
+              </button>
+            </div>
+            <div id="adv-chat-understood" class="mt-3 hidden" aria-live="polite"></div>
+            <div id="adv-chat-clarify" class="mt-2 hidden"></div>
+            <div class="flex items-center gap-3 my-5 text-xs text-slate-500">
+              <span class="flex-1 border-t border-slate-200"></span>or answer 4 quick questions<span class="flex-1 border-t border-slate-200"></span>
+            </div>
+          </div>
+
           <form id="advisor-form" onsubmit="event.preventDefault(); submitAdvisorProfile();" class="space-y-4 text-sm">
             <!-- Business Type / Archetype -->
             <div>
               <label class="block text-xs font-semibold text-slate-700 mb-1" id="lbl-biz-type">Business Type / Category</label>
-              <select id="adv-biz-type" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-sm focus:ring-2 focus:ring-airtel-red focus:bg-white outline-none">
+              <select id="adv-biz-type" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-base md:text-sm focus:ring-2 focus:ring-airtel-red focus:bg-white outline-none">
                 <option value="Kirana & Retail Store">Kirana & Retail Store (किराना / खुदरा)</option>
                 <option value="Clinic & Healthcare">Clinic / Diagnostic / Pharmacy (क्लीनिक / दवाखाना)</option>
                 <option value="CA / Legal / Consulting Office">CA / Legal / Professional Office (सीए / वकील)</option>
@@ -155,14 +187,14 @@
             <div class="grid grid-cols-2 gap-3">
               <div>
                 <label class="block text-xs font-semibold text-slate-700 mb-1">City Tier</label>
-                <select id="adv-city-tier" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-sm focus:ring-2 focus:ring-airtel-red focus:bg-white outline-none">
+                <select id="adv-city-tier" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-base md:text-sm focus:ring-2 focus:ring-airtel-red focus:bg-white outline-none">
                   <option value="1">Tier 1 (Metro / Major City)</option>
                   <option value="2">Tier 2 (Emerging Town / Hub)</option>
                 </select>
               </div>
               <div>
                 <label class="block text-xs font-semibold text-slate-700 mb-1">City Name</label>
-                <input type="text" id="adv-city-name" value="Visakhapatnam" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-sm focus:ring-2 focus:ring-airtel-red focus:bg-white outline-none" placeholder="e.g. Jaipur, Pune">
+                <input type="text" id="adv-city-name" value="Visakhapatnam" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-base md:text-sm focus:ring-2 focus:ring-airtel-red focus:bg-white outline-none" placeholder="e.g. Jaipur, Pune">
               </div>
             </div>
 
@@ -170,11 +202,11 @@
             <div class="grid grid-cols-2 gap-3">
               <div>
                 <label class="block text-xs font-semibold text-slate-700 mb-1">Staff / Employees</label>
-                <input type="number" id="adv-employees" value="4" min="1" max="200" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-sm focus:ring-2 focus:ring-airtel-red focus:bg-white outline-none">
+                <input type="number" id="adv-employees" value="4" min="1" max="200" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-base md:text-sm focus:ring-2 focus:ring-airtel-red focus:bg-white outline-none">
               </div>
               <div>
                 <label class="block text-xs font-semibold text-slate-700 mb-1">Operating Sites</label>
-                <input type="number" id="adv-sites" value="1" min="1" max="25" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-sm focus:ring-2 focus:ring-airtel-red focus:bg-white outline-none">
+                <input type="number" id="adv-sites" value="1" min="1" max="25" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-base md:text-sm focus:ring-2 focus:ring-airtel-red focus:bg-white outline-none">
               </div>
             </div>
 
@@ -182,11 +214,11 @@
             <div>
               <label class="block text-xs font-semibold text-slate-700 mb-1">GST Registration Status</label>
               <div class="grid grid-cols-2 gap-3">
-                <label class="flex items-center space-x-2 border border-slate-200 rounded-xl p-2.5 bg-slate-50 cursor-pointer hover:bg-slate-100">
+                <label class="flex items-center space-x-2 border border-slate-200 rounded-xl p-2.5 min-h-[44px] bg-slate-50 cursor-pointer hover:bg-slate-100">
                   <input type="radio" name="adv-has-gst" value="yes" checked class="text-airtel-red focus:ring-airtel-red">
                   <span class="text-xs font-medium text-slate-800">Has GSTIN (Registered)</span>
                 </label>
-                <label class="flex items-center space-x-2 border border-slate-200 rounded-xl p-2.5 bg-slate-50 cursor-pointer hover:bg-slate-100">
+                <label class="flex items-center space-x-2 border border-slate-200 rounded-xl p-2.5 min-h-[44px] bg-slate-50 cursor-pointer hover:bg-slate-100">
                   <input type="radio" name="adv-has-gst" value="no" class="text-airtel-red focus:ring-airtel-red">
                   <span class="text-xs font-medium text-slate-800">No GSTIN (Micro / Exemption)</span>
                 </label>
@@ -196,34 +228,37 @@
             <!-- Current Monthly Spend -->
             <div>
               <label class="block text-xs font-semibold text-slate-700 mb-1">Current Monthly Spend on Telecom/Tools (₹)</label>
-              <input type="number" id="adv-current-spend" value="2500" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-sm focus:ring-2 focus:ring-airtel-red focus:bg-white outline-none">
+              <input type="number" id="adv-current-spend" value="2500" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-base md:text-sm focus:ring-2 focus:ring-airtel-red focus:bg-white outline-none">
             </div>
 
-            <button type="submit" class="w-full bg-airtel-red hover:bg-airtel-darkred text-white font-semibold py-2.5 rounded-xl shadow-md shadow-red-200 transition flex items-center justify-center space-x-2">
+            <button type="submit" class="w-full bg-airtel-red hover:bg-airtel-darkred text-white font-semibold py-2.5 rounded-xl shadow-sm transition flex items-center justify-center space-x-2">
               <i data-lucide="wand-2" class="w-4 h-4"></i>
               <span id="btn-generate-rec">Generate Tailored Bundle</span>
             </button>
           </form>
 
-          <!-- Pre-canned Quick Scenarios for Live Judge Testing -->
+          <!-- Pre-canned Quick Scenarios for Live Testing -->
           <div class="mt-6 pt-4 border-t border-slate-100">
-            <p class="text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-2">⚡ 1-Click Judge Test Scenarios</p>
+            <p class="text-xs font-bold text-slate-700 uppercase tracking-wider mb-2 flex items-center gap-1.5">
+              <i data-lucide="zap" class="w-3.5 h-3.5 text-airtel-red" aria-hidden="true"></i>
+              <span>Try a sample business</span>
+            </p>
             <div class="grid grid-cols-2 gap-2 text-xs">
-              <button onclick="loadScenario('kirana_no_gst')" class="p-2 border border-slate-200 rounded-lg hover:border-airtel-red hover:bg-red-50 text-left">
+              <button type="button" onclick="loadScenario('kirana_no_gst')" class="p-2.5 min-h-[44px] border border-slate-200 rounded-xl hover:border-airtel-red hover:bg-red-50 text-left">
                 <span class="font-bold block text-slate-800">Kirana Store</span>
-                <span class="text-[11px] text-slate-500">Tier 2 · No GST · ₹1.5k spend</span>
+                <span class="text-xs text-slate-600">Tier 2 · No GST · ₹1.5k spend</span>
               </button>
-              <button onclick="loadScenario('clinic_pro')" class="p-2 border border-slate-200 rounded-lg hover:border-airtel-red hover:bg-red-50 text-left">
+              <button type="button" onclick="loadScenario('clinic_pro')" class="p-2.5 min-h-[44px] border border-slate-200 rounded-xl hover:border-airtel-red hover:bg-red-50 text-left">
                 <span class="font-bold block text-slate-800">Dental Clinic</span>
-                <span class="text-[11px] text-slate-500">Tier 1 · GST · 4 Staff</span>
+                <span class="text-xs text-slate-600">Tier 1 · GST · 4 Staff</span>
               </button>
-              <button onclick="loadScenario('multi_store')" class="p-2 border border-slate-200 rounded-lg hover:border-airtel-red hover:bg-red-50 text-left">
+              <button type="button" onclick="loadScenario('multi_store')" class="p-2.5 min-h-[44px] border border-slate-200 rounded-xl hover:border-airtel-red hover:bg-red-50 text-left">
                 <span class="font-bold block text-slate-800">Retail Chain</span>
-                <span class="text-[11px] text-slate-500">3 Sites · Multi-store · GST</span>
+                <span class="text-xs text-slate-600">3 Sites · Multi-store · GST</span>
               </button>
-              <button onclick="loadScenario('small_mfg')" class="p-2 border border-slate-200 rounded-lg hover:border-airtel-red hover:bg-red-50 text-left">
+              <button type="button" onclick="loadScenario('small_mfg')" class="p-2.5 min-h-[44px] border border-slate-200 rounded-xl hover:border-airtel-red hover:bg-red-50 text-left">
                 <span class="font-bold block text-slate-800">Textile Plant</span>
-                <span class="text-[11px] text-slate-500">Leased Line · IoT · GST</span>
+                <span class="text-xs text-slate-600">Leased Line · IoT · GST</span>
               </button>
             </div>
           </div>
@@ -240,18 +275,18 @@
 
             <div id="advisor-content">
               <!-- Bundle Header Banner -->
-              <div class="bg-gradient-to-r from-red-50 via-white to-orange-50 border border-red-100 rounded-xl p-5 mb-5 flex justify-between items-start">
+              <div class="bg-gradient-to-r from-red-50 via-white to-orange-50 border border-red-100 rounded-xl p-5 mb-5 flex flex-col sm:flex-row justify-between items-start gap-3">
                 <div>
-                  <span class="inline-flex items-center space-x-1 text-[11px] font-bold text-airtel-red bg-red-100/70 px-2.5 py-0.5 rounded-full uppercase tracking-wide">
+                  <span class="inline-flex items-center space-x-1 text-xs font-bold text-airtel-darkred bg-white border border-red-200 px-2.5 py-0.5 rounded-full uppercase tracking-wide">
                     <i data-lucide="award" class="w-3 h-3"></i>
                     <span>AI Recommended Bundle</span>
                   </span>
                   <h3 id="rec-bundle-title" class="text-xl font-bold text-slate-900 mt-1">Vyapar Booster Pack (Kirana & Micro-Enterprise)</h3>
                   <p id="rec-bundle-tagline" class="text-xs text-slate-600 mt-0.5">Customized for 4 team members · Zero salesperson visit delay</p>
                 </div>
-                <div class="text-right">
-                  <div class="text-2xl font-extrabold text-slate-900" id="rec-price">₹2,597<span class="text-xs text-slate-500 font-normal"> /mo</span></div>
-                  <span class="text-[10px] text-emerald-700 font-semibold bg-emerald-50 px-2 py-0.5 rounded border border-emerald-200 inline-block mt-0.5">Single Unified Invoicing</span>
+                <div class="sm:text-right">
+                  <div class="text-2xl font-extrabold text-slate-900 tabular" id="rec-price">₹2,597<span class="text-xs text-slate-500 font-normal"> /mo</span></div>
+                  <span class="text-xs text-emerald-700 font-semibold bg-emerald-50 px-2 py-0.5 rounded border border-emerald-200 inline-block mt-0.5">Single Unified Invoicing</span>
                 </div>
               </div>
 
@@ -269,14 +304,14 @@
               <!-- Product Breakdown Table -->
               <div class="mb-5 flex-1">
                 <h4 class="text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">Included Products & Monthly Cost</h4>
-                <div class="border border-slate-200 rounded-xl overflow-hidden text-xs">
+                <div class="border border-slate-200 rounded-xl overflow-hidden text-sm">
                   <table class="w-full text-left">
-                    <thead class="bg-slate-50 border-b border-slate-200 text-slate-500 font-semibold">
+                    <thead class="bg-slate-50 border-b border-slate-200 text-slate-600 font-semibold text-xs">
                       <tr>
-                        <th class="py-2 px-3">Product</th>
-                        <th class="py-2 px-3">Category</th>
-                        <th class="py-2 px-3 text-center">Qty</th>
-                        <th class="py-2 px-3 text-right">Monthly (₹)</th>
+                        <th class="py-2.5 px-3">Product</th>
+                        <th class="py-2.5 px-3">Category</th>
+                        <th class="py-2.5 px-3 text-center">Qty</th>
+                        <th class="py-2.5 px-3 text-right">Monthly (₹)</th>
                       </tr>
                     </thead>
                     <tbody id="rec-products-table" class="divide-y divide-slate-100">
@@ -287,17 +322,17 @@
               </div>
 
               <!-- Bottom Action Bar -->
-              <div class="pt-4 border-t border-slate-100 flex items-center justify-between">
+              <div class="pt-4 border-t border-slate-100 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
                 <div>
                   <span class="text-xs text-slate-500">Contract: <strong id="rec-contract" class="text-slate-800">12 Months</strong></span>
                   <span class="mx-2 text-slate-300">·</span>
                   <span class="text-xs text-slate-500">Install SLA: <strong id="rec-install" class="text-slate-800">3 Days</strong></span>
                 </div>
                 <div class="flex space-x-2">
-                  <button onclick="switchTab('quote')" class="px-4 py-2 border border-slate-300 rounded-xl text-xs font-semibold text-slate-700 hover:bg-slate-50 transition">
+                  <button type="button" onclick="switchTab('quote')" class="px-4 py-2 border border-slate-300 rounded-xl text-sm font-semibold text-slate-700 hover:bg-slate-50 transition min-h-[44px]">
                     Customize Add-ons
                   </button>
-                  <button onclick="proceedToKYCFromAdvisor()" class="px-5 py-2 bg-airtel-red hover:bg-airtel-darkred text-white rounded-xl text-xs font-bold shadow-md shadow-red-200 transition flex items-center space-x-1.5">
+                  <button type="button" onclick="proceedToKYCFromAdvisor()" class="px-5 py-2 bg-airtel-red hover:bg-airtel-darkred text-white rounded-xl text-sm font-bold shadow-sm transition flex items-center space-x-1.5 min-h-[44px]">
                     <span>Accept Quote & Smart KYC</span>
                     <i data-lucide="chevron-right" class="w-4 h-4"></i>
                   </button>
@@ -311,22 +346,22 @@
     </section>
 
     <!-- ==================== TAB 2: QUOTE & BUNDLE CONFIGURATOR ==================== -->
-    <section id="view-quote" class="tab-view">
+    <section id="view-quote" class="tab-view" role="tabpanel" aria-labelledby="tab-btn-quote" tabindex="-1">
       <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
         <!-- Left: Product Catalogue & Add-ons -->
         <div class="lg:col-span-8 bg-white rounded-2xl border border-slate-200 shadow-sm p-6">
-          <div class="flex justify-between items-center mb-4 pb-3 border-b border-slate-100">
+          <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4 pb-3 border-b border-slate-100 gap-3">
             <div>
               <h2 class="text-lg font-bold text-slate-900">Custom Bundle Configurator</h2>
               <p class="text-xs text-slate-500">Toggle products from the Accel Business catalog. Rules & dependencies update in real-time.</p>
             </div>
-            <div class="flex space-x-1 text-xs">
-              <button onclick="filterCatalogCategory('all')" class="cat-filter active">All (25)</button>
-              <button onclick="filterCatalogCategory('Connectivity')" class="cat-filter">Connectivity</button>
-              <button onclick="filterCatalogCategory('Communication')" class="cat-filter">Comms</button>
-              <button onclick="filterCatalogCategory('Cloud & Productivity')" class="cat-filter">Cloud</button>
-              <button onclick="filterCatalogCategory('Security')" class="cat-filter">Security</button>
-              <button onclick="filterCatalogCategory('IoT & Physical')" class="cat-filter">IoT</button>
+            <div class="flex flex-wrap gap-1.5 text-xs">
+              <button type="button" onclick="filterCatalogCategory('all')" class="cat-filter active min-h-[44px] flex items-center">All (25)</button>
+              <button type="button" onclick="filterCatalogCategory('Connectivity')" class="cat-filter min-h-[44px] flex items-center">Connectivity</button>
+              <button type="button" onclick="filterCatalogCategory('Communication')" class="cat-filter min-h-[44px] flex items-center">Comms</button>
+              <button type="button" onclick="filterCatalogCategory('Cloud & Productivity')" class="cat-filter min-h-[44px] flex items-center">Cloud</button>
+              <button type="button" onclick="filterCatalogCategory('Security')" class="cat-filter min-h-[44px] flex items-center">Security</button>
+              <button type="button" onclick="filterCatalogCategory('IoT & Physical')" class="cat-filter min-h-[44px] flex items-center">IoT</button>
             </div>
           </div>
 
@@ -350,7 +385,7 @@
               </div>
               <div class="flex justify-between text-slate-600">
                 <span>One-time Setup / Install</span>
-                <span id="bill-setup-fee" class="font-semibold text-slate-800">₹0</span>
+                <span id="bill-setup-fee" class="font-semibold text-slate-800 tabular">₹0</span>
               </div>
               <div class="flex justify-between text-slate-600">
                 <span>Contract Duration</span>
@@ -362,7 +397,7 @@
               </div>
               <div class="pt-2 border-t border-slate-200 flex justify-between items-baseline">
                 <span class="text-sm font-bold text-slate-900">Total Monthly Cost</span>
-                <span class="text-xl font-extrabold text-airtel-red" id="bill-monthly-total">₹2,597<span class="text-xs text-slate-400 font-normal">/mo</span></span>
+                <span class="text-xl font-extrabold text-airtel-red tabular" id="bill-monthly-total">₹2,597<span class="text-xs text-slate-500 font-normal">/mo</span></span>
               </div>
             </div>
 
@@ -372,13 +407,13 @@
                 <i data-lucide="trending-down" class="w-4 h-4 text-emerald-600"></i>
                 <span>₹13,800 Annual Savings</span>
               </div>
-              <p class="text-[11px] text-emerald-700">Compared to buying fragmented services from local ISPs, separate email vendors, and CCTV installers.</p>
+              <p class="text-xs text-emerald-800 leading-relaxed">Compared to buying fragmented services from local ISPs, separate email vendors, and CCTV installers.</p>
             </div>
 
             <!-- Rule Validation Alerts -->
             <div id="bill-validation-alerts" class="mb-4"></div>
 
-            <button onclick="switchTab('kyc')" class="w-full bg-airtel-red hover:bg-airtel-darkred text-white font-bold py-3 rounded-xl shadow-md shadow-red-200 transition flex items-center justify-center space-x-2">
+            <button type="button" onclick="switchTab('kyc')" class="w-full bg-airtel-red hover:bg-airtel-darkred text-white font-bold py-3 rounded-xl shadow-sm transition flex items-center justify-center space-x-2 min-h-[44px]">
               <span>Proceed to Instant KYC</span>
               <i data-lucide="arrow-right" class="w-4 h-4"></i>
             </button>
@@ -388,7 +423,7 @@
     </section>
 
     <!-- ==================== TAB 3: SMART KYC & DPDP CONSENT ==================== -->
-    <section id="view-kyc" class="tab-view">
+    <section id="view-kyc" class="tab-view" role="tabpanel" aria-labelledby="tab-btn-kyc" tabindex="-1">
       <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
 
         <!-- Left: Instant Registry Verification & Document Upload -->
@@ -398,56 +433,62 @@
               <h2 class="text-lg font-bold text-slate-900">1-Sitting Smart KYC & Digital Verification</h2>
               <p class="text-xs text-slate-500">Compliant with India's <strong>DPDP Act, 2023</strong> (Purpose limitation & data minimisation)</p>
             </div>
-            <span class="bg-emerald-50 text-emerald-700 font-bold text-xs px-2.5 py-1 rounded-full border border-emerald-200 flex items-center space-x-1">
-              <i data-lucide="lock" class="w-3 h-3"></i>
-              <span>256-bit Encrypted</span>
+            <span class="bg-ok-soft text-ok font-semibold text-xs px-2.5 py-1 rounded-full border border-emerald-200 flex items-center gap-1">
+              <i data-lucide="eye-off" class="w-3.5 h-3.5" aria-hidden="true"></i>
+              <span>IDs masked · purged in 30 days</span>
             </span>
           </div>
 
-          <!-- DPDP Act Consent Banner -->
-          <div class="bg-amber-50/70 border border-amber-200 rounded-xl p-4 mb-5 text-xs">
-            <div class="flex items-start space-x-3">
-              <input type="checkbox" id="dpdp-consent-chk" checked class="mt-0.5 rounded text-airtel-red focus:ring-airtel-red">
-              <div>
-                <label for="dpdp-consent-chk" class="font-bold text-amber-950 block cursor-pointer">
-                  DPDP Act 2023 Explicit Digital Consent
-                </label>
-                <p class="text-amber-900/80 text-[11px] mt-0.5">
-                  I give explicit affirmative consent to Accel Business to verify my GSTIN, Udyam registration, and utility address proof solely for service onboarding. Identifiers will be masked, and documents purged within 30 days post-activation.
-                </p>
+          <!-- Step 1: DPDP Act Consent Banner -->
+          <div class="mb-5">
+            <span class="text-xs font-bold uppercase tracking-wider text-slate-500 block mb-1">Step 1 of 3 · Digital Consent</span>
+            <div id="dpdp-consent-box" class="bg-amber-50/70 border border-amber-200 rounded-xl p-4 text-xs transition-colors">
+              <div class="flex items-start space-x-3">
+                <input type="checkbox" id="dpdp-consent-chk" aria-describedby="dpdp-consent-help" class="mt-0.5 rounded text-airtel-red focus:ring-airtel-red">
+                <div>
+                  <label for="dpdp-consent-chk" class="font-bold text-amber-950 block cursor-pointer">
+                    DPDP Act 2023 Explicit Digital Consent
+                  </label>
+                  <p class="text-amber-900/80 text-xs mt-0.5">
+                    I give explicit affirmative consent to Accel Business to verify my GSTIN, Udyam registration, and utility address proof solely for service onboarding. Identifiers will be masked, and documents purged within 30 days post-activation.
+                  </p>
+                </div>
               </div>
+              <p id="dpdp-consent-help" class="hidden mt-2 text-xs font-semibold text-err" role="alert">
+                Tick the consent box to continue. We can't verify documents without it.
+              </p>
             </div>
           </div>
 
-          <!-- Quick Test Applicant Selector for Judges -->
+          <!-- Step 2: Try a sample applicant -->
           <div class="mb-5 bg-slate-50 p-4 rounded-xl border border-slate-200">
             <div class="flex justify-between items-center mb-2">
               <label class="text-xs font-bold text-slate-700 uppercase tracking-wider flex items-center space-x-1.5">
                 <i data-lucide="user-check" class="w-4 h-4 text-airtel-red"></i>
-                <span>Load Live Judge Test Applicant (K01 – K12)</span>
+                <span>Try a sample applicant (K01 – K12)</span>
               </label>
-              <span class="text-[10px] text-slate-400">Planted hackathon specimens</span>
+              <span class="text-xs text-slate-500">Planted hackathon specimens</span>
             </div>
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-              <select id="kyc-applicant-select" onchange="onApplicantSelected(this.value)" class="w-full bg-white border border-slate-200 rounded-xl px-3 py-2 text-xs font-medium focus:ring-2 focus:ring-airtel-red outline-none">
+              <select id="kyc-applicant-select" onchange="onApplicantSelected(this.value)" class="w-full bg-white border border-slate-200 rounded-xl px-3 py-2 text-base md:text-sm font-medium focus:ring-2 focus:ring-airtel-red outline-none">
                 <option value="">-- Select an Applicant Specimen --</option>
                 <!-- Populated dynamically -->
               </select>
-              <button onclick="runSmartKYCVerification()" class="bg-slate-900 hover:bg-slate-800 text-white font-semibold px-4 py-2 rounded-xl text-xs flex items-center justify-center space-x-1.5 shadow-sm transition">
+              <button data-needs-consent onclick="runSmartKYCVerification()" class="bg-slate-900 hover:bg-slate-800 text-white font-semibold px-4 py-2 rounded-xl text-sm flex items-center justify-center space-x-1.5 shadow-sm transition">
                 <i data-lucide="play" class="w-3.5 h-3.5 text-emerald-400"></i>
                 <span>Run Smart Verification</span>
               </button>
             </div>
           </div>
 
-          <!-- 1-Click Registry Auto-Fill Demo -->
+          <!-- Step 3: 1-Click Registry Auto-Fill Demo -->
           <div class="space-y-4 text-xs">
             <!-- GSTIN Lookup Input -->
             <div>
               <label class="block font-semibold text-slate-700 mb-1">15-Digit GSTIN Number</label>
               <div class="flex space-x-2">
-                <input type="text" id="kyc-input-gstin" value="19EOGXH4115Y1ZL" placeholder="e.g. 19EOGXH4115Y1ZL" class="flex-1 bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 font-mono uppercase tracking-wide focus:bg-white focus:ring-2 focus:ring-airtel-red outline-none">
-                <button onclick="lookupGSTINManually()" class="bg-slate-100 hover:bg-slate-200 text-slate-800 font-semibold px-4 py-2 rounded-xl border border-slate-200 transition">Verify GST</button>
+                <input type="text" id="kyc-input-gstin" value="19EOGXH4115Y1ZL" placeholder="e.g. 19EOGXH4115Y1ZL" class="flex-1 bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 font-mono uppercase tracking-wide text-base md:text-sm focus:bg-white focus:ring-2 focus:ring-airtel-red outline-none">
+                <button data-needs-consent onclick="lookupGSTINManually()" class="bg-slate-100 hover:bg-slate-200 text-slate-800 font-semibold px-4 py-2 rounded-xl border border-slate-200 text-sm transition">Verify GST</button>
               </div>
               <div id="gst-lookup-result" class="mt-2 hidden"></div>
             </div>
@@ -456,8 +497,8 @@
             <div>
               <label class="block font-semibold text-slate-700 mb-1">Udyam Registration Number</label>
               <div class="flex space-x-2">
-                <input type="text" id="kyc-input-udyam" value="UDYAM-WB-00-5053330" placeholder="e.g. UDYAM-WB-00-5053330" class="flex-1 bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 font-mono uppercase tracking-wide focus:bg-white focus:ring-2 focus:ring-airtel-red outline-none">
-                <button onclick="lookupUdyamManually()" class="bg-slate-100 hover:bg-slate-200 text-slate-800 font-semibold px-4 py-2 rounded-xl border border-slate-200 transition">Verify Udyam</button>
+                <input type="text" id="kyc-input-udyam" value="UDYAM-WB-00-5053330" placeholder="e.g. UDYAM-WB-00-5053330" class="flex-1 bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 font-mono uppercase tracking-wide text-base md:text-sm focus:bg-white focus:ring-2 focus:ring-airtel-red outline-none">
+                <button data-needs-consent onclick="lookupUdyamManually()" class="bg-slate-100 hover:bg-slate-200 text-slate-800 font-semibold px-4 py-2 rounded-xl border border-slate-200 text-sm transition">Verify Udyam</button>
               </div>
               <div id="udyam-lookup-result" class="mt-2 hidden"></div>
             </div>
@@ -466,8 +507,8 @@
             <div>
               <label class="block font-semibold text-slate-700 mb-1">Address Proof Issue Date (Utility / Electricity Bill)</label>
               <div class="flex items-center space-x-3">
-                <input type="date" id="kyc-input-date" value="2026-05-22" class="bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 focus:bg-white focus:ring-2 focus:ring-airtel-red outline-none">
-                <span class="text-[11px] text-slate-500">Ref Date: <strong>2026-07-15</strong> (Must be &le;90 days)</span>
+                <input type="date" id="kyc-input-date" value="2026-05-22" class="bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-base md:text-sm focus:bg-white focus:ring-2 focus:ring-airtel-red outline-none">
+                <span class="text-xs text-slate-500">Ref Date: <strong>2026-07-15</strong> (Must be &le;90 days)</span>
               </div>
             </div>
 
@@ -478,52 +519,52 @@
                   <i data-lucide="file-up" class="w-4 h-4 text-airtel-red"></i>
                   <span>Document Upload & Live OCR Extraction Sandbox</span>
                 </label>
-                <span class="text-[10px] bg-slate-100 text-slate-600 px-2 py-0.5 rounded font-mono">Drag & Drop / Select Files</span>
               </div>
-              <p class="text-[11px] text-slate-500 mb-3">Upload your GST certificate, Udyam MSME, electricity bill, or signatory ID card to test live OCR extraction.</p>
+              <p class="text-xs text-slate-500 mb-3 leading-relaxed">Upload your GST certificate, Udyam MSME, electricity bill, or signatory ID card to test live OCR extraction.</p>
               
               <!-- Quick Specimen Loader Buttons -->
               <div class="flex flex-wrap gap-1.5 mb-3">
-                <button type="button" onclick="loadDocSpecimen('K02')" class="px-2.5 py-1 text-[11px] font-semibold bg-emerald-50 text-emerald-700 hover:bg-emerald-100 rounded-lg border border-emerald-200 transition">Sample K02 (Clean Pass)</button>
-                <button type="button" onclick="loadDocSpecimen('K06')" class="px-2.5 py-1 text-[11px] font-semibold bg-red-50 text-red-700 hover:bg-red-100 rounded-lg border border-red-200 transition">Sample K06 (Bogus GSTIN)</button>
-                <button type="button" onclick="loadDocSpecimen('K07')" class="px-2.5 py-1 text-[11px] font-semibold bg-red-50 text-red-700 hover:bg-red-100 rounded-lg border border-red-200 transition">Sample K07 (Name Mismatch)</button>
-                <button type="button" onclick="loadDocSpecimen('K11')" class="px-2.5 py-1 text-[11px] font-semibold bg-red-50 text-red-700 hover:bg-red-100 rounded-lg border border-red-200 transition">Sample K11 (257d Old Bill)</button>
+                <button type="button" data-needs-consent onclick="loadDocSpecimen('K02')" class="px-3 py-1.5 text-xs font-semibold bg-emerald-50 text-emerald-700 hover:bg-emerald-100 rounded-lg border border-emerald-200 transition">Sample K02 (Clean Pass)</button>
+                <button type="button" data-needs-consent onclick="loadDocSpecimen('K06')" class="px-3 py-1.5 text-xs font-semibold bg-red-50 text-red-700 hover:bg-red-100 rounded-lg border border-red-200 transition">Sample K06 (Bogus GSTIN)</button>
+                <button type="button" data-needs-consent onclick="loadDocSpecimen('K07')" class="px-3 py-1.5 text-xs font-semibold bg-red-50 text-red-700 hover:bg-red-100 rounded-lg border border-red-200 transition">Sample K07 (Name Mismatch)</button>
+                <button type="button" data-needs-consent onclick="loadDocSpecimen('K11')" class="px-3 py-1.5 text-xs font-semibold bg-red-50 text-red-700 hover:bg-red-100 rounded-lg border border-red-200 transition">Sample K11 (257d Old Bill)</button>
               </div>
 
               <!-- Upload Drag & Drop Box -->
-              <div class="border-2 border-dashed border-slate-200 rounded-xl p-3.5 bg-slate-50/50 hover:bg-slate-50 transition text-center mb-3">
-                <input type="file" id="kyc-file-upload-input" multiple accept="image/*,.txt,.json,.pdf" onchange="handleFileUpload(event)" class="hidden">
-                <label for="kyc-file-upload-input" class="cursor-pointer block">
+              <div id="kyc-dropzone" class="border-2 border-dashed border-slate-200 rounded-xl p-3.5 bg-slate-50/50 hover:bg-slate-50 transition text-center mb-3">
+                <input type="file" id="kyc-file-upload-input" multiple accept=".png,.jpg,.jpeg,.webp,.txt" onchange="handleFileUpload(event)" class="hidden">
+                <label for="kyc-file-upload-input" data-needs-consent class="cursor-pointer block">
                   <i data-lucide="upload-cloud" class="w-6 h-6 mx-auto text-slate-400 mb-1"></i>
                   <span class="text-xs font-semibold text-slate-700 block">Click to upload document files or drag and drop</span>
-                  <span class="text-[10px] text-slate-400 block mt-0.5">PNG, JPG, PDF, TXT supported (Max 10MB)</span>
+                  <span class="text-xs text-slate-500 block mt-0.5">PNG, JPG or WEBP · up to 4 MB each · up to 8 files</span>
                 </label>
-                <div id="uploaded-files-list" class="mt-2 text-left text-[11px] space-y-1 hidden"></div>
+                <div id="uploaded-files-list" class="mt-2 text-left text-xs space-y-1 hidden"></div>
+                <div id="upload-errors-list" class="mt-2 text-left text-xs text-err space-y-1 hidden" role="alert"></div>
               </div>
 
               <!-- Live Extracted Document Preview (Collapsible) -->
               <details class="text-xs group border border-slate-200 rounded-xl p-2.5 bg-white">
-                <summary class="font-semibold text-slate-700 cursor-pointer flex justify-between items-center text-[11px]">
-                  <span>View / Edit Extracted Document OCR Text</span>
-                  <span class="text-[10px] text-slate-400 group-open:hidden">Click to expand</span>
+                <summary class="font-semibold text-slate-700 cursor-pointer flex justify-between items-center text-xs">
+                  <span>Show what we read from your documents</span>
+                  <span class="text-xs text-slate-500 group-open:hidden">Click to expand</span>
                 </summary>
                 <div class="space-y-2 mt-2 pt-2 border-t border-slate-100">
                   <div>
-                    <label class="text-[10px] font-bold text-slate-600 block">GST Certificate OCR Text:</label>
-                    <textarea id="ocr-gst-text" rows="2" class="w-full text-[10px] font-mono p-2 bg-slate-50 border border-slate-200 rounded-lg outline-none" placeholder="GST Certificate text..."></textarea>
+                    <label class="text-xs font-bold text-slate-600 block mb-1">GST Certificate OCR Text:</label>
+                    <textarea id="ocr-gst-text" rows="2" class="w-full text-base md:text-xs font-mono p-2 bg-slate-50 border border-slate-200 rounded-lg outline-none" placeholder="GST Certificate text..."></textarea>
                   </div>
                   <div>
-                    <label class="text-[10px] font-bold text-slate-600 block">Udyam Certificate OCR Text:</label>
-                    <textarea id="ocr-udyam-text" rows="2" class="w-full text-[10px] font-mono p-2 bg-slate-50 border border-slate-200 rounded-lg outline-none" placeholder="Udyam Certificate text..."></textarea>
+                    <label class="text-xs font-bold text-slate-600 block mb-1">Udyam Certificate OCR Text:</label>
+                    <textarea id="ocr-udyam-text" rows="2" class="w-full text-base md:text-xs font-mono p-2 bg-slate-50 border border-slate-200 rounded-lg outline-none" placeholder="Udyam Certificate text..."></textarea>
                   </div>
                   <div>
-                    <label class="text-[10px] font-bold text-slate-600 block">Address Proof (Electricity Bill) OCR Text:</label>
-                    <textarea id="ocr-addr-text" rows="2" class="w-full text-[10px] font-mono p-2 bg-slate-50 border border-slate-200 rounded-lg outline-none" placeholder="Utility bill text..."></textarea>
+                    <label class="text-xs font-bold text-slate-600 block mb-1">Address Proof (Electricity Bill) OCR Text:</label>
+                    <textarea id="ocr-addr-text" rows="2" class="w-full text-base md:text-xs font-mono p-2 bg-slate-50 border border-slate-200 rounded-lg outline-none" placeholder="Utility bill text..."></textarea>
                   </div>
                 </div>
               </details>
 
-              <button onclick="uploadAndVerifyKYCDocuments()" class="w-full mt-3 bg-airtel-red hover:bg-airtel-darkred text-white font-semibold py-2 rounded-xl text-xs flex items-center justify-center space-x-1.5 shadow-sm transition">
+              <button data-needs-consent onclick="uploadAndVerifyKYCDocuments()" class="w-full mt-3 bg-airtel-red hover:bg-airtel-darkred text-white font-semibold py-2 rounded-xl text-sm flex items-center justify-center space-x-1.5 shadow-sm transition">
                 <i data-lucide="file-check" class="w-3.5 h-3.5 text-white"></i>
                 <span>Extract OCR & Verify Uploaded Documents</span>
               </button>
@@ -537,26 +578,29 @@
             <h3 class="text-base font-bold text-slate-900 mb-1">Automated Verification Audit</h3>
             <p class="text-xs text-slate-500 mb-4">Itemized compliance & defect diagnostic log</p>
 
-            <div id="kyc-verdict-banner" class="rounded-xl p-4 mb-4 border flex items-center space-x-3 bg-slate-50 border-slate-200 text-slate-700">
-              <i data-lucide="shield" class="w-6 h-6 text-slate-400"></i>
+            <div id="kyc-verdict-banner" role="status" aria-live="polite" class="rounded-xl p-4 mb-4 border flex items-center space-x-3 bg-slate-50 border-slate-200 text-slate-700">
+              <i data-lucide="shield" class="w-6 h-6 text-slate-500 shrink-0"></i>
               <div>
-                <span class="text-xs font-bold block" id="kyc-verdict-title">Ready for Verification</span>
-                <span class="text-[11px]" id="kyc-verdict-desc">Select an applicant or click 'Run Smart Verification' to validate.</span>
+                <span class="text-sm font-bold block" id="kyc-verdict-title">Ready for Verification</span>
+                <span class="text-xs text-slate-600" id="kyc-verdict-desc">Select an applicant or click 'Run Smart Verification' to validate.</span>
               </div>
             </div>
 
             <!-- Itemized Checklist -->
-            <div id="kyc-checklist-container" class="space-y-2 text-xs flex-1 mb-5">
-              <div class="p-3 rounded-lg border border-slate-100 bg-slate-50 text-slate-400 text-center py-6">
+            <div id="kyc-checklist-container" class="space-y-2 text-sm flex-1 mb-5">
+              <div class="p-3 rounded-lg border border-slate-100 bg-slate-50 text-slate-500 text-center py-6 text-xs">
                 No active audit executed yet.
               </div>
             </div>
 
             <!-- Place Order CTA -->
-            <button id="btn-place-order" onclick="placeOrderAfterKYC()" disabled class="w-full bg-emerald-600 disabled:bg-slate-200 disabled:text-slate-400 hover:bg-emerald-700 text-white font-bold py-3 rounded-xl shadow-md transition flex items-center justify-center space-x-2">
-              <i data-lucide="check" class="w-4 h-4"></i>
-              <span>Confirm & Activate Service</span>
-            </button>
+            <div>
+              <button id="btn-place-order" onclick="placeOrderAfterKYC()" disabled class="w-full bg-emerald-600 disabled:bg-slate-200 disabled:text-slate-400 hover:bg-emerald-700 text-white font-bold py-3 rounded-xl shadow-sm transition flex items-center justify-center space-x-2 min-h-[44px]">
+                <i data-lucide="check" class="w-4 h-4"></i>
+                <span>Confirm & Activate Service</span>
+              </button>
+              <p id="btn-place-order-hint" class="text-center text-xs text-slate-500 mt-2">Available after a PASS verdict</p>
+            </div>
           </div>
         </div>
 
@@ -564,19 +608,19 @@
     </section>
 
     <!-- ==================== TAB 4: ORDER TRACKER ==================== -->
-    <section id="view-tracker" class="tab-view">
+    <section id="view-tracker" class="tab-view" role="tabpanel" aria-labelledby="tab-btn-tracker" tabindex="-1">
       <div class="max-w-4xl mx-auto bg-white rounded-2xl border border-slate-200 shadow-sm p-6 sm:p-8">
         
         <!-- Search Order Bar -->
         <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center pb-6 border-b border-slate-100 gap-4">
           <div>
-            <span class="text-[11px] font-bold text-airtel-red uppercase tracking-wider">Self-Service Status View</span>
+            <span class="text-xs font-bold text-airtel-red uppercase tracking-wider">Self-Service Status View</span>
             <h2 class="text-xl font-bold text-slate-900 mt-0.5">Live Order Tracker</h2>
             <p class="text-xs text-slate-500">Track technician dispatch, feasibility & activation without calling customer care</p>
           </div>
           <div class="flex space-x-2 w-full sm:w-auto">
-            <input type="text" id="tracker-order-id" value="VS-2026-90412" placeholder="Order ID (e.g. VS-2026-90412)" class="bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs font-mono uppercase tracking-wide focus:bg-white focus:ring-2 focus:ring-airtel-red outline-none">
-            <button onclick="fetchOrderStatus()" class="bg-slate-900 hover:bg-slate-800 text-white text-xs font-semibold px-4 py-2 rounded-xl transition">Track</button>
+            <input type="text" id="tracker-order-id" value="VS-2026-90412" placeholder="Order ID (e.g. VS-2026-90412)" class="bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-base md:text-sm font-mono uppercase tracking-wide min-w-0 flex-1 focus:bg-white focus:ring-2 focus:ring-airtel-red outline-none">
+            <button type="button" onclick="fetchOrderStatus()" class="bg-slate-900 hover:bg-slate-800 text-white text-sm font-semibold px-4 py-2 rounded-xl transition min-h-[44px] shrink-0">Track</button>
           </div>
         </div>
 
@@ -586,7 +630,7 @@
         <div id="tracker-summary-card" class="mt-6 bg-slate-50 border border-slate-200 rounded-xl p-5 grid grid-cols-2 md:grid-cols-4 gap-4 text-xs">
           <div>
             <span class="text-slate-500 block">Order Number</span>
-            <strong class="text-slate-900 font-mono text-sm" id="trk-order-num">VS-2026-90412</strong>
+            <strong class="text-slate-900 font-mono text-sm tabular" id="trk-order-num">VS-2026-90412</strong>
           </div>
           <div>
             <span class="text-slate-500 block">Business Entity</span>
@@ -613,21 +657,21 @@
         <!-- Assigned Field Engineer Card -->
         <div id="tracker-tech-card" class="mt-8 bg-gradient-to-r from-red-50 to-orange-50 border border-red-100 rounded-xl p-5 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 text-xs">
           <div class="flex items-center space-x-3">
-            <div class="w-12 h-12 rounded-full bg-white shadow-sm border border-red-200 flex items-center justify-center text-airtel-red">
+            <div class="w-12 h-12 rounded-full bg-white shadow-sm border border-red-200 flex items-center justify-center text-airtel-red shrink-0">
               <i data-lucide="wrench" class="w-6 h-6"></i>
             </div>
             <div>
-              <span class="text-[10px] font-bold text-airtel-red uppercase">Assigned Field Technician</span>
+              <span class="text-xs font-bold text-airtel-red uppercase">Assigned Field Technician</span>
               <h4 class="text-sm font-bold text-slate-900" id="trk-tech-name">Ramesh Kumar</h4>
-              <p class="text-slate-600 text-[11px]" id="trk-tech-slot">Slot: Tomorrow, 11:00 AM - 01:00 PM</p>
+              <p class="text-slate-600 text-xs" id="trk-tech-slot">Slot: Tomorrow, 11:00 AM - 01:00 PM</p>
             </div>
           </div>
           <div class="flex items-center space-x-3">
             <div class="text-right">
-              <span class="text-[10px] text-slate-500 block">Technician Verification PIN</span>
-              <strong class="text-sm font-mono text-slate-900" id="trk-tech-pin">8492</strong>
+              <span class="text-xs text-slate-500 block">Technician Verification PIN</span>
+              <strong class="text-sm font-mono text-slate-900 tabular" id="trk-tech-pin">8492</strong>
             </div>
-            <a id="trk-tech-call" href="tel:+919840122334" class="px-3.5 py-2 bg-white border border-slate-200 hover:border-airtel-red rounded-lg text-slate-800 font-semibold flex items-center space-x-1.5 transition">
+            <a id="trk-tech-call" href="tel:+919840122334" aria-label="Call technician Ramesh Kumar" class="min-h-[44px] px-3.5 py-2 bg-white border border-slate-200 hover:border-airtel-red rounded-lg text-slate-800 font-semibold flex items-center space-x-1.5 transition">
               <i data-lucide="phone" class="w-3.5 h-3.5 text-emerald-600"></i>
               <span>Call Technician</span>
             </a>
@@ -638,29 +682,29 @@
     </section>
 
     <!-- ==================== TAB 5: PARTNER & FIELD RECOVERY PORTAL ==================== -->
-    <section id="view-partner" class="tab-view">
+    <section id="view-partner" class="tab-view" role="tabpanel" aria-labelledby="tab-btn-partner" tabindex="-1">
       <div class="space-y-6">
         <!-- Top Stats Banner -->
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
           <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm">
             <span class="text-xs text-slate-500 font-medium">Total Dropped Leads (Apr-Jun)</span>
-            <div class="text-2xl font-extrabold text-slate-900 mt-1" id="ptnr-dropped-leads">4,632</div>
-            <span class="text-[11px] text-slate-400">From 5,000 baseline leads</span>
+            <div class="text-2xl font-extrabold text-slate-900 mt-1 tabular" id="ptnr-dropped-leads">4,632</div>
+            <span class="text-xs text-slate-500">From 5,000 baseline leads</span>
           </div>
           <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm">
-            <span class="text-xs text-purple-700 font-medium">High Propensity Salvageable</span>
-            <div class="text-2xl font-extrabold text-purple-900 mt-1" id="ptnr-salvageable">932</div>
-            <span class="text-[11px] text-purple-600 font-semibold">Top 20% Propensity Score (&ge;80)</span>
+            <span class="text-xs text-slate-500 font-medium">High Propensity Salvageable</span>
+            <div class="text-2xl font-extrabold text-slate-900 mt-1 tabular" id="ptnr-salvageable">932</div>
+            <span class="text-xs text-slate-600 font-medium">Top 20% Propensity Score (&ge;80)</span>
           </div>
           <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm">
-            <span class="text-xs text-emerald-700 font-medium">Recoverable ARR Opportunity</span>
-            <div class="text-2xl font-extrabold text-emerald-900 mt-1" id="ptnr-arr">₹1.91 Cr</div>
-            <span class="text-[11px] text-emerald-600 font-semibold">At ₹2.5k avg bundle/mo</span>
+            <span class="text-xs text-slate-500 font-medium">Recoverable ARR Opportunity</span>
+            <div class="text-2xl font-extrabold text-ok mt-1 tabular" id="ptnr-arr">₹1.91 Cr</div>
+            <span class="text-xs text-ok font-medium">At ₹2.5k avg bundle/mo</span>
           </div>
           <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm">
-            <span class="text-xs text-amber-700 font-medium">Partner Commission Pool</span>
-            <div class="text-2xl font-extrabold text-amber-900 mt-1" id="ptnr-comm">₹28.6 Lakh</div>
-            <span class="text-[11px] text-amber-600 font-semibold">15% revenue share on assisted closes</span>
+            <span class="text-xs text-slate-500 font-medium">Partner Commission Pool</span>
+            <div class="text-2xl font-extrabold text-slate-900 mt-1 tabular" id="ptnr-comm">₹28.6 Lakh</div>
+            <span class="text-xs text-slate-600 font-medium">15% revenue share on assisted closes</span>
           </div>
         </div>
 
@@ -672,7 +716,7 @@
               <p class="text-xs text-slate-500">Surface leads that dropped out due to visit scheduling or quote delays for 1-click partner assistance</p>
             </div>
             <div class="flex space-x-2 text-xs">
-              <select id="ptnr-filter-segment" onchange="loadPartnerLeads()" class="bg-slate-50 border border-slate-200 rounded-xl px-3 py-1.5 focus:bg-white outline-none">
+              <select id="ptnr-filter-segment" onchange="loadPartnerLeads()" class="bg-slate-50 border border-slate-200 rounded-xl px-3 py-1.5 text-base md:text-sm focus:bg-white outline-none min-h-[44px]">
                 <option value="">All Segments</option>
                 <option value="Micro retail & services">Micro Retail (55%)</option>
                 <option value="Professional offices">Professional Offices (25%)</option>
@@ -682,16 +726,16 @@
             </div>
           </div>
 
-          <div class="overflow-x-auto mt-4 text-xs">
+          <div class="overflow-x-auto mt-4 text-sm">
             <table class="w-full text-left">
-              <thead class="bg-slate-50 border-b border-slate-200 text-slate-500 font-semibold">
+              <thead class="bg-slate-50 border-b border-slate-200 text-slate-600 font-semibold text-xs">
                 <tr>
                   <th class="py-2.5 px-3">Lead ID & Business</th>
                   <th class="py-2.5 px-3">Segment & City</th>
                   <th class="py-2.5 px-3">Stage Reached</th>
                   <th class="py-2.5 px-3">Drop Reason</th>
-                  <th class="py-2.5 px-3 text-center">Propensity Score</th>
-                  <th class="py-2.5 px-3 text-right">Recommended Recovery Action</th>
+                  <th class="py-2.5 px-3 text-center" title="Likelihood to convert with partner help (0–100)">Priority</th>
+                  <th class="py-2.5 px-3 text-right">Recovery Action</th>
                 </tr>
               </thead>
               <tbody id="ptnr-leads-table" class="divide-y divide-slate-100">
@@ -714,7 +758,7 @@
         <span>Airtel Sync 2026 Enterprise Track A</span>
       </div>
       <div>
-        <span>Designed for 6 Crore+ Indian MSMEs · Zero Paperwork · Instant Activation</span>
+        <span>Designed for 6 Crore+ Indian MSMEs · Paperless KYC · Live order tracking</span>
       </div>
     </div>
   </footer>

@@ -102,12 +102,17 @@ TEST_CASES = [
         "message": "मेरी जयपुर में 2-counter किराना दुकान है 2 लोग काम करते हैं",
         "segment": "micro",
         "checks": {"num_sites": 1}
+    },
+    {
+        "message": "मेरी जयपुर में किराना दुकान है, 2 लोग, GST नहीं है",
+        "segment": "micro",
+        "checks": {"employee_count": 2, "num_sites": 1, "has_gstin": False}
     }
 ]
 
 def main():
     print("=" * 70)
-    print("VyaparSetu · Advisor GenAI LLM Benchmark Evaluation (18 scenarios)")
+    print("VyaparSetu · Advisor GenAI LLM Benchmark Evaluation (19 scenarios)")
     print("=" * 70)
 
     catalog = CatalogEngine()

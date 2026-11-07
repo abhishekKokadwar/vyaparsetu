@@ -81,6 +81,8 @@ def test_ui_smoke_navigation_and_zero_console_errors():
         # 3. Tab 3: Smart KYC Verification (PASS & REJECT checks)
         page.click("#tab-btn-kyc")
         page.wait_for_timeout(500)
+        page.check("#dpdp-consent-chk")
+        page.wait_for_timeout(300)
 
         verdict_title = page.locator("#kyc-verdict-title")
         assert verdict_title.is_visible()
