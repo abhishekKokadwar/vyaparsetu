@@ -1,7 +1,15 @@
 import pytest
+import socket
 from playwright.sync_api import sync_playwright
 
 BASE_URL = "http://127.0.0.1:8000"
+
+def is_server_running(host="127.0.0.1", port=8000):
+    try:
+        with socket.create_connection((host, port), timeout=0.8):
+            return True
+    except OSError:
+        return False
 
 def get_browser(p):
     """Launches headless Chrome or Edge browser installed on Windows"""
@@ -21,6 +29,9 @@ def test_ui_smoke_navigation_and_zero_console_errors():
     3. Verifies zero 'undefined' or 'NaN' rendering bugs in DOM.
     4. Confirms pricing synchronization between Advisor recommendation and Quote bill.
     """
+    if not is_server_running():
+        pytest.skip("Local test server not running on port 8000; run 'py run.py' to run browser smoke tests")
+
     with sync_playwright() as p:
         browser = get_browser(p)
         page = browser.new_page()
@@ -122,6 +133,9 @@ def test_ui_smoke_navigation_and_zero_console_errors():
 
 def test_diagrams_page_smoke():
     """Verify SVG Architecture & Journey Diagrams page renders cleanly"""
+    if not is_server_running():
+        pytest.skip("Local test server not running on port 8000; run 'py run.py' to run browser smoke tests")
+
     with sync_playwright() as p:
         browser = get_browser(p)
         page = browser.new_page()

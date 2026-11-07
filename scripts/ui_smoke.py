@@ -92,13 +92,17 @@ def main():
             str(k07_dir / "K07_signatory_id.png"),
         ]
         if all(os.path.exists(f) for f in k07_files):
-            file_input = page.locator("#kyc-file-input")
-            file_input.set_input_files(k07_files)
-            page.wait_for_timeout(2500)
+            file_input = page.locator("#kyc-file-upload-input")
+            with page.expect_response(lambda res: "/api/kyc/upload-files" in res.url, timeout=45000) as response_info:
+                file_input.set_input_files(k07_files)
+            resp = response_info.value
+            assert resp.status == 200
+            page.wait_for_timeout(800)
             upload_verdict = page.locator("#kyc-verdict-title").inner_text()
-            upload_summary = page.locator("#kyc-verdict-summary").inner_text()
+            upload_desc = page.locator("#kyc-verdict-desc").inner_text()
             assert "REJECTED" in upload_verdict, f"K07 upload expected REJECTED, got {upload_verdict}"
-            assert "mismatch" in upload_summary.lower() or "mismatch" in page.content().lower()
+            checklist_text = page.locator("#kyc-checklist-container").inner_text()
+            assert "mismatch" in upload_desc.lower() or "mismatch" in checklist_text.lower(), f"Expected legal entity mismatch in verdict, got: {upload_desc}"
             print("      PASS: K07 upload correctly extracted and caught legal entity mismatch.")
         else:
             print("      SKIP: K07 files not found on disk.")
@@ -128,11 +132,11 @@ def main():
         print(f"      PASS: Partner portal shows {salvageable_text} salvageable leads.")
         checks_passed += 1
 
-        # 7. Absence of NaN or undefined in DOM
-        print("[7/8] Scanning DOM for 'undefined' or 'NaN' rendering bugs...")
-        full_content = page.content()
-        assert "undefined" not in full_content.lower()
-        assert "nan" not in full_content.lower()
+        # 7. Absence of NaN or undefined in DOM text
+        print("[7/8] Scanning DOM text for 'undefined' or 'NaN' rendering bugs...")
+        body_text = page.locator("body").inner_text()
+        assert not re.search(r'\bNaN\b', body_text), "Detected raw NaN rendered in visible page text"
+        assert not re.search(r'\bundefined\b', body_text, re.IGNORECASE), "Detected raw undefined rendered in visible page text"
         print("      PASS: Zero 'undefined' or 'NaN' text detected.")
         checks_passed += 1
 
