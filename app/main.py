@@ -303,7 +303,7 @@ async def upload_kyc_files(
     try:
         # First pass: validate extensions and sizes, save securely using UUIDs
         processed_files = []
-        max_size = 5 * 1024 * 1024  # 5 MB
+        max_size = 4 * 1024 * 1024  # 4 MB (enforces safety under Vercel's 4.5 MB edge proxy limit)
 
         for file in files:
             orig_name = file.filename or "unknown"
@@ -315,7 +315,7 @@ async def upload_kyc_files(
             if ext not in {'.png', '.jpg', '.jpeg', '.webp', '.txt', '.json'}:
                 raise HTTPException(status_code=400, detail=f"Unsupported file type: {ext}. Allowed: .png, .jpg, .jpeg, .webp, .txt")
 
-            # Read stream in 64 KB chunks, enforce 5 MB cap
+            # Read stream in 64 KB chunks, enforce 4 MB cap
             chunks = []
             total_size = 0
             while True:
@@ -324,7 +324,7 @@ async def upload_kyc_files(
                     break
                 total_size += len(chunk)
                 if total_size > max_size:
-                    raise HTTPException(status_code=413, detail=f"File '{orig_name}' exceeds 5 MB limit.")
+                    raise HTTPException(status_code=413, detail=f"File '{orig_name}' exceeds 4 MB limit.")
                 chunks.append(chunk)
 
             file_bytes = b"".join(chunks)

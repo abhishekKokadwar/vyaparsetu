@@ -434,71 +434,7 @@ class SmartKYCEngine:
             'detail': f"Explicit consent logged with cryptographic audit hash ({consent_record['consent_id']})."
         })
 
-        # 2. Address Proof Freshness Check (Strict 90-day rule from 2026-07-15)
-        raw_addr = docs_map.get('address_proof', '')
-        addr_data = self.extract_address_details(raw_addr)
-        if not file_presence.get('has_address_proof') or not addr_data['present'] or not addr_data['bill_date']:
-            checklist.append({
-                'title': 'Address Proof 90-Day Freshness Check',
-                'status': 'FAILED',
-                'detail': 'Address proof document is missing or utility issue date could not be parsed.'
-            })
-            verdict = "REJECT"
-            reject_reasons.append("Missing or unreadable address proof document")
-        elif addr_data['days_old'] > 90:
-            checklist.append({
-                'title': 'Address Proof 90-Day Freshness Check',
-                'status': 'FAILED',
-                'detail': f"Utility bill dated {addr_data['bill_date']} is {addr_data['days_old']} days old as of {REF_DATE_STR} (exceeds 90-day regulatory limit)."
-            })
-            verdict = "REJECT"
-            reject_reasons.append(f"Address proof expired: {addr_data['days_old']} days old (exceeds 90-day maximum limit)")
-        else:
-            checklist.append({
-                'title': 'Address Proof 90-Day Freshness Check',
-                'status': 'PASSED',
-                'detail': f"Utility bill dated {addr_data['bill_date']} is {addr_data['days_old']} days old (within valid 90-day window)."
-            })
-
-        # 3. Mandatory MSME Udyam Certificate Check
-        has_udyam_file = file_presence.get('has_udyam_certificate', False)
-        raw_udyam = docs_map.get('udyam_certificate', '')
-        udyam_data = self.extract_udyam_details(raw_udyam)
-
-        if not has_udyam_file:
-            checklist.append({
-                'title': 'Udyam Certificate Presence Check',
-                'status': 'FAILED',
-                'detail': 'Mandatory Udyam MSME Registration Certificate is missing from applicant submission.'
-            })
-            verdict = "REJECT"
-            reject_reasons.append("Missing mandatory Udyam MSME Registration Certificate")
-        elif not udyam_data['udyam_number']:
-            checklist.append({
-                'title': 'Udyam Registration Number Validation',
-                'status': 'FAILED',
-                'detail': 'Udyam certificate does not contain a valid registration number (format: UDYAM-XX-00-XXXXXXX).'
-            })
-            verdict = "REJECT"
-            reject_reasons.append("Udyam certificate does not contain a valid registration number")
-        else:
-            u_res = self.registry.lookup_udyam(udyam_data['udyam_number'])
-            if not u_res.get('found'):
-                checklist.append({
-                    'title': 'Udyam National Registry Match',
-                    'status': 'FAILED',
-                    'detail': f"Udyam registration {udyam_data['udyam_number']} not found in MSME national portal."
-                })
-                verdict = "REJECT"
-                reject_reasons.append(f"Udyam registration {udyam_data['udyam_number']} not found in MSME registry")
-            else:
-                checklist.append({
-                    'title': 'Udyam National Registry Match',
-                    'status': 'PASSED',
-                    'detail': f"Verified {u_res.get('enterprise_type', 'MSME')} ({udyam_data['udyam_number']}) in national database."
-                })
-
-        # 4. GST Registration Certificate OCR & National Registry Check
+        # 2. GST Registration Certificate OCR & National Registry Check
         has_gst_file = file_presence.get('has_gst_certificate', False)
         raw_gst = docs_map.get('gst_certificate', '')
         gst_data = self.extract_gst_details(raw_gst)
@@ -550,7 +486,7 @@ class SmartKYCEngine:
                     'detail': f"GSTIN {masked_gstin} is ACTIVE in national GSTN registry ({g_res.get('trade_name', '')})."
                 })
 
-                # 5. Cross-Document Legal Entity Name Reconciliation (Catches K07 mismatch)
+                # 3. Cross-Document Legal Entity Name Reconciliation (Catches K07 mismatch)
                 registry_legal = g_res.get('legal_name', '').strip()
                 if extracted_legal_name and registry_legal:
                     norm_extracted = re.sub(r'[^a-zA-Z0-9]', '', extracted_legal_name).lower()
@@ -570,6 +506,70 @@ class SmartKYCEngine:
                             'status': 'PASSED',
                             'detail': f"Legal entity name matches official registry record ('{registry_legal}')."
                         })
+
+        # 4. Address Proof Freshness Check (Strict 90-day rule from 2026-07-15)
+        raw_addr = docs_map.get('address_proof', '')
+        addr_data = self.extract_address_details(raw_addr)
+        if not file_presence.get('has_address_proof') or not addr_data['present'] or not addr_data['bill_date']:
+            checklist.append({
+                'title': 'Address Proof 90-Day Freshness Check',
+                'status': 'FAILED',
+                'detail': 'Address proof document is missing or utility issue date could not be parsed.'
+            })
+            verdict = "REJECT"
+            reject_reasons.append("Missing or unreadable address proof document")
+        elif addr_data['days_old'] > 90:
+            checklist.append({
+                'title': 'Address Proof 90-Day Freshness Check',
+                'status': 'FAILED',
+                'detail': f"Utility bill dated {addr_data['bill_date']} is {addr_data['days_old']} days old as of {REF_DATE_STR} (exceeds 90-day regulatory limit)."
+            })
+            verdict = "REJECT"
+            reject_reasons.append(f"Address proof expired: {addr_data['days_old']} days old (exceeds 90-day maximum limit)")
+        else:
+            checklist.append({
+                'title': 'Address Proof 90-Day Freshness Check',
+                'status': 'PASSED',
+                'detail': f"Utility bill dated {addr_data['bill_date']} is {addr_data['days_old']} days old (within valid 90-day window)."
+            })
+
+        # 5. Mandatory MSME Udyam Certificate Check
+        has_udyam_file = file_presence.get('has_udyam_certificate', False)
+        raw_udyam = docs_map.get('udyam_certificate', '')
+        udyam_data = self.extract_udyam_details(raw_udyam)
+
+        if not has_udyam_file:
+            checklist.append({
+                'title': 'Udyam Certificate Presence Check',
+                'status': 'FAILED',
+                'detail': 'Mandatory Udyam MSME Registration Certificate is missing from applicant submission.'
+            })
+            verdict = "REJECT"
+            reject_reasons.append("Missing mandatory Udyam MSME Registration Certificate")
+        elif not udyam_data['udyam_number']:
+            checklist.append({
+                'title': 'Udyam Registration Number Validation',
+                'status': 'FAILED',
+                'detail': 'Udyam certificate does not contain a valid registration number (format: UDYAM-XX-00-XXXXXXX).'
+            })
+            verdict = "REJECT"
+            reject_reasons.append("Udyam certificate does not contain a valid registration number")
+        else:
+            u_res = self.registry.lookup_udyam(udyam_data['udyam_number'])
+            if not u_res.get('found'):
+                checklist.append({
+                    'title': 'Udyam National Registry Match',
+                    'status': 'FAILED',
+                    'detail': f"Udyam registration {udyam_data['udyam_number']} not found in MSME national portal."
+                })
+                verdict = "REJECT"
+                reject_reasons.append(f"Udyam registration {udyam_data['udyam_number']} not found in MSME registry")
+            else:
+                checklist.append({
+                    'title': 'Udyam National Registry Match',
+                    'status': 'PASSED',
+                    'detail': f"Verified {u_res.get('enterprise_type', 'MSME')} ({udyam_data['udyam_number']}) in national database."
+                })
 
         # 6. Authorized Signatory Credential Authentication
         has_sig_file = file_presence.get('has_signatory_id', False)

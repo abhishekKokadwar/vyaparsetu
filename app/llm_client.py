@@ -4,7 +4,7 @@ import re
 import hashlib
 import urllib.request
 import urllib.error
-from typing import Optional, Dict, Any
+from typing import Optional, Dict, Any, List, Tuple
 from pathlib import Path
 
 # Load environment variables from .env file
@@ -27,7 +27,22 @@ if env_path.exists():
 OPENROUTER_API_KEY = os.environ.get("OPENROUTER_API_KEY", "")
 OPENROUTER_URL = "https://openrouter.ai/api/v1/chat/completions"
 DEFAULT_MODEL = os.environ.get("OPENROUTER_MODEL", "openai/gpt-4o-mini")
-REQUEST_TIMEOUT_SECONDS = 5.0
+GEMINI_URL = "https://generativelanguage.googleapis.com/v1beta/openai/chat/completions"
+# Free-tier Gemini models; the second is used when the first returns 503 (overloaded).
+GEMINI_MODELS = os.environ.get("GEMINI_MODELS", "gemini-3.5-flash-lite,gemini-flash-lite-latest").split(",")
+REQUEST_TIMEOUT_SECONDS = 10.0
+
+
+def _providers(api_key: Optional[str] = None, model: Optional[str] = None) -> List[Tuple[str, str, str]]:
+    """(url, key, model) in try order: Gemini first (free tier), OpenRouter as fallback."""
+    chain = []
+    gemini_key = os.environ.get("GEMINI_API_KEY", "")
+    if gemini_key:
+        chain += [(GEMINI_URL, gemini_key, m.strip()) for m in GEMINI_MODELS if m.strip()]
+    or_key = api_key or os.environ.get("OPENROUTER_API_KEY", "")
+    if or_key:
+        chain.append((OPENROUTER_URL, or_key, model or os.environ.get("OPENROUTER_MODEL", DEFAULT_MODEL)))
+    return chain
 
 SYSTEM_EXTRACTION_PROMPT = """You are VyaparSaarthi, Airtel's B2B AI Business Advisor for Indian MSMEs.
 Extract business parameters from user inquiry in English, Hindi, Hinglish, Marathi, Tamil, Punjabi, Telugu, etc. into JSON:
@@ -59,14 +74,34 @@ Return ONLY the text of the pitch."""
 
 class LLMAdvisorClient:
     """
-    GenAI LLM Integration Client via OpenRouter.
+    GenAI LLM Integration Client (Gemini free tier, OpenRouter fallback).
     Provides natural language understanding and multilingual pitch synthesis
     with strict fallback to deterministic rules.
     """
     def __init__(self, api_key: Optional[str] = None, model: Optional[str] = None):
-        self.api_key = api_key or os.environ.get("OPENROUTER_API_KEY", "") or OPENROUTER_API_KEY
-        self.model = model or os.environ.get("OPENROUTER_MODEL", DEFAULT_MODEL)
+        self.providers = _providers(api_key, model)
+        self.api_key = self.providers[0][1] if self.providers else ""
+        self.model = self.providers[0][2] if self.providers else ""
         self._cache: Dict[str, dict] = {}
+
+    def _chat(self, messages: list, max_tokens: int, temperature: float, timeout: float) -> Optional[str]:
+        """Tries each provider/model in order; returns the first non-empty reply text, else None."""
+        for url, key, model in self.providers:
+            payload = {"model": model, "messages": messages, "max_tokens": max_tokens, "temperature": temperature}
+            req = urllib.request.Request(
+                url,
+                data=json.dumps(payload).encode('utf-8'),
+                headers={"Authorization": f"Bearer {key}", "Content-Type": "application/json"}
+            )
+            try:
+                with urllib.request.urlopen(req, timeout=timeout) as resp:
+                    data = json.loads(resp.read().decode('utf-8'))
+                content = (data['choices'][0]['message'].get('content') or '').strip()
+                if content:
+                    return content
+            except Exception:
+                continue  # 402/429/503/timeout -> next provider
+        return None
 
     def extract_profile(self, query: str, base_profile: Optional[dict] = None) -> Optional[dict]:
         """
@@ -83,30 +118,14 @@ class LLMAdvisorClient:
         if cache_key in self._cache:
             return dict(self._cache[cache_key])
 
-        payload = {
-            "model": self.model,
-            "messages": [
-                {"role": "system", "content": SYSTEM_EXTRACTION_PROMPT},
-                {"role": "user", "content": f"User inquiry: {query}"}
-            ],
-            "max_tokens": 100,
-            "temperature": 0.1
-        }
+        messages = [
+            {"role": "system", "content": SYSTEM_EXTRACTION_PROMPT},
+            {"role": "user", "content": f"User inquiry: {query}"}
+        ]
 
         try:
-            req = urllib.request.Request(
-                OPENROUTER_URL,
-                data=json.dumps(payload).encode('utf-8'),
-                headers={
-                    "Authorization": f"Bearer {self.api_key}",
-                    "Content-Type": "application/json",
-                    "HTTP-Referer": "https://vyaparsetu.airtel.in",
-                    "X-Title": "Airtel VyaparSetu"
-                }
-            )
-            with urllib.request.urlopen(req, timeout=REQUEST_TIMEOUT_SECONDS) as resp:
-                data = json.loads(resp.read().decode('utf-8'))
-                content = data['choices'][0]['message']['content'].strip()
+            content = self._chat(messages, max_tokens=300, temperature=0.1, timeout=REQUEST_TIMEOUT_SECONDS)
+            if content:
                 clean_json = re.sub(r'^```(?:json)?\s*|\s*```$', '', content.strip(), flags=re.MULTILINE)
                 parsed = json.loads(clean_json)
 
@@ -152,37 +171,14 @@ class LLMAdvisorClient:
             f"Language: {language}"
         )
 
-        payload = {
-            "model": self.model,
-            "messages": [
-                {"role": "system", "content": SYSTEM_PITCH_PROMPT},
-                {"role": "user", "content": prompt_input}
-            ],
-            "max_tokens": 100,
-            "temperature": 0.3
-        }
-
-        try:
-            req = urllib.request.Request(
-                OPENROUTER_URL,
-                data=json.dumps(payload).encode('utf-8'),
-                headers={
-                    "Authorization": f"Bearer {self.api_key}",
-                    "Content-Type": "application/json",
-                    "HTTP-Referer": "https://vyaparsetu.airtel.in",
-                    "X-Title": "Airtel VyaparSetu"
-                }
-            )
-            with urllib.request.urlopen(req, timeout=REQUEST_TIMEOUT_SECONDS) as resp:
-                data = json.loads(resp.read().decode('utf-8'))
-                pitch = data['choices'][0]['message']['content'].strip()
-                return pitch
-        except Exception:
-            return None
+        return self._chat(
+            [{"role": "system", "content": SYSTEM_PITCH_PROMPT}, {"role": "user", "content": prompt_input}],
+            max_tokens=300, temperature=0.3, timeout=REQUEST_TIMEOUT_SECONDS
+        )
 
     def ocr_image(self, image_bytes: bytes, mime: str = "image/png") -> Optional[str]:
         """
-        Uses LLM vision input via OpenRouter to transcribe document images in the cloud (Linux/Vercel).
+        Uses LLM vision input (Gemini / OpenRouter) to transcribe document images in the cloud (Linux/Vercel).
         Returns raw transcribed text, or None on failure/disabled.
         """
         if os.environ.get("VYAPAR_LLM_DISABLED") == "1" or not self.api_key:
@@ -192,9 +188,7 @@ class LLMAdvisorClient:
         b64_img = base64.b64encode(image_bytes).decode('utf-8')
         data_uri = f"data:{mime};base64,{b64_img}"
 
-        payload = {
-            "model": self.model,
-            "messages": [
+        messages = [
                 {
                     "role": "user",
                     "content": [
@@ -208,25 +202,5 @@ class LLMAdvisorClient:
                         }
                     ]
                 }
-            ],
-            "max_tokens": 1000,
-            "temperature": 0.0
-        }
-
-        try:
-            req = urllib.request.Request(
-                OPENROUTER_URL,
-                data=json.dumps(payload).encode('utf-8'),
-                headers={
-                    "Authorization": f"Bearer {self.api_key}",
-                    "Content-Type": "application/json",
-                    "HTTP-Referer": "https://vyaparsetu.airtel.in",
-                    "X-Title": "Airtel VyaparSetu"
-                }
-            )
-            with urllib.request.urlopen(req, timeout=15) as resp:
-                data = json.loads(resp.read().decode('utf-8'))
-                text = data['choices'][0]['message']['content'].strip()
-                return text
-        except Exception:
-            return None
+        ]
+        return self._chat(messages, max_tokens=2000, temperature=0.0, timeout=20)

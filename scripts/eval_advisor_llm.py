@@ -141,6 +141,10 @@ def main():
                 reasons.append(f"{k} expected {v}, got {got}")
 
         source = profile.get("_source", "unknown")
+        if source != "llm":
+            matched = False
+            reasons.append(f"source was '{source}' (live LLM call required; check GEMINI_API_KEY / OPENROUTER_API_KEY and quota)")
+
         if matched:
             passed += 1
             print(f"[{idx:02d}/18] OK   ({latency:.2f}s, {source}) :: \"{msg[:42]}...\"")
@@ -153,10 +157,11 @@ def main():
     print("=" * 70)
 
     if passed < 17:
-        print(f"FAIL: Target is >= 17/18 correct (got {passed}/18).")
+        print(f"FAIL: Target is >= 17/18 correct LLM inferences (got {passed}/18).")
+        print("Note: If all rows failed with source='rules', please verify your OpenRouter credit balance at https://openrouter.ai/settings/credits.")
         sys.exit(1)
     else:
-        print("PASS: Met required >= 17/18 accuracy gate.")
+        print("PASS: Met required >= 17/18 live LLM accuracy gate.")
         sys.exit(0)
 
 if __name__ == "__main__":

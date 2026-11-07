@@ -79,11 +79,11 @@
 
   <g transform="translate(350, 475)">
     <rect width="230" height="130" rx="12" fill="#0F172A" stroke="#334155"/>
-    <text x="20" y="30" fill="#FFFFFF" font-size="13" font-weight="700">AI Propensity Salvage</text>
+    <text x="20" y="30" fill="#FFFFFF" font-size="13" font-weight="700">Lead Propensity Salvage</text>
     <text x="20" y="50" fill="#94A3B8" font-size="11">Evaluates 4,632 dropped leads</text>
-    <text x="20" y="68" fill="#94A3B8" font-size="11">Multi-factor propensity scoring</text>
-    <text x="20" y="86" fill="#94A3B8" font-size="11">1,420 High-yield targets (&gt;70)</text>
-    <text x="20" y="110" fill="#10B981" font-size="10" font-weight="600">₹4.26 Cr Recoverable ARR</text>
+    <text x="20" y="68" fill="#94A3B8" font-size="11">Percentile propensity scoring</text>
+    <text x="20" y="86" fill="#94A3B8" font-size="11">932 Top 20% targets (&gt;=80)</text>
+    <text x="20" y="110" fill="#10B981" font-size="10" font-weight="600">₹1.91 Cr Recoverable ARR</text>
   </g>
 
   <!-- Connectors from Col 2 to Col 3 -->

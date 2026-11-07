@@ -50,7 +50,7 @@ flowchart TD
     subgraph Fulfillment ["4. Activation & Tracking"]
         I --> J["Instant Checkout & Order Confirmation"]
         J --> K["Self-Service Order Tracker<br>(6 stages, SLA countdown, Technician PIN)"]
-        J --> L["Channel Partner Lead Salvage<br>(1,808 salvageable leads · ₹2.60 Cr ARR)"]
+        J --> L["Channel Partner Lead Salvage<br>(932 salvageable leads · ₹1.91 Cr ARR)"]
     end
 ```
 
@@ -95,7 +95,7 @@ flowchart TD
 * **Data Minimisation:** Restricts collection to mandatory verification fields only.
 * **Identifier Masking:** Masks central PAN characters in GSTIN (displays `37IHXXXXXX7L1ZS`), PAN, and phone numbers across client-facing UI and server logs.
 * **Cryptographic Audit Ledger:** SHA-256 tamper-evident hash logged for every consent grant and withdrawal event.
-* **Retention Policy:** Automated document purging schedule post-verification (180-day retention).
+* **Retention Policy:** Automated document purging schedule post-verification (30-day retention).
 
 ### Component 5: Real-Time Self-Serve Order Tracker
 * Visual milestone tracking (6 stages):
@@ -105,8 +105,8 @@ flowchart TD
 
 ### Component 6: Channel Partner & Field-Force Synergy
 * **Partner Assisted Mode:** Tablet-optimized view for local partners and field reps to guide non-digital owners through the journey in 1 sitting.
-* **Dropped Lead Recovery:** Identifies **1,808 high-propensity dropped leads** (>65 score) representing **₹2.60 Crore in salvageable ARR**.
-* **Partner Commission Attribution Ledger:** Allocates an attractive **15% revenue share commission** (~₹39.0 Lakh pool) to channel partners for successful win-back activations.
+* **Dropped Lead Recovery:** Identifies **932 high-propensity dropped leads** (top 20th percentile) representing **₹1.91 Crore in salvageable ARR**.
+* **Partner Commission Attribution Ledger:** Allocates an attractive **15% revenue share commission** (~₹28.6 Lakh pool) to channel partners for successful win-back activations.
 
 ---
 
