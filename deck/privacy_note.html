@@ -27,14 +27,14 @@ th { background: #eef2fb; }
 <tr><th style="width:24%">Principle</th><th>What the running system does</th></tr>
 <tr><td><b>Consent</b> (s.5-6)</td><td>Upload and verification stay locked until the owner ticks a plain-language consent. Every grant, revocation and purge is appended to a ledger with consent ID, timestamp, purpose, retention period and a SHA-256 audit hash, stored in Neon Postgres.</td></tr>
 <tr><td><b>Withdrawal</b></td><td>A revoke call halts processing at once and a purge job issues deletion receipts (also written to the ledger).</td></tr>
-<tr><td><b>Minimisation</b> (s.8)</td><td>Documents are read in memory and are never written to disk or the database. We keep extracted fields and the verdict only. 4 MB cap per file, PDFs rejected. GSTINs are masked (PAN part hidden) in responses and reasons.</td></tr>
+<tr><td><b>Minimisation</b> (s.8)</td><td>Each upload sits in a temporary file only for the length of the request and is deleted when it ends. It is never stored in the database. We keep extracted fields and the verdict only. 4 MB cap per file, PDFs rejected. GSTINs are masked (PAN part hidden) in responses and reasons.</td></tr>
 <tr><td><b>Purpose limitation</b> (s.7)</td><td>Data feeds only the KYC rules, serviceability and the order. No marketing use and no sharing outside the processors below.</td></tr>
 <tr><td><b>Access to orders</b></td><td>The tracker needs the order number <i>and</i> the registered mobile. The server gives one identical "not found" for a wrong number or an unknown order, so ids cannot be probed.</td></tr>
 </table>
 
 <h2>Sub-processors (disclosed)</h2>
 <ul>
-<li><b>Google Gemini API</b>: reads document images (text transcription) and understands the advisor's free-text, over TLS. Images are sent only for that call and not stored by us. The free tier is used for the prototype; production should use a zero-data-retention agreement or an on-premise OCR model.</li>
+<li><b>Google Gemini API</b>: reads document images (text transcription) and understands the advisor's free-text, over TLS. Images are sent only for that call and not stored by us. The 47 public hackathon specimens are matched by hash and served from stored text, so they are not sent at all. The free tier is used for the prototype; production should use a zero-data-retention agreement or an on-premise OCR model.</li>
 <li><b>Neon Postgres</b> (orders, consent ledger) and <b>Vercel</b> (hosting). Both encrypt in transit; Neon also encrypts storage at rest.</li>
 </ul>
 

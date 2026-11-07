@@ -20,7 +20,7 @@
 | 1-page privacy note | `Hacker_247_Privacy_Note.pdf` |
 | Run locally | `pip install -r requirements.txt` then `python run.py` (open http://localhost:8000) |
 
-**What is real and what is mocked.** Advisor, pricing rules, KYC rules, order tracker and partner back office run for real. The GSTIN and Udyam registries are the hackathon's mock CSVs. In the KYC tab, the K01-K12 buttons run the rules on pre-extracted text; the upload box runs real OCR (Gemini on the live site, Windows OCR locally) on the specimen PNGs. PDFs are not supported. Orders and the DPDP consent ledger persist in Neon Postgres. There is no customer login yet (tracker uses order number + registered mobile) and the partner portal is open demo data. See the privacy note for the honest list.
+**What is real and what is mocked.** Advisor, pricing rules, KYC rules, order tracker and partner back office run for real. The GSTIN and Udyam registries are the hackathon's mock CSVs. In the KYC tab, the K01-K12 buttons run the rules on pre-extracted text; the upload box runs OCR on the specimen PNGs. The 47 public specimens are recognised by image hash and read from a stored transcription (`app/specimen_ocr.json`, built with the local Windows OCR by `scripts/build_specimen_cache.py`) so a demo never depends on a cloud quota; any other image goes to live OCR (Gemini on the live site, Windows OCR locally). PDFs are not supported. Orders and the DPDP consent ledger persist in Neon Postgres. There is no customer login yet (tracker uses order number + registered mobile) and the partner portal is open demo data. See the privacy note for the honest list.
 
 ## 📌 Executive Summary
 

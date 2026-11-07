@@ -111,6 +111,20 @@ class SmartKYCEngine:
 
         return "".join(chars)
 
+    _FIELD_LABELS = ('legal name', 'trade name', 'constitution', 'address', 'date of liability',
+                     'type of registration', 'gstin', 'specimen', 'format', 'accel')
+
+    @classmethod
+    def _labelled_value(cls, text: str, label: str):
+        """Value after `label`, on the same line or the next one. None if missing or if it is another label."""
+        m = re.search(rf'{re.escape(label)}[ \t]*:?[ \t]*(?:\n\s*)?([^\n]+)', text, re.I)
+        if not m:
+            return None
+        val = m.group(1).strip().strip(':').strip()
+        if not val or val.lower().startswith(cls._FIELD_LABELS):
+            return None
+        return val
+
     @classmethod
     def extract_gst_details(cls, text: str) -> dict:
         """Extracts GSTIN, legal name, and trade name from GST certificate text (Windows OCR or Gemini Vision)"""
@@ -153,13 +167,13 @@ class SmartKYCEngine:
         # Extract legal name and trade name across full text (handles both Gemini key-value & Windows flow)
         legal_name = None
         trade_name = None
-        # Labelled layout (cloud VLM): "Legal name\n<value>\nTrade name\n<value>" - take the value lines as-is
-        lab_legal = re.search(r'Legal name\s*:?\s*\n\s*([^\n]+)', text, re.I)
+        # Labelled layout (cloud VLM): "Legal name: <value>" or "Legal name\n<value>". A value that is itself a
+        # label ("Trade name", "Constitution"...) means the model listed labels first, so we ignore it.
+        lab_legal = cls._labelled_value(text, 'Legal name')
         prop_m = None if lab_legal else re.search(r'([A-Za-z\s]+?\s*\([Pp]rop\.?\s*([^)]+)\))', text)
         if lab_legal:
-            legal_name = lab_legal.group(1).strip()
-            lab_trade = re.search(r'Trade name\s*:?\s*\n\s*([^\n]+)', text, re.I)
-            trade_name = lab_trade.group(1).strip() if lab_trade else legal_name
+            legal_name = lab_legal
+            trade_name = cls._labelled_value(text, 'Trade name') or legal_name
         elif prop_m:
             legal_name = prop_m.group(1).strip()
             legal_name = re.sub(r'^(?:legal\s*name\s*[:\-]?\s*)', '', legal_name, flags=re.I).strip()
@@ -216,11 +230,23 @@ class SmartKYCEngine:
         """Extracts utility bill issue date and freshness from address proof text"""
         if not text:
             return {'present': False, 'bill_date': None, 'days_old': None}
-        date_m = re.search(r'(202\d-\d{2}-\d{2})', text)
+        b_dt = None
+        date_m = re.search(r'(20\d{2})-(\d{1,2})-(\d{1,2})', text)
         if date_m:
-            b_dt = datetime.strptime(date_m.group(1), "%Y-%m-%d")
-            days = (REF_DATE - b_dt).days
-            return {'present': True, 'bill_date': date_m.group(1), 'days_old': days}
+            b_dt = datetime(int(date_m.group(1)), int(date_m.group(2)), int(date_m.group(3)))
+        else:
+            dmy = re.search(r'\b(\d{1,2})[/.-](\d{1,2})[/.-](20\d{2})\b', text)
+            if dmy:
+                b_dt = datetime(int(dmy.group(3)), int(dmy.group(2)), int(dmy.group(1)))
+            else:
+                txt = re.search(r'\b(\d{1,2})\s+([A-Za-z]{3})[a-z]*\.?,?\s+(20\d{2})\b', text)
+                if txt:
+                    try:
+                        b_dt = datetime.strptime(f"{txt.group(1)} {txt.group(2).title()} {txt.group(3)}", "%d %b %Y")
+                    except ValueError:
+                        b_dt = None
+        if b_dt:
+            return {'present': True, 'bill_date': b_dt.strftime("%Y-%m-%d"), 'days_old': (REF_DATE - b_dt).days}
         return {'present': True, 'bill_date': None, 'days_old': None}
 
     @staticmethod
@@ -228,8 +254,9 @@ class SmartKYCEngine:
         """Extracts signatory identity credentials from specimen card or arbitrary text"""
         if not text:
             return {'present': False, 'name': None, 'designation': None, 'expiry_date': None, 'is_expired': False}
-        name_m = re.search(r'Name\s+([A-Za-z\s]+?)(?:\s+Designation|\s+Role|\s+ID|\s+Valid|$)', text, re.IGNORECASE)
-        desig_m = re.search(r'(?:Designation|Role)\s+([A-Za-z\s]+?)(?:\s+For business|\s+Valid till|\s+ID|$)', text, re.IGNORECASE)
+        # Accept 'Name Anita Kulkarni' (single-line OCR) and 'Name: Anita Kulkarni' / 'Name\nAnita Kulkarni' (one field per line)
+        name_m = re.search(r'\bName\s*:?\s*([A-Za-z.\' ]+?)(?:\s*\n|\s+Designation|\s+Role|\s+ID|\s+Valid|$)', text, re.IGNORECASE)
+        desig_m = re.search(r'(?:Designation|Role)\s*:?\s*([A-Za-z ]+?)(?:\s*\n|\s+For business|\s+Valid till|\s+ID|$)', text, re.IGNORECASE)
 
         desig_val = desig_m.group(1).strip() if desig_m else None
         if not desig_val:

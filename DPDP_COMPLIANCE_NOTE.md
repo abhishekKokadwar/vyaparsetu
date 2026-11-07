@@ -10,7 +10,7 @@ One-page PDF for submission: [Hacker_247_Privacy_Note.pdf](Hacker_247_Privacy_No
 |---|---|
 | Consent (s.5-6) | Upload and verification stay locked until the owner ticks a plain-language consent. Each grant, revocation and purge is appended to a ledger (consent ID, timestamp, purpose, retention, SHA-256 audit hash) in Neon Postgres. |
 | Withdrawal | A revoke call halts processing; a purge job issues deletion receipts, also written to the ledger. |
-| Minimisation (s.8) | Documents are read in memory and never written to disk or the database. Only extracted fields and the verdict are kept. 4 MB file cap, PDFs rejected. GSTINs are masked in responses. |
+| Minimisation (s.8) | Each upload sits in a temporary file for the length of the request and is deleted when it ends; it is never stored in the database. Only extracted fields and the verdict are kept. 4 MB file cap, PDFs rejected. GSTINs are masked in responses. |
 | Purpose limitation (s.7) | Data feeds only the KYC rules, serviceability and the order. |
 | Order access | Tracker needs order number and the registered mobile; the server returns one identical "not found" for a wrong number or unknown order. |
 

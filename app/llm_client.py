@@ -204,7 +204,7 @@ class LLMAdvisorClient:
                 "content": [
                     {
                         "type": "text",
-                        "text": "Transcribe all text in this document exactly as printed, in reading order. Output only the text, no commentary."
+                        "text": "Transcribe all text in this document exactly as printed. Where the document has labelled fields, print each field on ONE line as 'Label: value'. If a value wraps onto a second line, join it into the same line. Keep every character exactly as printed. Output only the text, no commentary."
                     },
                     {
                         "type": "image_url",

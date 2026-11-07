@@ -7,6 +7,8 @@ from concurrent.futures import ThreadPoolExecutor
 from pydantic import BaseModel
 from typing import List, Optional, Tuple
 import os
+import hashlib
+import json
 import shutil
 import tempfile
 import subprocess
@@ -258,6 +260,18 @@ def classify_document(text: str, filename: str) -> str:
     return "unclassified"
 
 
+def _load_specimen_cache() -> dict:
+    """SHA-256 -> transcription for the hackathon's 47 known specimen images (see scripts/build_specimen_cache.py)."""
+    try:
+        with open(os.path.join(os.path.dirname(__file__), "specimen_ocr.json"), encoding="utf-8") as f:
+            return json.load(f)
+    except Exception:
+        return {}
+
+
+SPECIMEN_OCR = _load_specimen_cache()
+
+
 def extract_text_from_file(file_path: str, ext: str, file_bytes: bytes, original_filename: str) -> Tuple[str, str]:
     """
     Extracts text from an uploaded document using:
@@ -274,6 +288,11 @@ def extract_text_from_file(file_path: str, ext: str, file_bytes: bytes, original
             return "", "none"
 
     if ext in ['.png', '.jpg', '.jpeg', '.bmp', '.webp']:
+        # Known hackathon specimen (matched by image hash): stored transcription, no OCR quota needed.
+        known = SPECIMEN_OCR.get(hashlib.sha256(file_bytes).hexdigest())
+        if known:
+            return known, "specimen"
+
         # Windows Native Runtime OCR
         if os.name == "nt" and os.environ.get("OCR_BACKEND") != "llm":
             ocr_script = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'scripts', 'ocr_test.ps1'))
@@ -434,7 +453,7 @@ async def upload_kyc_files(
             consent_granted=consent_granted
         )
 
-        effective_backend = "windows" if "windows" in backends_used else ("llm" if "llm" in backends_used else "text")
+        effective_backend = next((b for b in ("llm", "windows", "specimen") if b in backends_used), "text")
 
         return {
             'status': 'SUCCESS',
