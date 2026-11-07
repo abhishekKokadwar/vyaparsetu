@@ -313,7 +313,7 @@ function renderCatalogList() {
       : '';
 
     return `
-      <label class="p-3.5 border rounded-xl flex items-start justify-between cursor-pointer transition min-h-[44px] ${isChecked ? 'bg-red-50/40 border-red-200' : 'bg-white border-slate-200 hover:border-slate-300'}">
+      <label class="p-3.5 border rounded-xl flex items-start justify-between cursor-pointer transition min-h-[44px] ${isChecked ? 'bg-indigo-50/60 border-indigo-200' : 'bg-white border-slate-200 hover:border-slate-300'}">
         <div class="flex items-start space-x-3">
           <input type="checkbox" onchange="toggleProductSelection('${p.product_id}', this.checked)" ${isChecked ? 'checked' : ''} class="mt-1 w-5 h-5 rounded text-airtel-red focus:ring-airtel-red shrink-0">
           <div>

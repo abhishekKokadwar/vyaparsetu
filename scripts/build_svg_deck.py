@@ -44,7 +44,7 @@ def link_box(slide, x, y, w, h, url):
     b = slide.shapes.add_shape(MSO_SHAPE.RECTANGLE, int(x * k), int(y * k), int(w * k), int(h * k))
     b.fill.background(); b.line.fill.background(); b.shadow.inherit = False
     b.click_action.hyperlink.address = url
-link_box(prs.slides[0], 150, 1016 - 30, 640, 40, 'https://vyaparsetu247.vercel.app')
+link_box(prs.slides[0], 150, 1016 - 30, 640, 40, 'https://vyaparsetu-airtel.vercel.app')
 link_box(prs.slides[0], 600, 972 - 26, 360, 36, 'https://github.com/abhishekKokadwar/vyaparsetu')
 
 pptx = ROOT / f'{NAME}.pptx'

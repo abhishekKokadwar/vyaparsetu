@@ -1,7 +1,7 @@
 /* VyaparSetu Custom Styles */
 
 :root {
-  --brand: #E40000; --brand-strong: #B80000; --brand-soft: #FFF1F1;
+  --brand: #1E3A8A; --brand-strong: #14285F; --brand-soft: #EEF2FB;
   --ink: #0F172A; --text: #334155; --muted: #64748B; --line: #E2E8F0;
   --info: #0369A1; --info-soft: #F0F9FF;
   --ok: #047857;   --ok-soft: #ECFDF5;
@@ -31,7 +31,7 @@ img, svg, table { max-width: 100%; }
 .nav-tab.active {
   background-color: var(--brand-soft);
   color: var(--brand-strong);
-  box-shadow: 0 1px 2px rgba(228, 0, 0, 0.08);
+  box-shadow: 0 1px 2px rgba(30, 58, 138, 0.12);
 }
 
 .sub-tab {
@@ -147,3 +147,11 @@ img, svg, table { max-width: 100%; }
   }
 }
 
+
+/* ---- Layout polish: fill large screens, calmer surfaces ---- */
+@media (min-width: 1536px) { html { font-size: 17px; } }
+@media (min-width: 1920px) { html { font-size: 17.5px; } }
+.tab-view.active { min-height: calc(100vh - 11rem); }
+.tab-view.active > .grid { align-items: stretch; }
+main section > .grid > * { min-width: 0; }
+header { box-shadow: 0 1px 0 #DCE2EC; }
