@@ -613,3 +613,4 @@ body {
 [data-theme="dark"] .tab-view.active .card {
   background-color: var(--theme-surface-2) !important;
 }
+[data-theme="dark"] .side-brand img { background: #fff; border-radius: .5rem; padding: 3px; }
