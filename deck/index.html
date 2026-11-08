@@ -23,7 +23,7 @@ const q = new URLSearchParams(location.search);
 const RED='#E40000', INK='#0F172A', SLATE='#475569', MUTED='#64748B', LINE='#E2E8F0',
       SOFT='#F8FAFC', REDBG='#FFF1F1', GREEN='#059669', GREENBG='#ECFDF5', AMBER='#D97706', AMBERBG='#FFF7E6';
 const SERIF="Georgia, 'Nirmala UI', serif", SANS="'Segoe UI', 'Nirmala UI', sans-serif", MONO="Consolas, monospace";
-const TOTAL=7;
+const TOTAL=9;
 
 // ---------- svg helpers ----------
 const esc = s => String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
@@ -204,9 +204,28 @@ S.push(()=>{
   return s;
 });
 
-// 5 · ARCHITECTURE + PRIVACY
+// 5 · BEYOND THE BRIEF (stretch goals, real screenshots)
 S.push(()=>{
-  let s=head(5,'Architecture · trust','The AI suggests, the rules engine decides, and privacy is built in','Main components and data flows, with DPDP Act 2023 controls.');
+  let s=head(5,'Stretch goals · partners','Beyond the brief: voice, a partner back-office and a lead score','All three stretch goals are built and live, and they keep the field force and partners in the loop.');
+  const cols=[['shot_hindi','Advice in the owner’s language',['Speak or type in English or हिंदी; the advisor picks out business type, size and city.','The reply and the “why this bundle” reasons come back in the same language.']],
+              ['shot_partner','A ranked queue of dropped leads',['The score blends funnel stage, GSTIN, spend and team size, so the top leads rank apart (97.6, 97.5, 97.5 …).','Each lead shows why it ranks: stage, drop reason, spend.']],
+              ['shot_lead','One click to a recovery plan',['The drawer gives the fix for that drop reason and a ready WhatsApp message in English and हिंदी.','The partner sees what they earn: bounty plus 15% first-year revenue share.']]];
+  cols.forEach(([f,t,bl],i)=>{
+    const x=110+i*575, w=550, y=300;
+    s+=card(x,y,w,580);
+    s+=`<clipPath id="c5_${i}"><rect x="${x+10}" y="${y+10}" width="530" height="326" rx="8"/></clipPath><image href="assets/${f}.jpg" x="${x+10}" y="${y+10}" width="530" height="326" preserveAspectRatio="xMidYMin slice" clip-path="url(#c5_${i})"/>`;
+    s+=`<rect x="${x+10}" y="${y+10}" width="530" height="326" rx="8" fill="none" stroke="${LINE}"/>`;
+    s+=T(x+24,y+380,t,{font:SERIF,size:24,w:700});
+    let yy=y+416;
+    bl.forEach(b=>{ s+=C(x+30,yy-6,4,{fill:RED}); const q=W(x+46,yy,w-76,b,{size:17.5,fill:INK,lh:1.3}); s+=q.svg; yy+=q.h+14; });
+  });
+  s+=foot(5,'**Partners and field sales gain, not lose:** they get a ranked list of leads the advisor could not close, a message ready to send, and the commission shown up front.');
+  return s;
+});
+
+// 6 · ARCHITECTURE + PRIVACY
+S.push(()=>{
+  let s=head(6,'Architecture · trust','The AI suggests, the rules engine decides, and privacy is built in','Main components and data flows, with DPDP Act 2023 controls.');
   s+=card(110,300,1070,580);
   s+=kick(140,342,'Solution architecture',MUTED);
   const planned=new Set(['WhatsApp','Partner tablet','Field sales app','CRM','Billing (one bill)','Provisioning','Partner payouts']);
@@ -234,13 +253,13 @@ S.push(()=>{
   for(let i=1;i<=12;i++){ const k='K'+String(i).padStart(2,'0'), x=1230+((i-1)%6)*94, y=718+Math.floor((i-1)/6)*52, bad=rej[k];
     s+=R(x,y,84,42,{fill:bad?REDBG:GREENBG,stroke:bad?'#FCA5A5':'#A7F3D0',r:8})+T(x+42,y+28,k,{font:MONO,size:17,w:700,fill:bad?RED:GREEN,anchor:'middle'}); }
   s+=W(1230,840,560,'**6 rejected, 6 cleared** (matches the answer key): cancelled or bogus GSTIN · unreadable cert · missing Udyam · name mismatch · old address proof',{size:14.5,fill:SLATE,bfill:RED,lh:1.25}).svg;
-  s+=foot(5,'**The LLM never sets a price or approves KYC** — catalogue rules and registry data do, with an audit trail.');
+  s+=foot(6,'**The LLM never sets a price or approves KYC** — catalogue rules and registry data do, with an audit trail.');
   return s;
 });
 
-// 6 · COMPETITION
+// 7 · COMPETITION
 S.push(()=>{
-  let s=head(6,'Competitive analysis','Rivals sell one piece; we sell the whole setup in one sitting','Our assessment of public SMB offerings, Oct 2026.  ● full  ◐ partial  ○ none.  VyaparSetu column = designed scope; the prototype shows the first four rows.');
+  let s=head(7,'Competitive analysis','Rivals sell one piece; we sell the whole setup in one sitting','Our assessment of public SMB offerings, Oct 2026.  ● full  ◐ partial  ○ none.  VyaparSetu column = designed scope; the prototype shows the first four rows.');
   const cols=['Jio Business','Tata Tele Business','Local ISP / reseller','Single-product apps (POS, email, CCTV)','VyaparSetu (Accel)'];
   const rows=[
     ['Buy online, no sales visit',[1,0,0,2,2]],
@@ -268,13 +287,43 @@ S.push(()=>{
             ['Partners stay in the loop','Self-serve sales are QR-tagged, so the local partner still earns.'],
             ['Trust from verified data','GSTIN leads activate ~5× more; we verify them in seconds.']];
   rw.forEach(([a,b],i)=>{ const x=110+i*575; s+=card(x,762,550,122,{accent:RED}); s+=T(x+30,798,a,{font:SERIF,size:22,w:700}); s+=W(x+30,834,500,b,{size:17.5,fill:SLATE,lh:1.3}).svg; });
-  s+=foot(6,'**Our gap is price, not scope:** one bill for everything the shop needs, from ₹1,996 a month.');
+  s+=foot(7,'**Our gap is price, not scope:** one bill for everything the shop needs, from ₹1,996 a month.');
   return s;
 });
 
-// 7 · IMPACT
+// 8 · SAVINGS & RISKS
 S.push(()=>{
-  let s=head(7,'Impact · metrics · rollout','Twice the activations from the same leads, at half the cost each','6-month targets against the Apr–Jun 2026 baseline.');
+  let s=head(8,'Savings · risks','Cheaper than piecemeal, and the risks are covered by rules, not by the AI','Monthly cost of the same setup: separate local vendors versus one VyaparSetu bill.');
+  // savings card
+  s+=card(110,300,860,580);
+  s+=kick(140,342,'Monthly cost of the same setup',MUTED);
+  const rows=[['Micro retail','kirana, 3 staff',2794,1996,798],['Professional office','clinic, 8 staff',5035,3597,1438],['Multi-site','3-site restaurant chain',15663,11188,4475],['Manufacturer','60-staff unit',15740,11243,4497]];
+  rows.forEach(([n,sub,v,o,sv],i)=>{
+    const y=372+i*118, full=520, w2=Math.round(full*o/v);
+    s+=T(140,y+22,n,{size:20,w:700})+T(140,y+46,sub,{size:15,fill:MUTED});
+    s+=R(330,y+4,full,26,{fill:'#CBD5E1',r:6})+T(330+full+12,y+23,'₹'+v.toLocaleString('en-IN'),{size:16,fill:SLATE});
+    s+=R(330,y+38,w2,26,{fill:RED,r:6})+T(330+w2+12,y+57,'₹'+o.toLocaleString('en-IN'),{size:16,w:700,fill:RED});
+    s+=T(140,y+76,'saves ₹'+sv.toLocaleString('en-IN')+' a month',{size:15,w:700,fill:GREEN});
+  });
+  s+=R(140,838,22,10,{fill:'#CBD5E1',r:3})+T(170,848,'Separate vendors',{size:14,fill:SLATE})+R(320,838,22,10,{fill:RED,r:3})+T(350,848,'One VyaparSetu bill',{size:14,fill:SLATE});
+  s+=W(520,832,430,'Vendor cost = catalogue price × 1.40, our assumed local mark-up, not measured market data.',{size:13.5,fill:MUTED,lh:1.25}).svg;
+  // risks card
+  s+=card(1000,300,810,580);
+  s+=kick(1030,342,'Main risks and what covers them',MUTED);
+  const rk=[['The AI recommends the wrong thing','The rules engine checks every bundle against catalogue limits. The LLM never sets a price or approves KYC, and the advisor still works with the LLM switched off.'],
+            ['OCR misreads a document','Values are cross-checked with the GSTIN and Udyam registries. A failure rejects with the exact reason, and the owner can type the number by hand.'],
+            ['Partners see the app as a threat','QR-tagged sales pay the partner a 15% first-year revenue share, and the queue hands them the leads we could not close.'],
+            ['The owner is not comfortable with digital','Hindi chat and voice today; assisted mode on a partner tablet is the planned next step.'],
+            ['Personal data is misused','Consent before any upload, masked IDs, uploads deleted after reading. Production adds OTP login and encryption at rest.']];
+  let yy=372;
+  rk.forEach(([a,b])=>{ s+=T(1030,yy+18,a,{size:19,w:700,fill:RED}); const q=W(1030,yy+44,750,b,{size:16,fill:SLATE,lh:1.3}); s+=q.svg; yy+=q.h+66; });
+  s+=foot(8,'**Same shop, one bill:** about 28% less than piecemeal vendors, and each major risk is covered by a rule, a registry check or a partner incentive.');
+  return s;
+});
+
+// 9 · IMPACT
+S.push(()=>{
+  let s=head(9,'Impact · metrics · rollout','Twice the activations from the same leads, at half the cost each','6-month targets against the Apr–Jun 2026 baseline.');
   // KPI table
   s+=card(110,300,990,420);
   const hd=['Metric','Today','6-mo target','Main lever'], cx=[140,500,640,800];
@@ -310,7 +359,7 @@ S.push(()=>{
   s+=kick(140,778,'Rollout',MUTED);
   const ph=[['0–3 mo · Pilot','2 cities · Hindi/English'],['3–6 mo · Scale','Tier 1–2 · WhatsApp · 6 languages'],['6–12 mo · National','Multi-site, factory · voice']];
   ph.forEach(([a,b],i)=>{ const x=140+i*318; s+=R(x,796,300,8,{fill:i===0?RED:(i===1?'#F87171':'#FCA5A5'),r:4}); s+=T(x,830,a,{size:18,w:700}); s+=T(x,858,b,{size:16,fill:SLATE}); });
-  s+=foot(7,'**Risks covered:** AI errors → rules engine · channel conflict → QR commission · low digital comfort → assisted mode.');
+  s+=foot(9,'**Risks covered:** AI errors → rules engine · channel conflict → QR commission · low digital comfort → assisted mode.');
   return s;
 });
 

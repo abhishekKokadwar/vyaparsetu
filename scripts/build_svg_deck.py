@@ -13,7 +13,7 @@ OUT = ROOT / 'deck' / 'render'
 TEMPLATE = ROOT / 'airtel_sync_case' / 'Submission Template_Sync.pptx'
 NAME = 'Hacker_247_ABVIIITMGwalior'   # TeamName_CampusName, as the brief requires
 CHROME = r'C:\Program Files\Google\Chrome\Application\chrome.exe'
-N = 7
+N = 9
 
 OUT.mkdir(exist_ok=True)
 for i in range(1, N + 1):

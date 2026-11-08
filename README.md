@@ -15,7 +15,7 @@
 | What | Where |
 |---|---|
 | Live prototype | https://vyaparsetu-airtel.vercel.app |
-| Business case (7 slides) | `Hacker_247_ABVIIITMGwalior.pptx` / `.pdf` |
+| Business case (9 slides) | `Hacker_247_ABVIIITMGwalior.pptx` / `.pdf` |
 | Architecture diagram | slide 4 of the deck, and `/diagrams` in the running app |
 | 1-page privacy note | `Hacker_247_Privacy_Note.pdf` |
 | Run locally | `pip install -r requirements.txt` then `python run.py` (open http://localhost:8000) |
@@ -51,7 +51,7 @@ India's 6 Crore+ Micro, Small, and Medium Enterprises (MSMEs) are increasingly a
 ├── PLAN.md                        # Complete project blueprint & execution plan
 ├── DPDP_COMPLIANCE_NOTE.md        # Official 1-Page DPDP Act 2023 compliance architecture
 ├── DEMO_SCRIPT.md                 # 3-Minute timed demo walkthrough script
-├── Hacker_247_ABVIIITMGwalior.pptx  # 7-slide submission deck (official Sync template)
+├── Hacker_247_ABVIIITMGwalior.pptx  # 9-slide submission deck (official Sync template)
 ├── Hacker_247_ABVIIITMGwalior.pdf   # Same deck as PDF
 ├── deck/index.html                 # Deck source: every slide drawn as SVG by JS
 ├── scripts/build_svg_deck.py       # Rebuilds the PPTX + PDF from deck/index.html
@@ -107,7 +107,7 @@ Same 5,000 leads a quarter → 750 activations instead of 368: about +₹26 L a 
 - [x] **Comprehensive Product & Engineering Roadmap (6 Fixed + 5 Stretch Phases)** (`ROADMAP.md`)
 - [x] **Interactive Full-Stack Web Application** (FastAPI backend + Modern UI served via `run.py`)
 - [x] **Smart KYC Engine with Automated Document & Expiry Verification** (Live K01–K12 Answer Key)
-- [x] **7-Slide Submission Deck on the official template** (`Hacker_247_ABVIIITMGwalior.pptx`)
+- [x] **9-Slide Submission Deck on the official template** (`Hacker_247_ABVIIITMGwalior.pptx`)
 - [x] **Submission PDF** (`Hacker_247_ABVIIITMGwalior.pdf`)
 - [x] **1-Page DPDP Act 2023 Compliance & Data Minimisation Note** (`DPDP_COMPLIANCE_NOTE.md`)
 - [x] **3-Minute Demo Video Walkthrough Script** (`DEMO_SCRIPT.md`)
