@@ -528,6 +528,8 @@ function renderAdvisorRecommendation(data) {
   const contentEl0 = document.getElementById('advisor-content');
   if (contentEl0) contentEl0.classList.remove('hidden');
   document.getElementById('rec-bundle-title').textContent = data.bundle_name;
+  const tag = document.getElementById('rec-bundle-tagline');
+  if (tag && data.employee_count) tag.textContent = `Sized for ${data.employee_count} ${data.employee_count === 1 ? 'person' : 'people'} · No salesperson visit needed`;
   document.getElementById('rec-price').innerHTML = `₹${data.pricing.monthly_total_inr.toLocaleString('en-IN')}<span class="text-xs text-slate-500 font-normal"> /mo</span>`;
   document.getElementById('rec-contract').textContent = `${data.pricing.contract_lock_months} Months`;
   document.getElementById('rec-install').textContent = `${data.pricing.estimated_install_sla_days} Days`;

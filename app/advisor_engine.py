@@ -539,6 +539,7 @@ class AdvisorEngine:
             'typical_install_days': typical_days,
             'sla_commitment': '99.9% Business SLA Guarantee' if 'P05' in selected_pids or 'P06' in selected_pids or 'P09' in selected_pids else '99.5% Uptime SLA',
             'cache_hit': False,
+            'employee_count': employees,
             'latency_ms': execution_time_ms
         }
 
