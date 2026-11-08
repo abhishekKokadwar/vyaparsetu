@@ -33,6 +33,11 @@ function applyTheme(theme) {
     if (icon) { icon.setAttribute('data-lucide', 'moon'); icon.classList.remove('text-amber-500'); icon.classList.add('text-slate-600'); }
     if (btn) { btn.classList.remove('bg-slate-800', 'text-amber-500', 'border-slate-700'); btn.classList.add('bg-slate-50', 'text-slate-600', 'border-slate-200'); }
   }
+  if (btn) {
+    btn.setAttribute('aria-pressed', String(theme === 'dark'));
+    const label = theme === 'dark' ? 'Switch to light theme' : 'Switch to dark theme';
+    btn.setAttribute('aria-label', label); btn.setAttribute('title', label);
+  }
   if (window.lucide) lucide.createIcons();
   try { localStorage.setItem('vyapar_theme', theme); } catch (e) { /* storage may be blocked */ }
 }
@@ -45,7 +50,7 @@ function initTheme() {
   let theme = 'light';
   try { theme = localStorage.getItem('vyapar_theme'); } catch (e) { /* ignore */ }
   if (!theme || (theme !== 'light' && theme !== 'dark')) {
-    theme = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+    theme = 'light';   // light is the default; dark is an explicit choice (it is remembered)
   }
   applyTheme(theme);
 }
@@ -1306,7 +1311,7 @@ async function loadPartnerLeads() {
             </div>
           </td>
           <td class="py-2.5 px-3 text-right">
-            <button type="button" onclick="assistDroppedLead('${escapeHtml(l.lead_id)}')" class="px-3 py-1.5 border border-slate-300 text-slate-800 hover:border-airtel-red bg-white rounded-lg text-xs font-semibold shadow-sm transition min-h-[44px]">
+            <button type="button" onclick="assistDroppedLead('${escapeHtml(l.lead_id)}')" class="btn-secondary btn-compact">
               1-Click Assist
             </button>
           </td>

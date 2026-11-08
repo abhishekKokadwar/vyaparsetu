@@ -3,6 +3,21 @@
 Goal: a calm, premium, professional dashboard. One visual system across all five tabs, no fake data, no leaked test metadata.
 Evidence below comes from an audit of the running app at 1440x800 and 375x740 (screenshots plus a style census per tab).
 
+
+## STATUS (8 Nov, evening, measured, not estimated)
+
+| Package | State | Evidence / what is left |
+|---|---|---|
+| WP1 Shared components and tokens | **Done** | Audit now fails on off-token button heights (only 36 compact or 44+) and corner radii (8 / 12 / pill). Nested cards 0 on every tab (was 27 / 13 / 3 / 1). Inputs uniform. |
+| WP2 Quote tab | **Done** | Rows not cards, pinned bill, mobile total bar, GST-gated rows, Recommended badge, empty state, computed savings. |
+| WP3 KYC tab | **Done** | 3-step flow, locked until consent, no pre-filled IDs, no verdict hints, specimens in a labelled section. |
+| WP4 Tracker | **Partly** | Done: lookup, history, labelled sample, flat page. **Left:** two-column layout and the notification log. |
+| WP5 Partner | **Partly** | Done: tie-break ranking, reasons, 40 rows, shared controls. **Left:** search, sort, detail drawer, feedback when "Assist" is clicked. Scores still cap at 98 (kept so the deck's 932 / 1.91 Cr stay true). |
+| WP6 Shell | **Partly** | Done: collapsible sidebar and mobile drawer, light/dark theme (light by default, dark audited). **Left:** sidebar progress ticks, mobile bottom tab bar, language toggle (translate or relabel), loading skeletons, remove duplicate Start KYC. |
+| WP7 QA gate | **Done** | `ui_audit.py` enforces tokens, contrast, sizes; `AUDIT_THEME=dark` audits dark mode; HTML tag-balance test; 114 tests. |
+
+New features: voice input done, chat view done. **Not started:** D notification log, E Good/Better/Best, F metrics view, G printable quote, H upload progress.
+
 ---
 
 ## 1. What is wrong today (findings)

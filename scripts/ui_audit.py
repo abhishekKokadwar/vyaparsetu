@@ -18,6 +18,24 @@ BASE = sys.argv[1] if len(sys.argv) > 1 else os.environ.get("SMOKE_BASE_URL", "h
 SHOTS = sys.argv[2] if len(sys.argv) > 2 else None
 TABS = ["advisor", "quote", "kyc", "tracker", "partner"]
 
+TOKENS = r"""() => {
+  const vis = e => { const r = e.getBoundingClientRect(), s = getComputedStyle(e);
+    return r.width > 0 && r.height > 0 && s.visibility !== 'hidden' && s.display !== 'none'
+           && e.closest('.tab-view:not(.active)') === null && !e.closest('#app-sidebar'); };
+  const bad = { buttonHeights: [], radii: [] };
+  document.querySelectorAll('button, a[role=button]').forEach(b => {
+    if (!vis(b) || b.classList.contains('link-btn') || b.classList.contains('splitter') || b.closest('.stepper')) return;
+    const h = Math.round(b.getBoundingClientRect().height);
+    if (h !== 36 && h < 44) bad.buttonHeights.push((b.textContent || b.getAttribute('aria-label') || '').trim().slice(0, 24) + ' ' + h);
+  });
+  document.querySelectorAll('.btn-primary, .btn-secondary, .btn-confirm, .field, .seg, .kpi-strip, .disc, .consent-box, .empty, .dropzone, .notice').forEach(e => {
+    if (!vis(e)) return;
+    const r = parseFloat(getComputedStyle(e).borderTopLeftRadius);
+    if (![8, 12].includes(Math.round(r))) bad.radii.push(e.className.toString().split(' ')[0] + ' ' + r);
+  });
+  return bad;
+}"""
+
 METRICS = r"""() => {
   const vis = e => { const r = e.getBoundingClientRect(), s = getComputedStyle(e);
     return r.width > 0 && r.height > 0 && s.visibility !== 'hidden' && s.display !== 'none'
@@ -62,7 +80,10 @@ results, failures = {}, []
 with sync_playwright() as p:
     browser = p.chromium.launch(channel="chrome")
     for device, vp in [("desktop", {"width": 1440, "height": 900}), ("mobile", {"width": 375, "height": 812})]:
-        page = browser.new_page(viewport=vp)
+        ctx = browser.new_context(viewport=vp)
+        if os.environ.get("AUDIT_THEME") in ("dark", "light"):   # AUDIT_THEME=dark py scripts/ui_audit.py ...
+            ctx.add_init_script(f"localStorage.setItem('vyapar_theme', '{os.environ['AUDIT_THEME']}')")
+        page = ctx.new_page()
         errors = []
         page.on("pageerror", lambda e: errors.append(str(e)))
         page.goto(BASE)
@@ -82,6 +103,11 @@ with sync_playwright() as p:
                 failures.append(f"{device}/{tab}: {m['textUnder12px']} text elements under 12px")
             if m["lowContrast"]:
                 failures.append(f"{device}/{tab}: {m['lowContrast']} low-contrast texts e.g. {m['lowContrastSamples'][:2]}")
+            tk = page.evaluate(TOKENS)   # design tokens: button heights 36/44, radii 8/12
+            if tk["buttonHeights"]:
+                failures.append(f"{device}/{tab}: button heights off-token {tk['buttonHeights'][:3]}")
+            if tk["radii"]:
+                failures.append(f"{device}/{tab}: corner radius off-token {tk['radii'][:3]}")
             if device == "mobile" and m["inputsUnder16px"]:
                 failures.append(f"mobile/{tab}: {m['inputsUnder16px']} inputs under 16px (iOS will zoom)")
             if device == "mobile" and m["tapTargetsUnder44px"]:

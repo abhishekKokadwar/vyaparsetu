@@ -614,3 +614,26 @@ body {
   background-color: var(--theme-surface-2) !important;
 }
 [data-theme="dark"] .side-brand img { background: #fff; border-radius: .5rem; padding: 3px; }
+.brand-setu { color: #B3262D; }
+[data-theme="dark"] .brand-setu { color: #FF8A91; }
+
+
+/* ================= Design tokens (enforced last): radius 8 / 12 / pill, controls 44 (compact 36 on desktop), no shadows ================= */
+:root { --r-control: 8px; --r-panel: 12px; --h-control: 44px; --h-compact: 36px; }
+.btn-primary, .btn-secondary, .btn-confirm, .field, .seg, .icon-btn, .nav-tab, .sub-tab, .mic-btn { border-radius: var(--r-control); }
+.mode-switch { border-radius: var(--r-panel); }
+.mode-switch button, .stepper li { border-radius: var(--r-control); }
+.kpi-strip, .disc, .consent-box, .empty, .dropzone, .notice, .bill-save, .panel { border-radius: var(--r-panel); }
+.btn-primary, .btn-secondary, .btn-confirm, .icon-btn { min-height: var(--h-control); }
+.btn-confirm { display: inline-flex; align-items: center; justify-content: center; gap: .5rem; padding: 0 1.1rem; font-size: .95rem; font-weight: 700;
+  background: #047857; color: #fff; }
+.btn-confirm:hover:not(:disabled) { background: #065F46; }
+.btn-confirm:disabled { background: #E2E8F0; color: #94A3B8; cursor: not-allowed; }
+[data-theme="dark"] .btn-confirm:disabled { background: var(--theme-surface-2); color: var(--theme-muted); }
+@media (min-width: 1024px) {
+  .chip, .btn-compact { min-height: var(--h-compact); }
+  .btn-compact { padding: 0 .85rem; font-size: .85rem; }
+}
+.shadow-sm, .shadow-md { box-shadow: none !important; }
+.btn-compact { white-space: nowrap; }
+.thread .chip { min-height: var(--h-control); height: auto; padding: .5rem .9rem; text-align: left; line-height: 1.3; border-radius: var(--r-panel); }

@@ -49,7 +49,7 @@
     <div class="side-brand h-16 px-5 flex items-center gap-3 border-b border-slate-100 cursor-pointer" onclick="switchTab('advisor')">
       <img src="/static/logo-mark.png" alt="VyaparSetu logo" width="36" height="36" class="w-9 h-9 object-contain">
       <div class="brand-text leading-tight">
-        <h1 class="text-[1.1rem] font-extrabold tracking-tight text-slate-900">Vyapar<span style="color:#B3262D">Setu</span></h1>
+        <h1 class="text-[1.1rem] font-extrabold tracking-tight text-slate-900">Vyapar<span class="brand-setu">Setu</span></h1>
         <p class="text-[0.8rem] text-slate-500 font-medium">व्यापारसेतु · MSME Suite</p>
       </div>
     </div>
@@ -92,7 +92,7 @@
       </button>
       <div class="flex items-center gap-3 lg:hidden cursor-pointer" onclick="switchTab('advisor')">
         <img src="/static/logo-mark.png" alt="VyaparSetu logo" width="32" height="32" class="w-8 h-8 object-contain">
-        <h1 class="text-lg font-extrabold tracking-tight text-slate-900">Vyapar<span style="color:#B3262D">Setu</span></h1>
+        <h1 class="text-lg font-extrabold tracking-tight text-slate-900">Vyapar<span class="brand-setu">Setu</span></h1>
       </div>
       <div class="hidden lg:block min-w-0">
         <p class="text-[0.8rem] font-semibold uppercase tracking-wider text-slate-500">Airtel Sync 2026 · Enterprise Track A</p>
@@ -557,7 +557,7 @@
 
             <!-- Place Order CTA -->
             <div>
-              <button id="btn-place-order" onclick="placeOrderAfterKYC()" disabled class="w-full bg-emerald-600 disabled:bg-slate-200 disabled:text-slate-400 hover:bg-emerald-700 text-white font-bold py-3 rounded-xl shadow-sm transition flex items-center justify-center space-x-2 min-h-[44px]">
+              <button id="btn-place-order" onclick="placeOrderAfterKYC()" disabled class="btn-confirm w-full">
                 <i data-lucide="check" class="w-4 h-4"></i>
                 <span>Confirm & Activate Service</span>
               </button>
@@ -592,7 +592,7 @@
             <button type="submit" class="btn-primary">Track order</button>
           </form>
           <p class="help">Use the order number from your confirmation and the mobile number given at KYC.
-            <button type="button" onclick="openSampleOrder()" class="underline font-semibold text-slate-700 hover:text-slate-900">View a sample order</button>
+            <button type="button" onclick="openSampleOrder()" class="link-btn underline font-semibold text-slate-700 hover:text-slate-900">View a sample order</button>
           </p>
         </div>
 
@@ -605,7 +605,7 @@
         </div>
 
         <div id="tracker-order-view" class="hidden">
-          <button type="button" onclick="showTrackerHome()" class="mt-4 text-sm font-semibold text-slate-600 hover:text-slate-900 inline-flex items-center gap-1 min-h-[44px]">
+          <button type="button" onclick="showTrackerHome()" class="link-btn mt-4 text-sm font-semibold text-slate-600 hover:text-slate-900 inline-flex items-center gap-1 min-h-[44px]">
             <i data-lucide="arrow-left" class="w-4 h-4" aria-hidden="true"></i>All orders
           </button>
           <p id="tracker-sample-badge" class="hidden mt-1 text-sm bg-slate-100 text-slate-700 rounded-lg px-3 py-2">Sample order with illustrative data. It does not belong to a real customer.</p>
@@ -701,7 +701,7 @@
               <p class="text-xs text-slate-500">Surface leads that dropped out due to visit scheduling or quote delays for 1-click partner assistance</p>
             </div>
             <div class="flex space-x-2 text-xs">
-              <select id="ptnr-filter-segment" onchange="loadPartnerLeads()" class="bg-slate-50 border border-slate-200 rounded-xl px-3 py-1.5 text-base md:text-sm focus:bg-white outline-none min-h-[44px]">
+              <select id="ptnr-filter-segment" onchange="loadPartnerLeads()" class="field" style="width:auto;min-width:12rem" aria-label="Filter by segment">
                 <option value="">All Segments</option>
                 <option value="Micro retail & services">Micro Retail (55%)</option>
                 <option value="Professional offices">Professional Offices (25%)</option>
