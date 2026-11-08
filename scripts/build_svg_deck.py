@@ -13,12 +13,14 @@ OUT = ROOT / 'deck' / 'render'
 TEMPLATE = ROOT / 'airtel_sync_case' / 'Submission Template_Sync.pptx'
 NAME = 'Hacker_247_ABVIIITMGwalior'   # TeamName_CampusName, as the brief requires
 CHROME = r'C:\Program Files\Google\Chrome\Application\chrome.exe'
-N = 9
+import os
+DECK = os.environ.get('DECK', '7')          # '7' = Unstop submission (7 slides); '9' = extended deck
+N = int(DECK)
 
 OUT.mkdir(exist_ok=True)
 for i in range(1, N + 1):
     for bare, name in ((1, f'overlay{i}.png'), (0, f'slide{i}.png')):
-        url = f'{HTML}?s={i}' + ('&bare=1' if bare else '')
+        url = f'{HTML}?deck={DECK}&s={i}' + ('&bare=1' if bare else '')
         subprocess.run([CHROME, '--headless=new', '--disable-gpu', '--hide-scrollbars',
                         '--window-size=1920,1080', '--force-device-scale-factor=2',
                         '--default-background-color=00000000', '--virtual-time-budget=1500',
@@ -47,6 +49,10 @@ def link_box(slide, x, y, w, h, url):
 link_box(prs.slides[0], 150, 1016 - 30, 640, 40, 'https://vyaparsetu-airtel.vercel.app')
 link_box(prs.slides[0], 600, 972 - 26, 360, 36, 'https://github.com/abhishekKokadwar/vyaparsetu')
 
+link_box(prs.slides[3], 1450, 262, 370, 32, 'https://vyaparsetu-airtel.vercel.app')
+link_box(prs.slides[N - 1], 1450, 246, 370, 32, 'https://vyaparsetu-airtel.vercel.app')
+
+NAME = NAME if DECK == '7' else NAME + '_extended_9slides'
 pptx = ROOT / f'{NAME}.pptx'
 prs.save(pptx)
 print('saved', pptx)

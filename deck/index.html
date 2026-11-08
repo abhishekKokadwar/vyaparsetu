@@ -23,7 +23,8 @@ const q = new URLSearchParams(location.search);
 const RED='#E40000', INK='#0F172A', SLATE='#475569', MUTED='#64748B', LINE='#E2E8F0',
       SOFT='#F8FAFC', REDBG='#FFF1F1', GREEN='#059669', GREENBG='#ECFDF5', AMBER='#D97706', AMBERBG='#FFF7E6';
 const SERIF="Georgia, 'Nirmala UI', serif", SANS="'Segoe UI', 'Nirmala UI', sans-serif", MONO="Consolas, monospace";
-const TOTAL=9;
+// ?deck=7 builds the 7-slide Unstop submission (cover, problem, segments, journey, architecture, competition, impact); default is the 9-slide extended deck
+const ORDER=q.get('deck')==='7'?[1,2,3,4,6,7,9]:[1,2,3,4,5,6,7,8,9], TOTAL=ORDER.length, num=n=>ORDER.indexOf(n)+1;
 
 // ---------- svg helpers ----------
 const esc = s => String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
@@ -72,13 +73,13 @@ const defs=`<defs><marker id="ar" viewBox="0 0 10 10" refX="9" refY="5" markerWi
 
 // common chrome for content slides — sits inside the template's safe area (logos top, Unstop bottom-right)
 function head(n,k,title,sub){
-  return kick(110,165,`${String(n).padStart(2,'0')} · ${k}`)+
+  return kick(110,165,`${String(num(n)).padStart(2,'0')} · ${k}`)+
     T(110,226,title,{font:SERIF,size:46,w:700})+(sub?T(110,266,sub,{size:22,fill:SLATE}):'');
 }
 function foot(n,takeaway){
   const t=W(140,938,1640,takeaway,{size:21,fill:'#fff',bfill:'#FF6B6B'}), h=t.h+36;
   return R(110,900,1700,h,{fill:INK,r:12})+R(110,900,8,h,{fill:RED})+t.svg+
-    T(110,1040,`HACKER_247 · ABV-IIITM GWALIOR  ·  ${String(n).padStart(2,'0')} / ${String(TOTAL).padStart(2,'0')}`,{font:MONO,size:16,fill:MUTED,ls:2});
+    T(110,1040,`HACKER_247 · ABV-IIITM GWALIOR  ·  ${String(num(n)).padStart(2,'0')} / ${String(TOTAL).padStart(2,'0')}`,{font:MONO,size:16,fill:MUTED,ls:2});
 }
 
 // ---------- slides ----------
@@ -182,7 +183,7 @@ S.push(()=>{
     {n:'Smart KYC',t:'~3 min',was:'Paper copies, in person',b:['GSTIN / Udyam lookup fills the form','OCR checks and logged consent; DigiLocker and e-sign are next']},
     {n:'Tracker',t:'2–5 days',was:'3 chase calls per customer',b:['5 milestones, technician and slot','WhatsApp updates, no chase calls']},
   ];
-  s+=`<image href="assets/qr.png" x="1700" y="162" width="96" height="96"/>`+T(1748,278,'Scan to try it live',{size:13,fill:MUTED,anchor:'middle'});
+  s+=`<image href="assets/qr.png" x="1700" y="162" width="96" height="96"/>`+T(1810,284,'Try it live  ·  vyaparsetu-airtel.vercel.app',{size:15,w:700,fill:RED,anchor:'end'});
   const x0=110,w=400,g=33,y=300;
   st.forEach((p,i)=>{
     const x=x0+i*(w+g);
@@ -324,6 +325,7 @@ S.push(()=>{
 // 9 · IMPACT
 S.push(()=>{
   let s=head(9,'Impact · metrics · rollout','Twice the activations from the same leads, at half the cost each','6-month targets against the Apr–Jun 2026 baseline.');
+  s+=T(1810,268,'Try it live  ·  vyaparsetu-airtel.vercel.app',{size:15,w:700,fill:RED,anchor:'end'});
   // KPI table
   s+=card(110,300,990,420);
   const hd=['Metric','Today','6-mo target','Main lever'], cx=[140,500,640,800];
@@ -366,9 +368,9 @@ S.push(()=>{
 // ---------- render ----------
 const only=+q.get('s')||0, bare=q.has('bare');
 if(only) document.body.classList.add('one'); if(bare) document.body.classList.add('bare');
-document.getElementById('deck').innerHTML=S.map((f,i)=>{
+document.getElementById('deck').innerHTML=ORDER.map((k,i)=>{
   if(only && i+1!==only) return '';
-  return `<div class="slide"><img src="assets/tpl${i===0?1:2}.jpg"><svg viewBox="0 0 1920 1080" width="1920" height="1080" xmlns="http://www.w3.org/2000/svg">${defs}${f()}</svg></div>`;
+  return `<div class="slide"><img src="assets/tpl${i===0?1:2}.jpg"><svg viewBox="0 0 1920 1080" width="1920" height="1080" xmlns="http://www.w3.org/2000/svg">${defs}${S[k-1]()}</svg></div>`;
 }).join('');
 </script>
 </body>
