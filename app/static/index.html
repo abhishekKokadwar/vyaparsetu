@@ -100,29 +100,28 @@
       </div>
       </div>
       <div class="flex items-center gap-3">
-        <div class="inline-flex rounded-xl border border-slate-200 p-0.5 bg-slate-50">
+        <div class="flex items-center gap-2"><span class="hidden xl:inline text-xs font-semibold text-slate-500">Advisor language</span><div role="group" aria-label="Advisor language" title="Language of the AI Advisor's replies" class="inline-flex rounded-xl border border-slate-200 p-0.5 bg-slate-50">
           <button id="lang-en" type="button" onclick="setLanguage('en')" class="px-3 py-2 min-h-[44px] text-xs font-bold rounded-lg bg-white shadow-sm text-slate-800 flex items-center justify-center">EN</button>
           <button id="lang-hi" type="button" onclick="setLanguage('hi')" class="px-3 py-2 min-h-[44px] text-xs font-bold rounded-lg text-slate-600 hover:text-slate-800 flex items-center justify-center">हिंदी</button>
-        </div>
+        </div></div>
         <button id="theme-toggle" type="button" onclick="toggleTheme()" aria-label="Switch theme" title="Switch theme" class="p-2 min-h-[44px] min-w-[44px] rounded-lg bg-slate-50 border border-slate-200 text-slate-600 hover:bg-slate-100 flex items-center justify-center transition">
           <i id="theme-icon" data-lucide="moon" class="w-5 h-5"></i>
         </button>
-        <button onclick="switchTab('kyc')" class="hidden sm:flex bg-airtel-red hover:bg-airtel-darkred text-white text-xs font-semibold px-4 py-2.5 min-h-[44px] rounded-lg shadow-sm transition items-center space-x-1.5">
-          <span>Start KYC</span>
+        <button id="next-step-btn" type="button" onclick="goNextStep()" class="hidden sm:flex bg-airtel-red hover:bg-airtel-darkred text-white text-xs font-semibold px-4 py-2.5 min-h-[44px] rounded-lg shadow-sm transition items-center space-x-1.5">
+          <span id="next-step-label">Start with the Advisor</span>
           <i data-lucide="arrow-right" class="w-3.5 h-3.5"></i>
         </button>
       </div>
     </div>
   </header>
 
-  <!-- Mobile / tablet sub-nav -->
-  <nav id="mobile-subnav" role="tablist" aria-label="Onboarding steps" class="lg:hidden bg-white border-b border-slate-200 flex overflow-x-auto px-4 py-2 gap-1.5 text-xs shrink-0">
-    <button type="button" role="tab" data-tab="advisor" aria-controls="view-advisor" aria-selected="true" onclick="switchTab('advisor')" class="sub-tab active">1. Advisor</button>
-    <button type="button" role="tab" data-tab="quote" aria-controls="view-quote" aria-selected="false" onclick="switchTab('quote')" class="sub-tab">2. Quote</button>
-    <button type="button" role="tab" data-tab="kyc" aria-controls="view-kyc" aria-selected="false" onclick="switchTab('kyc')" class="sub-tab">3. KYC</button>
-    <button type="button" role="tab" data-tab="tracker" aria-controls="view-tracker" aria-selected="false" onclick="switchTab('tracker')" class="sub-tab">4. Tracker</button>
-    <span class="w-px h-6 bg-slate-200 mx-0.5 self-center" aria-hidden="true"></span>
-    <button type="button" role="tab" data-tab="partner" aria-controls="view-partner" aria-selected="false" onclick="switchTab('partner')" class="sub-tab">Partner</button>
+  <!-- Mobile / tablet bottom tab bar -->
+  <nav id="mobile-subnav" role="tablist" aria-label="Sections" class="bottom-nav lg:hidden">
+    <button type="button" role="tab" data-tab="advisor" aria-controls="view-advisor" aria-selected="true" onclick="switchTab('advisor')" class="sub-tab active"><i data-lucide="compass" class="w-5 h-5"></i><span>Advisor</span></button>
+    <button type="button" role="tab" data-tab="quote" aria-controls="view-quote" aria-selected="false" onclick="switchTab('quote')" class="sub-tab"><i data-lucide="layers" class="w-5 h-5"></i><span>Quote</span></button>
+    <button type="button" role="tab" data-tab="kyc" aria-controls="view-kyc" aria-selected="false" onclick="switchTab('kyc')" class="sub-tab"><i data-lucide="shield-check" class="w-5 h-5"></i><span>KYC</span></button>
+    <button type="button" role="tab" data-tab="tracker" aria-controls="view-tracker" aria-selected="false" onclick="switchTab('tracker')" class="sub-tab"><i data-lucide="map-pin" class="w-5 h-5"></i><span>Track</span></button>
+    <button type="button" role="tab" data-tab="partner" aria-controls="view-partner" aria-selected="false" onclick="switchTab('partner')" class="sub-tab"><i data-lucide="users" class="w-5 h-5"></i><span>Partner</span></button>
   </nav>
 
   <!-- Main Content Body -->
@@ -710,7 +709,7 @@
                 <th class="py-2.5 px-3 text-right">Action</th>
               </tr>
             </thead>
-            <tbody id="ptnr-leads-table" class="divide-y divide-slate-100"></tbody>
+            <tbody id="ptnr-leads-table" class="divide-y divide-slate-100"><tr><td colspan="6" class="py-3"><div class="skeleton" style="height:4rem"></div></td></tr><tr><td colspan="6" class="py-3"><div class="skeleton" style="height:4rem"></div></td></tr><tr><td colspan="6" class="py-3"><div class="skeleton" style="height:4rem"></div></td></tr></tbody>
           </table>
           <p id="ptnr-empty" class="help hidden py-6 text-center">No leads match that search.</p>
         </div>

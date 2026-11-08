@@ -1677,3 +1677,36 @@ document.addEventListener('DOMContentLoaded', () => {
   setAdvisorMode(saved);
   initVoice();
 });
+
+
+// ---- Journey progress: ticks in the sidebar + header button that jumps to the next incomplete step -----------
+const STEPS = ['advisor', 'quote', 'kyc', 'tracker'];
+const STEP_NAMES = { advisor: 'the Advisor', quote: 'the Quote', kyc: 'Smart KYC', tracker: 'the Tracker' };
+let quoteVisited = false; // the quote counts as reviewed once the customer has opened it with items selected
+function stepDone() {
+  return {
+    advisor: !!currentRecommendation,
+    quote: selectedProductIds.size > 0 && quoteVisited,
+    kyc: !document.getElementById('btn-place-order')?.disabled,
+    tracker: !!lastCreatedOrderId,
+  };
+}
+function updateProgress() {
+  const done = stepDone();
+  STEPS.forEach((t, i) => {
+    document.querySelectorAll(`.nav-tab[data-tab="${t}"], .sub-tab[data-tab="${t}"]`).forEach(b => {
+      b.classList.toggle('is-done', done[t]);
+      const n = b.querySelector('.nav-step'); if (n) n.textContent = done[t] ? '✓' : String(i + 1);
+    });
+  });
+  const next = STEPS.find(t => !done[t]);
+  const label = document.getElementById('next-step-label');
+  if (label) label.textContent = !next ? 'Track your order' : (next === STEPS[0] && !done.advisor ? 'Start with the Advisor' : `Continue to ${STEP_NAMES[next]}`);
+}
+function goNextStep() { switchTab(STEPS.find(t => !stepDone()[t]) || 'tracker'); }
+['renderAdvisorRecommendation', 'toggleProductSelection', 'renderKYCDiagnostics', 'renderOrderTracker', 'switchTab'].forEach(n => {
+  const orig = window[n];
+  if (typeof orig !== 'function') return;
+  window[n] = function (...a) { if (n === 'switchTab' && a[0] === 'quote') quoteVisited = true; const r = orig.apply(this, a); try { updateProgress(); } catch (e) {} return r; };
+});
+updateProgress();

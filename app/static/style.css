@@ -691,3 +691,22 @@ body {
 @media (min-width: 1024px) { .ptnr { padding: 1.5rem 2rem; } }
 /* contrast: muted text on the Partner view sits on a tinted page background */
 :root:not([data-theme="dark"]) .ptnr .help, :root:not([data-theme="dark"]) .ptnr .text-slate-500 { color: #475569; }
+
+/* ===== Progress ticks + mobile bottom tab bar ===== */
+.nav-tab.is-done .nav-step { color: #047857; opacity: 1; }
+.nav-tab.is-done.active .nav-step { color: #fff; }
+[data-theme="dark"] .nav-tab.is-done .nav-step { color: #86E3BC; }
+.bottom-nav { position: fixed; left: 0; right: 0; bottom: 0; z-index: 45; display: flex; background: #fff; border-top: 1px solid var(--line);
+  padding-bottom: env(safe-area-inset-bottom); }
+.bottom-nav .sub-tab { flex: 1; min-height: 56px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px;
+  font-size: .75rem; font-weight: 600; border-radius: 0; background: transparent; position: relative; color: #475569; }
+.bottom-nav .sub-tab.active { color: var(--brand); background: transparent; }
+.bottom-nav .sub-tab.active::before { content: ''; position: absolute; top: 0; left: 25%; right: 25%; height: 3px; background: var(--brand); border-radius: 0 0 3px 3px; }
+.bottom-nav .sub-tab.is-done::after { content: ''; position: absolute; top: 8px; right: calc(50% - 20px); width: 8px; height: 8px; border-radius: 50%; background: #047857; }
+[data-theme="dark"] .bottom-nav { background: var(--theme-surface); }
+[data-theme="dark"] .bottom-nav .sub-tab { color: var(--theme-text) !important; background: transparent !important; }
+[data-theme="dark"] .bottom-nav .sub-tab.active { color: var(--brand-strong) !important; }
+@media (max-width: 1023.98px) {
+  body { padding-bottom: calc(56px + env(safe-area-inset-bottom)); }
+  .q-mobilebar { bottom: calc(56px + env(safe-area-inset-bottom)); }
+}
