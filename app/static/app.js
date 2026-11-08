@@ -1235,7 +1235,7 @@ async function loadPartnerPortal() {
 
 async function loadPartnerLeads() {
   const seg = document.getElementById('ptnr-filter-segment').value;
-  const url = seg ? `/api/partner/leads?limit=12&segment=${encodeURIComponent(seg)}` : '/api/partner/leads?limit=12';
+  const url = seg ? `/api/partner/leads?limit=12&segment=${encodeURIComponent(seg)}` : '/api/partner/leads?limit=40';
   try {
     const res = await fetch(url);
     const data = await res.json();
@@ -1247,6 +1247,7 @@ async function loadPartnerLeads() {
           <td class="py-2.5 px-3">
             <span class="font-bold text-slate-800 block">${escapeHtml(l.business_name)}</span>
             <span class="text-xs font-mono text-slate-500">${escapeHtml(l.lead_id)} · ${l.employee_count} Staff</span>
+            ${(l.reasons || []).length ? `<span class="flex flex-wrap gap-1 mt-1">${l.reasons.map(r => `<span class="badge">${escapeHtml(r)}</span>`).join('')}</span>` : ''}
           </td>
           <td class="py-2.5 px-3">
             <span class="text-slate-700 block">${escapeHtml(l.segment)}</span>
@@ -1264,7 +1265,7 @@ async function loadPartnerLeads() {
               <div class="w-12 h-1.5 rounded-full bg-slate-100 overflow-hidden inline-block">
                 <div class="h-full rounded-full bg-ok" style="width:${l.propensity_score}%"></div>
               </div>
-              <span class="text-xs font-bold text-slate-700 tabular">${l.propensity_score}%</span>
+              <span class="text-xs font-bold text-slate-700 tabular" title="Rule-based propensity score out of 100. Ties are ranked by spend, team size and recency.">${l.propensity_score}</span>
             </div>
           </td>
           <td class="py-2.5 px-3 text-right">
@@ -1374,4 +1375,163 @@ function updateKycStepper(verdict) {
 document.addEventListener('DOMContentLoaded', () => {
   document.getElementById('dpdp-consent-chk')?.addEventListener('change', () => updateKycStepper());
   updateKycStepper();
+});
+
+
+// ---- Advisor: Chat / Form modes ---------------------------------------------------------------------------
+const MODE_KEY = 'vs_adv_mode';
+const STARTERS = [
+  'Kirana store in Jaipur, 2 staff, no GST',
+  'Dental clinic in Pune, 6 staff, we have GST',
+  '3 restaurants in Bengaluru, 15 staff',
+  'मेरी किराना दुकान है, 2 लोग, GST नहीं है'
+];
+let advisorMode = 'chat';
+
+function setAdvisorMode(mode) {
+  advisorMode = mode === 'form' ? 'form' : 'chat';
+  try { localStorage.setItem(MODE_KEY, advisorMode); } catch (e) {}
+  document.getElementById('adv-chat-mode')?.classList.toggle('hidden', advisorMode !== 'chat');
+  document.getElementById('adv-form-mode')?.classList.toggle('hidden', advisorMode !== 'form');
+  document.getElementById('adv-rail')?.classList.toggle('is-chat', advisorMode === 'chat');
+  document.getElementById('mode-chat')?.setAttribute('aria-pressed', String(advisorMode === 'chat'));
+  document.getElementById('mode-form')?.setAttribute('aria-pressed', String(advisorMode === 'form'));
+  if (advisorMode === 'chat' && !document.getElementById('adv-thread').children.length) greetInThread();
+  if (window.lucide) lucide.createIcons();
+}
+
+function threadScroll() {
+  const t = document.getElementById('adv-thread');
+  if (t) t.scrollTop = t.scrollHeight;
+}
+
+function addBubble(role, html) {
+  const t = document.getElementById('adv-thread');
+  const el = document.createElement('div');
+  el.className = `bubble bubble-${role}`;
+  el.innerHTML = html;
+  t.appendChild(el);
+  if (window.lucide) lucide.createIcons();
+  threadScroll();
+  return el;
+}
+
+function greetInThread() {
+  addBubble('bot', `
+    <p>Namaste! Tell me about your business: what you do, how many people work with you, where you are, and whether you have a GSTIN.</p>
+    <p class="mt-1 text-slate-600">You can type or speak, in English, हिंदी, मराठी, தமிழ் and more.</p>
+    <div class="flex flex-wrap gap-2 mt-3">
+      ${STARTERS.map(q => `<button type="button" class="chip" data-starter="${escapeHtml(q)}">${escapeHtml(q)}</button>`).join('')}
+    </div>`);
+  document.querySelectorAll('#adv-thread [data-starter]').forEach(b => b.addEventListener('click', () => sendThreadMessage(b.dataset.starter)));
+}
+
+async function sendThreadMessage(text) {
+  const input = document.getElementById('thread-input');
+  const query = (text ?? input.value).trim();
+  if (!query) { input.focus(); return; }
+  input.value = '';
+  addBubble('user', escapeHtml(query));
+  const typing = addBubble('bot', '<span class="typing" role="status" aria-label="The advisor is typing"><i></i><i></i><i></i></span>');
+  const sendBtn = document.getElementById('thread-send');
+  sendBtn.disabled = true;
+
+  try {
+    const res = await fetch('/api/advisor/chat', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ query, current_profile: chatProfile })
+    });
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    const data = await res.json();
+    chatProfile = data.profile;
+    currentRecommendation = data.recommendation;
+    renderAdvisorRecommendation(data.recommendation);
+    syncFormFromProfile(data.profile);
+    typing.remove();
+
+    const p = data.profile || {};
+    const chips = [p.business_type, p.employee_count && `${p.employee_count} staff`, p.num_sites && `${p.num_sites} site${p.num_sites > 1 ? 's' : ''}`,
+                   p.city, p.has_gstin === true ? 'GST registered' : p.has_gstin === false ? 'No GST' : null].filter(Boolean);
+    const rec = data.recommendation || {};
+    const monthly = rec.pricing?.monthly_total_inr;
+    const yearly = rec.pricing?.vendor_savings_benchmark?.annual_savings_inr;
+    const clar = (data.clarifications || [])[0];
+
+    let html = '';
+    if (chips.length) html += `<div class="flex flex-wrap gap-1.5 mb-2">${chips.map(c => `<span class="badge">${escapeHtml(c)}</span>`).join('')}</div>`;
+    if (clar) {
+      const q = currentLanguage === 'hi' ? (clar.question_hi || clar.question) : (clar.question_en || clar.question);
+      html += `<p>${escapeHtml(q)}</p><div class="flex flex-wrap gap-2 mt-2">${(clar.options || []).map(o =>
+        `<button type="button" class="chip" data-reply="${escapeHtml(o)}">${escapeHtml(o)}</button>`).join('')}</div>`;
+    } else {
+      if (rec.pitch_narrative) html += `<p>${escapeHtml(rec.pitch_narrative)}</p>`;
+      if (monthly) html += `<p class="mt-2"><b>${escapeHtml(rec.bundle_name || 'Recommended bundle')}</b><br><span class="tabular">${inr(monthly)}/month</span>${yearly ? ` · saves ${inr(yearly)} a year` : ''}</p>`;
+      html += `<button type="button" class="btn-secondary mt-3 lg:hidden" onclick="document.getElementById('advisor-result-card').scrollIntoView({behavior:'smooth',block:'start'})">See the full bundle</button>`;
+    }
+    const bubble = addBubble('bot', html || '<p>Thanks. Tell me a little more about your business.</p>');
+    bubble.querySelectorAll('[data-reply]').forEach(b => b.addEventListener('click', () => sendThreadMessage(b.dataset.reply)));
+  } catch (err) {
+    typing.remove();
+    addBubble('bot', `<p>Sorry, I couldn't reach the advisor just now. Please try again, or switch to the <b>Form</b>.</p>`);
+  } finally {
+    sendBtn.disabled = false;
+    input.focus();
+  }
+}
+
+// ---- Voice input (browser speech recognition; hidden where unsupported) -----------------------------------
+const SpeechRec = window.SpeechRecognition || window.webkitSpeechRecognition;
+let activeRecognition = null;
+const VOICE_KEY = 'vs_voice_lang';
+
+function initVoice() {
+  if (!SpeechRec) return;   // Firefox and some browsers: leave the mic hidden, typing still works
+  const sel = document.getElementById('voice-lang');
+  document.getElementById('voice-lang-wrap')?.classList.remove('hidden');
+  try { sel.value = localStorage.getItem(VOICE_KEY) || (currentLanguage === 'hi' ? 'hi-IN' : 'en-IN'); } catch (e) {}
+  sel.addEventListener('change', () => { try { localStorage.setItem(VOICE_KEY, sel.value); } catch (e) {} });
+  document.querySelectorAll('[data-mic]').forEach(btn => {
+    btn.classList.remove('hidden');
+    btn.addEventListener('click', () => toggleMic(btn));
+  });
+}
+
+function toggleMic(btn) {
+  if (activeRecognition) { activeRecognition.stop(); return; }
+  const target = document.getElementById(btn.dataset.target);
+  const rec = new SpeechRec();
+  rec.lang = document.getElementById('voice-lang').value;
+  rec.interimResults = true;
+  rec.maxAlternatives = 1;
+  let finalText = '';
+  rec.onresult = e => {
+    let interim = '';
+    for (let i = e.resultIndex; i < e.results.length; i++) {
+      const t = e.results[i][0].transcript;
+      if (e.results[i].isFinal) finalText += t; else interim += t;
+    }
+    target.value = (finalText + interim).trim();
+  };
+  rec.onerror = e => {
+    toast(e.error === 'not-allowed' || e.error === 'service-not-allowed'
+      ? 'The microphone is blocked. Allow it in the address bar and try again.'
+      : "Couldn't hear that. Please try again.", 'error');
+  };
+  rec.onend = () => {
+    btn.classList.remove('is-listening');
+    btn.setAttribute('aria-pressed', 'false');
+    activeRecognition = null;
+    if (btn.dataset.target === 'thread-input' && target.value.trim()) sendThreadMessage();   // chat: send what was said
+  };
+  btn.classList.add('is-listening');
+  btn.setAttribute('aria-pressed', 'true');
+  activeRecognition = rec;
+  rec.start();
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+  let saved = 'chat';
+  try { saved = localStorage.getItem(MODE_KEY) || 'chat'; } catch (e) {}
+  setAdvisorMode(saved);
+  initVoice();
 });

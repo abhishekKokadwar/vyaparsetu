@@ -551,7 +551,7 @@ class AdvisorEngine:
         Quantifies realistic fragmented unorganized market expenses for the identical capabilities.
         Captures local retail ISP rates, standalone CCTV vendor subscriptions, local IT AMC, etc.
         """
-        unorganized_cost = int(vyapar_monthly_inr * 1.45)
+        unorganized_cost = int(vyapar_monthly_inr * 1.40)  # same factor as catalog_engine, so the pitch and the quote agree
         monthly_savings = unorganized_cost - vyapar_monthly_inr
         annual_savings = monthly_savings * 12
         gst_itc_monthly = int(vyapar_monthly_inr * 0.18)
@@ -589,7 +589,7 @@ class AdvisorEngine:
                 'vyapar_cost_inr': vyapar_monthly_inr,
                 'monthly_savings_inr': monthly_savings,
                 'annual_savings_inr': annual_savings,
-                'savings_percent': 31,
+                'savings_percent': 28.5,
                 'gst_itc_monthly_inr': gst_itc_monthly
             },
             'breakdown': items_breakdown

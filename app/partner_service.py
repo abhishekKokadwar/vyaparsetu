@@ -152,6 +152,39 @@ class PartnerService:
             return min(98, max(10, score))
 
         leads['propensity_score'] = leads.apply(score_lead, axis=1)
+
+        # The rule score saturates (many leads share the same value), so rank ties by secondary signals:
+        # monthly spend, team size, and how recently the lead entered the funnel (later = warmer).
+        created = pd.to_datetime(leads.get('created_date'), errors='coerce')
+        spend_rank = pd.to_numeric(leads['monthly_telecom_spend_inr'], errors='coerce').fillna(0).rank(pct=True)
+        staff_rank = pd.to_numeric(leads['employee_count'], errors='coerce').fillna(1).rank(pct=True)
+        recency_rank = created.rank(pct=True).fillna(0)
+        leads['tie_break'] = (spend_rank + staff_rank + recency_rank) / 3.0
+
+        def why(row):
+            out = []
+            stage = str(row.get('stage_reached', '')).strip()
+            if stage in ('KYC complete', 'Quote accepted'):
+                out.append(f"Reached '{stage}'")
+            elif stage:
+                out.append(f"Got as far as '{stage}'")
+            try:
+                if float(row.get('monthly_telecom_spend_inr', 0)) >= 5000:
+                    out.append(f"Spends Rs {int(float(row['monthly_telecom_spend_inr'])):,}/mo")
+            except (TypeError, ValueError):
+                pass
+            try:
+                if int(row.get('employee_count', 1)) >= 5:
+                    out.append(f"{int(row['employee_count'])} staff")
+            except (TypeError, ValueError):
+                pass
+            if str(row.get('has_gstin')).upper() == 'Y':
+                out.append('GSTIN registered')
+            if str(row.get('has_udyam')).upper() == 'Y':
+                out.append('Udyam registered')
+            return out[:3]
+
+        leads['reasons'] = leads.apply(why, axis=1)
         leads['drop_category'] = leads['drop_reason'].apply(self._categorize_drop_reason)
         
         # Propensity tier: 80th percentile threshold so HIGH means top ~20%
@@ -165,7 +198,7 @@ class PartnerService:
                 return 'LOW'
 
         leads['propensity_tier'] = leads['propensity_score'].apply(get_tier)
-        return leads.sort_values(by='propensity_score', ascending=False)
+        return leads.sort_values(by=['propensity_score', 'tie_break'], ascending=[False, False]).reset_index(drop=True)
 
     def _build_index(self):
         """Builds fast in-memory dictionary for sub-millisecond retrieval by lead_id"""
@@ -308,6 +341,7 @@ class PartnerService:
                 'drop_category': r['drop_category'],
                 'propensity_score': int(r['propensity_score']),
                 'propensity_tier': r['propensity_tier'],
+                'reasons': list(r['reasons']) if 'reasons' in r else [],
                 'recommended_action': DROP_PLAYBOOKS.get(r['drop_category'], DROP_PLAYBOOKS['SALES_INACTIVITY'])['recommended_action'],
                 'partner_commission_inr': comm['total_partner_payout_inr']
             }

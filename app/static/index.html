@@ -130,7 +130,44 @@
       <div class="advisor-split">
 
         <!-- Left rail: inputs (flat form, no nested cards) -->
-        <div class="adv-rail">
+        <div class="adv-rail" id="adv-rail">
+          <div class="mode-switch" role="group" aria-label="How would you like to talk to the advisor?">
+            <button type="button" id="mode-chat" onclick="setAdvisorMode('chat')" aria-pressed="true">
+              <i data-lucide="message-circle" class="w-4 h-4" aria-hidden="true"></i>Chat
+            </button>
+            <button type="button" id="mode-form" onclick="setAdvisorMode('form')" aria-pressed="false">
+              <i data-lucide="list-checks" class="w-4 h-4" aria-hidden="true"></i>Form
+            </button>
+          </div>
+          <div id="voice-lang-wrap" class="hidden voice-lang">
+            <label for="voice-lang" class="text-sm text-slate-600">Voice language</label>
+            <select id="voice-lang" class="field voice-select" aria-label="Voice language">
+              <option value="en-IN">English</option>
+              <option value="hi-IN">हिंदी (Hindi)</option>
+              <option value="mr-IN">मराठी (Marathi)</option>
+              <option value="ta-IN">தமிழ் (Tamil)</option>
+              <option value="te-IN">తెలుగు (Telugu)</option>
+              <option value="bn-IN">বাংলা (Bengali)</option>
+              <option value="gu-IN">ગુજરાતી (Gujarati)</option>
+              <option value="pa-IN">ਪੰਜਾਬੀ (Punjabi)</option>
+            </select>
+          </div>
+
+          <div id="adv-chat-mode" class="adv-chatmode hidden">
+            <div id="adv-thread" class="thread" role="log" aria-live="polite" aria-label="Conversation with the AI advisor"></div>
+            <div class="thread-input">
+              <textarea id="thread-input" rows="1" class="field resize-none" placeholder="Type or speak about your business…" aria-label="Your message"
+                onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();sendThreadMessage();}"></textarea>
+              <button type="button" class="icon-btn mic-btn hidden" data-mic data-target="thread-input" aria-label="Speak your message" aria-pressed="false">
+                <i data-lucide="mic" class="w-5 h-5" aria-hidden="true"></i>
+              </button>
+              <button type="button" id="thread-send" onclick="sendThreadMessage()" class="btn-primary" aria-label="Send message">
+                <i data-lucide="send" class="w-4 h-4" aria-hidden="true"></i>
+              </button>
+            </div>
+          </div>
+
+          <div id="adv-form-mode">
           <div class="mb-5">
             <h2 class="text-lg font-bold text-slate-900" id="txt-advisor-title">Conversational Business Discovery</h2>
             <p class="text-sm text-slate-600 mt-0.5" id="txt-advisor-subtitle">Answer 4 quick questions for an optimized enterprise bundle</p>
@@ -143,6 +180,9 @@
                 placeholder="e.g. मेरी जयपुर में किराना दुकान है, 2 लोग, GST नहीं है"
                 class="field flex-1 min-w-0 resize-none"
                 onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();sendAdvisorChat();}"></textarea>
+              <button type="button" class="icon-btn mic-btn hidden self-stretch" data-mic data-target="adv-chat-input" aria-label="Speak your description" aria-pressed="false">
+                <i data-lucide="mic" class="w-5 h-5" aria-hidden="true"></i>
+              </button>
               <button id="adv-chat-send" type="button" onclick="sendAdvisorChat()" aria-label="Ask the AI advisor"
                 class="btn-primary shrink-0 self-stretch px-4">
                 <i data-lucide="send" class="w-4 h-4" aria-hidden="true"></i><span>Ask</span>
@@ -223,6 +263,7 @@
               <button type="button" onclick="loadScenario('small_mfg')" class="chip" title="Leased line · IoT · GST">Textile plant</button>
             </div>
           </div>
+        </div><!-- /adv-form-mode -->
         </div>
 
         <div class="splitter" role="separator" aria-orientation="vertical" tabindex="0" aria-label="Resize the form panel (drag, or use the arrow keys; double-click resets)" data-var="--rail-w" data-mode="left" data-min="280" data-max="560" data-key="vs_rail_w"></div>

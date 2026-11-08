@@ -55,3 +55,13 @@ def test_specimen_upload_passes_without_cloud_ocr():
         body = client.post("/api/kyc/upload-files", files=files).json()
         assert body["ocr_backend"] == "specimen"
         assert body["verification"]["verdict"] == expected, code
+
+
+def test_pitch_and_quote_report_the_same_savings():
+    """The advisor's narrative and the quote must quote one savings figure, not two."""
+    from fastapi.testclient import TestClient
+    from app.main import app
+    rec = TestClient(app).post("/api/advisor/recommend", json={
+        "business_type": "Clinic & Healthcare", "city_tier": 1, "employee_count": 6, "num_sites": 1,
+        "has_gstin": True, "current_spend": 3000, "preferred_language": "en"}).json()
+    assert rec["savings"]["annual_savings_inr"] == rec["pricing"]["vendor_savings_benchmark"]["annual_savings_inr"]
