@@ -1294,6 +1294,7 @@ async function loadPartnerPortal() {
     document.getElementById('ptnr-dropped-leads').textContent = stats.total_dropped_leads.toLocaleString('en-IN');
     document.getElementById('ptnr-salvageable').textContent = stats.high_propensity_count.toLocaleString('en-IN');
     document.getElementById('ptnr-arr').textContent = `₹${(stats.projected_recoverable_arr_inr / 10000000).toFixed(2)} Cr`;
+    document.getElementById('ptnr-threshold').textContent = `Top 20% by propensity score (${stats.high_score_threshold} or above)`;
     document.getElementById('ptnr-comm').textContent = `₹${(stats.partner_commission_pool_inr / 100000).toFixed(1)} Lakh`;
 
     await loadPartnerLeads();
@@ -1302,59 +1303,127 @@ async function loadPartnerPortal() {
   }
 }
 
+const ASSISTED_KEY = 'vs_assisted_leads';
+function assistedMap() { try { return JSON.parse(localStorage.getItem(ASSISTED_KEY) || '{}'); } catch (e) { return {}; } }
+
 async function loadPartnerLeads() {
-  const seg = document.getElementById('ptnr-filter-segment').value;
-  const url = seg ? `/api/partner/leads?limit=12&segment=${encodeURIComponent(seg)}` : '/api/partner/leads?limit=40';
   try {
-    const res = await fetch(url);
-    const data = await res.json();
-    partnerLeads = data.leads || [];
-    const tbody = document.getElementById('ptnr-leads-table');
-    tbody.innerHTML = partnerLeads.map((l, idx) => {
-      return `
-        <tr class="hover:bg-slate-50 text-sm">
-          <td class="py-2.5 px-3">
-            <span class="font-bold text-slate-800 block">${escapeHtml(l.business_name)}</span>
-            <span class="text-xs font-mono text-slate-500">${escapeHtml(l.lead_id)} · ${l.employee_count} Staff</span>
-            ${(l.reasons || []).length ? `<span class="flex flex-wrap gap-1 mt-1">${l.reasons.map(r => `<span class="badge">${escapeHtml(r)}</span>`).join('')}</span>` : ''}
-          </td>
-          <td class="py-2.5 px-3">
-            <span class="text-slate-700 block">${escapeHtml(l.segment)}</span>
-            <span class="text-xs text-slate-500">${escapeHtml(l.city)} (Tier ${l.city_tier})</span>
-          </td>
-          <td class="py-2.5 px-3">
-            <span class="bg-slate-100 text-slate-700 text-xs font-semibold px-2 py-0.5 rounded">${escapeHtml(l.stage_reached)}</span>
-          </td>
-          <td class="py-2.5 px-3 text-slate-600 max-w-xs text-xs truncate" title="${escapeHtml(l.drop_reason)}">
-            ${escapeHtml(l.drop_reason)}
-          </td>
-          <td class="py-2.5 px-3 text-center">
-            <div class="flex items-center justify-center gap-1.5">
-              <span class="text-xs font-bold text-slate-500">#${idx + 1}</span>
-              <div class="w-12 h-1.5 rounded-full bg-slate-100 overflow-hidden inline-block">
-                <div class="h-full rounded-full bg-ok" style="width:${l.propensity_score}%"></div>
-              </div>
-              <span class="text-xs font-bold text-slate-700 tabular" title="Rule-based propensity score out of 100. Ties are ranked by spend, team size and recency.">${l.propensity_score}</span>
-            </div>
-          </td>
-          <td class="py-2.5 px-3 text-right">
-            <button type="button" onclick="assistDroppedLead('${escapeHtml(l.lead_id)}')" class="btn-secondary btn-compact">
-              1-Click Assist
-            </button>
-          </td>
-        </tr>
-      `;
-    }).join('');
+    const res = await fetch('/api/partner/leads?limit=300');
+    partnerLeads = (await res.json()).leads || [];
+    renderPartnerRows();
   } catch (err) {
-    console.error("Failed to load partner leads:", err);
+    console.error('Failed to load partner leads:', err);
+    document.getElementById('ptnr-leads-table').innerHTML = '<tr><td colspan="6" class="py-6 text-center help">Could not load leads. Refresh to try again.</td></tr>';
   }
 }
 
-// 1-Click Assist Dropped Lead
+function renderPartnerRows() {
+  const q = document.getElementById('ptnr-search').value.trim().toLowerCase();
+  const seg = document.getElementById('ptnr-filter-segment').value;
+  const sort = document.getElementById('ptnr-sort').value;
+  const done = assistedMap();
+  let rows = partnerLeads.filter(l => (!seg || l.segment === seg) &&
+    (!q || `${l.business_name} ${l.lead_id} ${l.city}`.toLowerCase().includes(q)));
+  const by = { score: l => -l.propensity_score, spend: l => -l.monthly_spend, staff: l => -l.employee_count, name: l => l.business_name.toLowerCase() };
+  rows = rows.map((l, i) => [l, i]).sort((x, y) => {
+    const a = by[sort](x[0]), b = by[sort](y[0]);
+    return (a < b ? -1 : a > b ? 1 : x[1] - y[1]);
+  }).map(r => r[0]);
+  const shown = rows.slice(0, 40);
+  document.getElementById('ptnr-empty').classList.toggle('hidden', rows.length > 0);
+  document.getElementById('ptnr-count').textContent = rows.length ? `Showing ${shown.length} of ${rows.length} leads` : '';
+  document.getElementById('ptnr-leads-table').innerHTML = shown.map((l, idx) => `
+    <tr class="hover:bg-slate-50 text-sm">
+      <td class="py-2.5 px-3">
+        <span class="font-bold text-slate-800 block">${escapeHtml(l.business_name)}</span>
+        <span class="text-xs font-mono text-slate-500">${escapeHtml(l.lead_id)} · ${l.employee_count} staff</span>
+        ${(l.reasons || []).length ? `<span class="flex flex-wrap gap-1 mt-1">${l.reasons.map(r => `<span class="badge">${escapeHtml(r)}</span>`).join('')}</span>` : ''}
+      </td>
+      <td class="py-2.5 px-3"><span class="text-slate-700 block">${escapeHtml(l.segment)}</span><span class="text-xs text-slate-500">${escapeHtml(l.city)} (Tier ${l.city_tier})</span></td>
+      <td class="py-2.5 px-3"><span class="badge">${escapeHtml(l.stage_reached)}</span></td>
+      <td class="py-2.5 px-3 text-slate-600 text-xs" style="max-width:16rem">${escapeHtml(l.drop_reason)}</td>
+      <td class="py-2.5 px-3 text-center">
+        <div class="flex items-center justify-center gap-1.5">
+          <span class="text-xs font-bold text-slate-500">#${idx + 1}</span>
+          <div class="w-12 h-1.5 rounded-full bg-slate-100 overflow-hidden inline-block"><div class="h-full rounded-full bg-ok" style="width:${l.propensity_score}%"></div></div>
+          <span class="text-xs font-bold text-slate-700 tabular" title="Rule-based score plus a small continuous signal from spend, team size and recency.">${l.propensity_score.toFixed(1)}</span>
+        </div>
+      </td>
+      <td class="py-2.5 px-3 text-right">
+        ${done[l.lead_id] ? `<span class="badge badge-ok mr-2">${escapeHtml(done[l.lead_id])}</span>` : ''}
+        <button type="button" onclick="openLeadDrawer('${escapeHtml(l.lead_id)}')" class="btn-secondary btn-compact">${done[l.lead_id] ? 'View' : 'Assist'}</button>
+      </td>
+    </tr>`).join('');
+}
+
+let drawerLead = null;
+async function openLeadDrawer(leadId) {
+  const body = document.getElementById('pd-body');
+  body.innerHTML = '<div class="skeleton" style="height:12rem"></div>';
+  const d = document.getElementById('ptnr-drawer');
+  d.classList.add('open'); d.setAttribute('aria-hidden', 'false');
+  document.getElementById('ptnr-scrim').classList.remove('hidden');
+  try {
+    const res = await fetch(`/api/partner/lead/${encodeURIComponent(leadId)}`);
+    if (!res.ok) throw new Error(res.status);
+    const l = await res.json(); drawerLead = l;
+    const pb = l.playbook || {}, c = l.commission || {};
+    const done = assistedMap()[l.lead_id];
+    const inrs = n => '₹' + Number(n || 0).toLocaleString('en-IN');
+    document.getElementById('pd-name').textContent = l.business_name;
+    document.getElementById('pd-sub').textContent = `${l.lead_id} · ${l.segment} · ${l.city} (Tier ${l.city_tier})`;
+    const fact = (k, v) => `<div><dt class="kpi-l">${k}</dt><dd class="text-sm font-semibold text-slate-900">${escapeHtml(String(v))}</dd></div>`;
+    body.innerHTML = `
+      <dl class="grid grid-cols-2 gap-3">
+        ${fact('Priority score', l.propensity_score.toFixed(1) + ' (' + l.propensity_tier.toLowerCase() + ')')}
+        ${fact('Stage reached', l.stage_reached)}
+        ${fact('Team size', l.employee_count + ' staff')}
+        ${fact('Monthly spend', inrs(l.monthly_spend_inr))}
+        ${fact('GSTIN', l.has_gstin ? 'Registered' : 'Not registered')}
+        ${fact('Udyam', l.has_udyam ? 'Registered' : 'Not registered')}
+      </dl>
+      <section><h4 class="section-h">Why they dropped</h4><p class="text-sm text-slate-700">${escapeHtml(l.drop_reason)}</p>
+        <p class="text-sm text-slate-900 mt-2"><b>Suggested fix:</b> ${escapeHtml(pb.recommended_action || '')}</p></section>
+      <section><h4 class="section-h">Win-back message (WhatsApp)</h4>
+        <p class="text-sm text-slate-700">${escapeHtml(pb.pitch_en || '')}</p>
+        <p class="text-sm text-slate-700 mt-2" lang="hi">${escapeHtml(pb.pitch_hi || '')}</p></section>
+      <section><h4 class="section-h">Partner earnings if recovered</h4>
+        <p class="text-sm text-slate-700">${inrs(c.fixed_bounty_inr)} bounty + ${inrs(c.first_year_rev_share_inr)} first-year revenue share = <b>${inrs(c.total_partner_payout_inr)}</b></p></section>
+      <div class="flex flex-wrap gap-2">
+        <button type="button" class="btn-primary" id="pd-send" ${done ? 'disabled' : ''} onclick="sendWinBack()">${done ? escapeHtml(done) : 'Send win-back message'}</button>
+        <button type="button" class="btn-secondary" onclick="assistDroppedLead('${escapeHtml(l.lead_id)}')">Open in AI Advisor</button>
+      </div>
+      <p class="help">Sending is simulated in this prototype. Nothing is delivered to the customer.</p>`;
+    if (window.lucide) lucide.createIcons();
+    document.querySelector('#ptnr-drawer .icon-btn').focus();
+  } catch (e) {
+    body.innerHTML = '<p class="help">Lead details are unavailable right now.</p>';
+  }
+}
+
+function closeLeadDrawer() {
+  const d = document.getElementById('ptnr-drawer');
+  d.classList.remove('open'); d.setAttribute('aria-hidden', 'true');
+  document.getElementById('ptnr-scrim').classList.add('hidden');
+}
+document.addEventListener('keydown', e => { if (e.key === 'Escape') closeLeadDrawer(); });
+
+function sendWinBack() {
+  if (!drawerLead) return;
+  const m = assistedMap(); m[drawerLead.lead_id] = 'Message sent';
+  try { localStorage.setItem(ASSISTED_KEY, JSON.stringify(m)); } catch (e) {}
+  const b = document.getElementById('pd-send'); b.disabled = true; b.textContent = 'Message sent';
+  toast(`Win-back message queued for ${drawerLead.business_name} (simulated)`, 'success');
+  renderPartnerRows();
+}
+
+// Open the lead in the AI Advisor, pre-filled
 function assistDroppedLead(leadId) {
   const l = partnerLeads.find(x => x.lead_id === leadId);
   if (!l) return;
+  closeLeadDrawer();
   switchTab('advisor');
+  if (typeof setAdvisorMode === 'function') setAdvisorMode('form');
   document.getElementById('adv-biz-type').value = LEAD_SEGMENT_TO_BIZ[l.segment] || 'Kirana & Retail Store';
   document.getElementById('adv-city-tier').value = String(l.city_tier);
   document.getElementById('adv-city-name').value = l.city || '';

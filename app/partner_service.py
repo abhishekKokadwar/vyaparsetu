@@ -156,10 +156,19 @@ class PartnerService:
         # The rule score saturates (many leads share the same value), so rank ties by secondary signals:
         # monthly spend, team size, and how recently the lead entered the funnel (later = warmer).
         created = pd.to_datetime(leads.get('created_date'), errors='coerce')
-        spend_rank = pd.to_numeric(leads['monthly_telecom_spend_inr'], errors='coerce').fillna(0).rank(pct=True)
-        staff_rank = pd.to_numeric(leads['employee_count'], errors='coerce').fillna(1).rank(pct=True)
-        recency_rank = created.rank(pct=True).fillna(0)
-        leads['tie_break'] = (spend_rank + staff_rank + recency_rank) / 3.0
+        spend = pd.to_numeric(leads['monthly_telecom_spend_inr'], errors='coerce').fillna(0)
+        staff = pd.to_numeric(leads['employee_count'], errors='coerce').fillna(1)
+        # raw magnitudes (not ranks) so the best leads still differ from each other
+        spend_n = spend / max(spend.max(), 1)
+        staff_n = staff / max(staff.max(), 1)
+        recency_n = (created - created.min()).dt.days.fillna(0)
+        recency_n = recency_n / max(recency_n.max(), 1)
+        leads['tie_break'] = (spend_n + staff_n + recency_n) / 3.0
+        # The rule score saturates (thousands share 98), so cap it at 95 and add up to 3 points of
+        # continuous signal. Scores stay 10-98 and ordering by rule is preserved; ties spread out.
+        base = leads['propensity_score']
+        # invalid-number leads stay pinned at the penalty floor (10)
+        leads['propensity_score'] = (base.clip(upper=95) + 3 * leads['tie_break'] * (base > 10)).round(1)
 
         def why(row):
             out = []
@@ -168,6 +177,9 @@ class PartnerService:
                 out.append(f"Reached '{stage}'")
             elif stage:
                 out.append(f"Got as far as '{stage}'")
+            drop = str(row.get('drop_reason', '')).strip()
+            if drop and drop.lower() != 'nan':
+                out.append(drop[0].upper() + drop[1:])
             try:
                 if float(row.get('monthly_telecom_spend_inr', 0)) >= 5000:
                     out.append(f"Spends Rs {int(float(row['monthly_telecom_spend_inr'])):,}/mo")
@@ -334,7 +346,7 @@ class PartnerService:
                 'stage_reached': r['stage_reached'],
                 'drop_reason': r['drop_reason'],
                 'drop_category': r['drop_category'],
-                'propensity_score': int(r['propensity_score']),
+                'propensity_score': round(float(r['propensity_score']), 1),
                 'propensity_tier': r['propensity_tier'],
                 'reasons': list(r['reasons']) if 'reasons' in r else [],
                 'recommended_action': DROP_PLAYBOOKS.get(r['drop_category'], DROP_PLAYBOOKS['SALES_INACTIVITY'])['recommended_action'],
@@ -369,7 +381,7 @@ class PartnerService:
             'stage_reached': raw['stage_reached'],
             'drop_reason': raw['drop_reason'],
             'drop_category': raw['drop_category'],
-            'propensity_score': int(raw['propensity_score']),
+            'propensity_score': round(float(raw['propensity_score']), 1),
             'propensity_tier': raw['propensity_tier'],
             'commission': comm,
             'playbook': pitch
@@ -406,6 +418,7 @@ class PartnerService:
         return {
             'total_dropped_leads': total_dropped,
             'high_propensity_count': n_high,
+            'high_score_threshold': int(q80),
             'medium_propensity_count': n_med,
             'low_propensity_count': n_low,
             'high_propensity_pct': round((n_high / total_dropped) * 100, 1),

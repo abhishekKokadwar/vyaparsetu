@@ -154,7 +154,7 @@ def run_journey(page, mode_name: str, base_url: str):
     switch_to_tab(page, "partner")
     page.wait_for_timeout(400)
     salvageable_text = page.locator("#ptnr-salvageable").inner_text()
-    assert "932" in salvageable_text, f"Expected 932 high propensity leads, got {salvageable_text}"
+    assert "927" in salvageable_text, f"Expected 927 high propensity leads, got {salvageable_text}"
     rows = page.locator("#ptnr-leads-table tr")
     assert rows.count() > 0, "Expected at least 1 lead row in partner table"
     print(f"        PASS: Partner portal shows {salvageable_text} salvageable leads.")

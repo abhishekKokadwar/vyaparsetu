@@ -88,7 +88,7 @@ arch_svg = """<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 680" wid
     <text x="20" y="30" fill="#FFFFFF" font-size="13" font-weight="700">Lead Propensity Salvage</text>
     <text x="20" y="50" fill="#94A3B8" font-size="11">Evaluates 4,632 dropped leads</text>
     <text x="20" y="68" fill="#94A3B8" font-size="11">Percentile propensity scoring</text>
-    <text x="20" y="86" fill="#94A3B8" font-size="11">932 Top 20% targets (&gt;=80)</text>
+    <text x="20" y="86" fill="#94A3B8" font-size="11">927 Top 20% targets (&gt;=80)</text>
     <text x="20" y="110" fill="#10B981" font-size="10" font-weight="600">₹1.91 Cr Recoverable ARR</text>
   </g>
 

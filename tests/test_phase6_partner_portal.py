@@ -123,3 +123,10 @@ def test_macro_portfolio_salvage_stats(partner_service):
     assert stats['projected_recoverable_arr_inr'] > 0
     assert stats['partner_commission_pool_inr'] > 0
     assert len(stats['drop_categories_breakdown']) == 5
+
+
+def test_top_leads_have_spread_scores_and_reasons(partner_service):
+    """The rule score saturates; the continuous blend must keep the top of the queue distinguishable."""
+    top = partner_service.get_dropped_leads(limit=25)
+    assert len({l['propensity_score'] for l in top}) > 4
+    assert all(1 <= len(l['reasons']) <= 3 for l in top)

@@ -159,7 +159,7 @@ def test_ui_smoke_navigation_and_zero_console_errors():
         assert "4,632" in dropped_stat
 
         salvageable_stat = page.locator("#ptnr-salvageable").inner_text()
-        assert "932" in salvageable_stat
+        assert "927" in salvageable_stat
 
         arr_stat = page.locator("#ptnr-arr").inner_text()
         assert "1.91" in arr_stat

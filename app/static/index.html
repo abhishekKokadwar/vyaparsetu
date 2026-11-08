@@ -664,68 +664,67 @@
 
     <!-- ==================== TAB 5: PARTNER & FIELD RECOVERY PORTAL ==================== -->
     <section id="view-partner" class="tab-view" role="tabpanel" aria-labelledby="tab-btn-partner" tabindex="-1">
-      <div class="space-y-6">
-        <!-- Top Stats Banner -->
-        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-          <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm">
-            <span class="text-xs text-slate-500 font-medium">Total Dropped Leads (Apr-Jun)</span>
-            <div class="text-2xl font-extrabold text-slate-900 mt-1 tabular" id="ptnr-dropped-leads">4,632</div>
-            <span class="text-xs text-slate-500">From 5,000 baseline leads</span>
+      <div class="ptnr">
+        <dl class="kpi-strip kpi-4">
+          <div><dt class="kpi-l">Total dropped leads (Apr-Jun)</dt><dd class="kpi-v" id="ptnr-dropped-leads">4,632</dd><span class="help">From 5,000 baseline leads</span></div>
+          <div><dt class="kpi-l">High propensity, salvageable</dt><dd class="kpi-v" id="ptnr-salvageable">927</dd><span class="help" id="ptnr-threshold">Top 20% by propensity score</span></div>
+          <div><dt class="kpi-l">Recoverable ARR opportunity</dt><dd class="kpi-v text-ok" id="ptnr-arr">₹1.91 Cr</dd><span class="help">At ₹2.5k avg bundle/mo</span></div>
+          <div><dt class="kpi-l">Partner commission pool</dt><dd class="kpi-v" id="ptnr-comm">₹28.6 Lakh</dd><span class="help">15% revenue share on assisted closes</span></div>
+        </dl>
+
+        <p class="notice notice-warn ptnr-note"><i data-lucide="info" class="w-4 h-4 shrink-0" aria-hidden="true"></i>
+          <span>Demo data from the 5,000-lead sample set. In production this portal sits behind partner sign-in and shows only that partner's territory.</span></p>
+
+        <div class="ptnr-head">
+          <div>
+            <h2 class="text-lg font-bold text-slate-900">Propensity score recovery queue</h2>
+            <p class="help">Leads that dropped out, ranked by how likely they are to convert with partner help.</p>
           </div>
-          <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm">
-            <span class="text-xs text-slate-500 font-medium">High Propensity Salvageable</span>
-            <div class="text-2xl font-extrabold text-slate-900 mt-1 tabular" id="ptnr-salvageable">932</div>
-            <span class="text-xs text-slate-600 font-medium">Top 20% Propensity Score (&ge;80)</span>
-          </div>
-          <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm">
-            <span class="text-xs text-slate-500 font-medium">Recoverable ARR Opportunity</span>
-            <div class="text-2xl font-extrabold text-ok mt-1 tabular" id="ptnr-arr">₹1.91 Cr</div>
-            <span class="text-xs text-ok font-medium">At ₹2.5k avg bundle/mo</span>
-          </div>
-          <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm">
-            <span class="text-xs text-slate-500 font-medium">Partner Commission Pool</span>
-            <div class="text-2xl font-extrabold text-slate-900 mt-1 tabular" id="ptnr-comm">₹28.6 Lakh</div>
-            <span class="text-xs text-slate-600 font-medium">15% revenue share on assisted closes</span>
+          <div class="ptnr-tools">
+            <input id="ptnr-search" type="search" class="field" placeholder="Search name, lead ID or city" aria-label="Search leads" oninput="renderPartnerRows()">
+            <select id="ptnr-filter-segment" onchange="renderPartnerRows()" class="field" aria-label="Filter by segment">
+              <option value="">All segments</option>
+              <option value="Micro retail & services">Micro retail</option>
+              <option value="Professional offices">Professional offices</option>
+              <option value="Small multi-site businesses">Multi-site</option>
+              <option value="Small manufacturers">Manufacturing</option>
+            </select>
+            <select id="ptnr-sort" onchange="renderPartnerRows()" class="field" aria-label="Sort leads">
+              <option value="score">Sort: Priority</option>
+              <option value="spend">Sort: Monthly spend</option>
+              <option value="staff">Sort: Team size</option>
+              <option value="name">Sort: Name</option>
+            </select>
           </div>
         </div>
 
-        <!-- Dropped Leads Recovery Table -->
-        <div class="bg-white rounded-2xl border border-slate-200 shadow-sm p-6">
-          <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center pb-4 border-b border-slate-100 gap-3">
-            <div>
-              <h2 class="text-lg font-bold text-slate-900">Propensity Score Recovery Queue</h2>
-              <p class="text-xs text-slate-500">Surface leads that dropped out due to visit scheduling or quote delays for 1-click partner assistance</p>
-            </div>
-            <div class="flex space-x-2 text-xs">
-              <select id="ptnr-filter-segment" onchange="loadPartnerLeads()" class="field" style="width:auto;min-width:12rem" aria-label="Filter by segment">
-                <option value="">All Segments</option>
-                <option value="Micro retail & services">Micro Retail (55%)</option>
-                <option value="Professional offices">Professional Offices (25%)</option>
-                <option value="Small multi-site businesses">Multi-Site (15%)</option>
-                <option value="Small manufacturers">Manufacturing (5%)</option>
-              </select>
-            </div>
-          </div>
-
-          <div class="overflow-x-auto mt-4 text-sm">
-            <table class="w-full text-left">
-              <thead class="bg-slate-50 border-b border-slate-200 text-slate-600 font-semibold text-xs">
-                <tr>
-                  <th class="py-2.5 px-3">Lead ID & Business</th>
-                  <th class="py-2.5 px-3">Segment & City</th>
-                  <th class="py-2.5 px-3">Stage Reached</th>
-                  <th class="py-2.5 px-3">Drop Reason</th>
-                  <th class="py-2.5 px-3 text-center" title="Likelihood to convert with partner help (0–100)">Priority</th>
-                  <th class="py-2.5 px-3 text-right">Recovery Action</th>
-                </tr>
-              </thead>
-              <tbody id="ptnr-leads-table" class="divide-y divide-slate-100">
-                <!-- Populated dynamically -->
-              </tbody>
-            </table>
-          </div>
+        <div class="overflow-x-auto text-sm">
+          <table class="w-full text-left">
+            <thead class="text-slate-600 font-semibold text-xs">
+              <tr>
+                <th class="py-2.5 px-3">Lead and business</th>
+                <th class="py-2.5 px-3">Segment and city</th>
+                <th class="py-2.5 px-3">Stage reached</th>
+                <th class="py-2.5 px-3">Drop reason</th>
+                <th class="py-2.5 px-3 text-center" title="Likelihood to convert with partner help (0-100)">Priority</th>
+                <th class="py-2.5 px-3 text-right">Action</th>
+              </tr>
+            </thead>
+            <tbody id="ptnr-leads-table" class="divide-y divide-slate-100"></tbody>
+          </table>
+          <p id="ptnr-empty" class="help hidden py-6 text-center">No leads match that search.</p>
         </div>
+        <p id="ptnr-count" class="help mt-2"></p>
       </div>
+
+      <div id="ptnr-scrim" class="ptnr-scrim hidden" onclick="closeLeadDrawer()"></div>
+      <aside id="ptnr-drawer" class="ptnr-drawer" aria-hidden="true" aria-labelledby="pd-name" role="dialog">
+        <div class="flex items-start justify-between gap-3">
+          <div class="min-w-0"><h3 id="pd-name" class="text-lg font-bold text-slate-900"></h3><p id="pd-sub" class="help"></p></div>
+          <button type="button" class="icon-btn" onclick="closeLeadDrawer()" aria-label="Close lead details"><i data-lucide="x" class="w-5 h-5"></i></button>
+        </div>
+        <div id="pd-body" class="mt-4 space-y-5"></div>
+      </aside>
     </section>
 
   </main>
