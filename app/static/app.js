@@ -1359,7 +1359,11 @@ function initSplitter(el) {
   const box = el.parentElement;
   const cssVar = el.dataset.var, mode = el.dataset.mode;
   const min = +el.dataset.min, max = +el.dataset.max, key = el.dataset.key;
-  const apply = px => box.style.setProperty(cssVar, Math.max(min, Math.min(max, Math.round(px))) + 'px');
+  const OTHER_MIN = 340;   // the panel on the other side never gets narrower than this
+  const apply = px => {
+    const ceiling = Math.min(max, box.clientWidth - OTHER_MIN - el.offsetWidth);
+    box.style.setProperty(cssVar, Math.max(min, Math.min(ceiling, Math.round(px))) + 'px');
+  };
   const current = () => parseFloat(getComputedStyle(box).getPropertyValue(cssVar)) || (mode === 'left' ? el.previousElementSibling : el.nextElementSibling).getBoundingClientRect().width;
   try { const saved = localStorage.getItem(key); if (saved) apply(+saved); } catch (e) {}
   const save = () => { try { localStorage.setItem(key, String(parseFloat(box.style.getPropertyValue(cssVar)))); } catch (e) {} };
