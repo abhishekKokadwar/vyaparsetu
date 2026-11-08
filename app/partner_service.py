@@ -173,11 +173,6 @@ class PartnerService:
                     out.append(f"Spends Rs {int(float(row['monthly_telecom_spend_inr'])):,}/mo")
             except (TypeError, ValueError):
                 pass
-            try:
-                if int(row.get('employee_count', 1)) >= 5:
-                    out.append(f"{int(row['employee_count'])} staff")
-            except (TypeError, ValueError):
-                pass
             if str(row.get('has_gstin')).upper() == 'Y':
                 out.append('GSTIN registered')
             if str(row.get('has_udyam')).upper() == 'Y':
