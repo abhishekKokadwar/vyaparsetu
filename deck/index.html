@@ -23,7 +23,7 @@ const q = new URLSearchParams(location.search);
 const RED='#E40000', INK='#0F172A', SLATE='#475569', MUTED='#64748B', LINE='#E2E8F0',
       SOFT='#F8FAFC', REDBG='#FFF1F1', GREEN='#059669', GREENBG='#ECFDF5', AMBER='#D97706', AMBERBG='#FFF7E6';
 const SERIF="Georgia, 'Nirmala UI', serif", SANS="'Segoe UI', 'Nirmala UI', sans-serif", MONO="Consolas, monospace";
-const TOTAL=8;
+const TOTAL=7;
 
 // ---------- svg helpers ----------
 const esc = s => String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
@@ -175,13 +175,14 @@ S.push(()=>{
 
 // 4 · JOURNEY
 S.push(()=>{
-  let s=head(4,'The solution · working prototype','From first question to a booked install in one session','Four phone screens replace the field visit, the PDF quote and paper KYC.');
+  let s=head(4,'The solution · working prototype','From first question to a booked install in one session','Four real screens, captured from the live prototype, replace the field visit, the PDF quote and paper KYC.');
   const st=[
     {n:'Advisor',t:'~3 min',was:'Sales visit after 3+ calls',b:['Chat in Hindi, English + 6 languages','Explains “why this bundle” plainly']},
     {n:'Quote & pay',t:'~2 min',was:'PDF quote in 3–5 days',b:['One monthly price, no product codes','Add-ons toggle; rules checked live']},
     {n:'Smart KYC',t:'~3 min',was:'Paper copies, in person',b:['GSTIN / Udyam lookup fills the form','OCR checks and logged consent; DigiLocker and e-sign are next']},
     {n:'Tracker',t:'2–5 days',was:'3 chase calls per customer',b:['5 milestones, technician and slot','WhatsApp updates, no chase calls']},
   ];
+  s+=`<image href="assets/qr.png" x="1700" y="162" width="96" height="96"/>`+T(1748,278,'Scan to try it live',{size:13,fill:MUTED,anchor:'middle'});
   const x0=110,w=400,g=33,y=300;
   st.forEach((p,i)=>{
     const x=x0+i*(w+g);
@@ -190,76 +191,22 @@ S.push(()=>{
     s+=T(x+76,y+51,p.n,{font:SERIF,size:27,w:700});
     const pl=pill(x+w-20-((ctx.font=`700 13px ${MONO}`),ctx.measureText(p.t).width+13*0.16*p.t.length+24),y+26,p.t,{size:13,fill:SOFT,color:SLATE}); s+=pl.svg;
     if(i<3) s+=`<path d="M${x+w+4} ${y+42} h${g-10}" stroke="${RED}" stroke-width="3" marker-end="url(#arR)"/>`;
-    // mini phone mock
-    const mx=x+22,my=y+84,mw=w-44,mh=196;
-    s+=R(mx,my,mw,mh,{fill:SOFT,stroke:LINE,r:12});
-    if(i===0){
-      s+=R(mx+14,my+16,250,40,{fill:'#fff',stroke:LINE,r:10})+T(mx+28,my+42,'आपका व्यवसाय क्या है?',{size:17});
-      s+=R(mx+mw-234,my+68,220,40,{fill:INK,r:10})+T(mx+mw-220,my+94,'Dental clinic, 4 staff',{size:17,fill:'#fff'});
-      s+=R(mx+14,my+120,mw-28,60,{fill:REDBG,stroke:RED,r:10,sw:1})+T(mx+28,my+145,'Vyapar Professional Suite · ₹3,097/mo',{size:17,w:700,fill:RED})+T(mx+28,my+168,'Fibre 300, email × 4, backup, guest Wi-Fi, static IP',{size:13,fill:SLATE});
-    }
-    if(i===1){
-      [['Biz Fibre 300','₹1,499',1],['Cloud email × 4','₹500',1],['Cloud backup 1TB','₹499',1],['Guest Wi-Fi','₹399',1]].forEach(([n,v,on],j)=>{
-        const yy=my+30+j*36; s+=T(mx+16,yy,n,{size:16,fill:on?INK:MUTED})+T(mx+mw-78,yy,v,{size:16,w:600,anchor:'end',fill:on?INK:MUTED});
-        s+=R(mx+mw-62,yy-16,44,22,{fill:on?GREEN:'#CBD5E1',r:11})+C(on?mx+mw-29:mx+mw-51,yy-5,8,{fill:'#fff'});
-      });
-      s+=Ln(mx+16,my+158,mx+mw-16,my+158)+T(mx+16,my+184,'Total / month (+ ₹200 Static IP)',{size:14,w:700})+T(mx+mw-16,my+184,'₹3,097',{size:20,w:700,fill:RED,anchor:'end'});
-    }
-    if(i===2){
-      [['GSTIN 23AAB•••••4K1Z9','Active',1],['Udyam UDYAM-MP-••-0451','Matched',1],['Address proof','257 days old',0]].forEach(([n,v,ok],j)=>{
-        const yy=my+32+j*40; s+=(ok?tick(mx+26,yy-6):cross(mx+26,yy-6))+T(mx+46,yy,n,{size:15,fill:INK})+T(mx+mw-14,yy,v,{size:15,w:700,anchor:'end',fill:ok?GREEN:RED});
-      });
-      s+=R(mx+14,my+142,mw-28,40,{fill:'#fff',stroke:LINE,r:8})+R(mx+26,my+153,18,18,{fill:INK,r:4})+`<path d="M${mx+30} ${my+162} l4 4 l7 -8" stroke="#fff" stroke-width="2.4" fill="none"/>`+T(mx+54,my+168,'I consent: used only for this connection',{size:14,fill:SLATE});
-    }
-    if(i===3){
-      const ms=['Order','KYC','Survey','Install','Live']; const sx=mx+30, step=(mw-60)/4;
-      s+=Ln(sx,my+44,sx+step*4,my+44,{stroke:LINE,sw:4})+Ln(sx,my+44,sx+step*2,my+44,{stroke:GREEN,sw:4});
-      ms.forEach((m,j)=>{ const cx=sx+j*step; s+= j<2?tick(cx,my+44):(j===2?C(cx,my+44,11,{fill:'#fff',stroke:RED,sw:4}):C(cx,my+44,9,{fill:'#fff',stroke:'#CBD5E1',sw:3})); s+=T(cx,my+80,m,{size:14,anchor:'middle',fill:j<=2?INK:MUTED,w:j===2?700:400}); });
-      s+=R(mx+14,my+106,mw-28,74,{fill:'#fff',stroke:LINE,r:10})+C(mx+46,my+143,20,{fill:INK})+T(mx+46,my+150,'RK',{size:15,w:700,fill:'#fff',anchor:'middle'});
-      s+=T(mx+78,my+136,'Ravi K. · Fri 10:00–12:00',{size:16,w:700})+T(mx+78,my+162,'Visit PIN 4821 · tap to reschedule',{size:14,fill:SLATE});
-    }
+    // real screenshot from the deployed prototype
+    const mx=x+22,my=y+84,mw=w-44,mh=196, shot=['shot_advisor','shot_quote','shot_kyc','shot_tracker'][i];
+    s+=`<clipPath id="c4_${i}"><rect x="${mx}" y="${my}" width="${mw}" height="${mh}" rx="10"/></clipPath><image href="assets/${shot}.jpg" x="${mx}" y="${my}" width="${mw}" height="${mh}" preserveAspectRatio="xMidYMin slice" clip-path="url(#c4_${i})"/>`;
+    s+=`<rect x="${mx}" y="${my}" width="${mw}" height="${mh}" rx="10" fill="none" stroke="${LINE}"/>`;
     // bullets
     let yy=y+326;
     p.b.forEach(b=>{ s+=C(x+30,yy-6,4,{fill:RED}); const t=W(x+44,yy,w-66,b,{size:18.5,fill:INK,lh:1.3}); s+=t.svg; yy+=t.h+12; });
     s+=R(x+22,y+424,w-44,54,{fill:SOFT,r:10})+T(x+38,y+457,'TODAY',{font:MONO,size:13,w:700,fill:MUTED,ls:2})+T(x+112,y+457,p.was,{size:16.5,fill:SLATE,style:'text-decoration="line-through"'});
   });
-  s+=foot(4,'**Working prototype:** 32 APIs · rules engine · mock GSTIN/Udyam registries · KYC checks · tracker · partner back office.');
+  s+=foot(4,'**Working prototype:** 32 APIs · 19/19 advisor scenarios · 12/12 KYC specimens match the answer key · 927 leads ranked with reasons · voice input · partner back-office.');
   return s;
 });
 
-// 5 · PROOF (real screenshots of the running prototype)
+// 5 · ARCHITECTURE + PRIVACY
 S.push(()=>{
-  let s=head(5,'Proof · live prototype','It runs: four real screens, live today','Screenshots from the deployed prototype, not mock-ups. Try it at vyaparsetu-airtel.vercel.app');
-  const shots=[['shot_advisor','1 · Advisor','Describe the business, typed or spoken; get a bundle with reasons'],
-               ['shot_quote','2 · Quote','One monthly price; toggle add-ons, rules re-check live'],
-               ['shot_kyc','3 · Smart KYC','Consent first; a cancelled GSTIN is caught, with the reason'],
-               ['shot_tracker','4 · Tracker','Order number + mobile: timeline, technician, messages sent']];
-  shots.forEach(([f,t,c],i)=>{
-    const x=110+i*430, w=410, y=300;
-    s+=card(x,y,w,330);
-    s+=`<clipPath id="clip${i}"><rect x="${x+10}" y="${y+10}" width="390" height="240" rx="8"/></clipPath><image href="assets/${f}.jpg" x="${x+10}" y="${y+10}" width="390" height="240" preserveAspectRatio="xMidYMid slice" clip-path="url(#clip${i})"/>`;
-    s+=`<rect x="${x+10}" y="${y+10}" width="390" height="240" rx="8" fill="none" stroke="${LINE}"/>`;
-    s+=T(x+16,y+280,t,{size:19,w:700});
-    s+=W(x+16,y+296,380,c,{size:15,fill:SLATE,lh:1.25}).svg;
-  });
-  // evidence strip
-  s+=card(110,650,1270,230);
-  s+=kick(140,692,'Evidence',MUTED);
-  const ev=[['19 / 19','advisor test scenarios passed'],['12 / 12','KYC specimen applicants match the answer key (6 pass, 6 reject)'],['927','high-propensity leads, each ranked with reasons'],['116','automated tests pass; UI audited in light and dark']];
-  ev.forEach(([v,l],i)=>{ const x=140+i*310; s+=T(x,775,v,{font:SERIF,size:44,w:700,fill:i===0?RED:INK}); s+=W(x,800,280,l,{size:16,fill:SLATE,lh:1.3}).svg; });
-  // QR
-  s+=card(1400,650,410,230,{accent:RED});
-  s+=`<image href="assets/qr.png" x="1425" y="690" width="150" height="150"/>`;
-  s+=T(1595,730,'Try it live',{font:SERIF,size:26,w:700});
-  s+=W(1595,752,200,'Scan, or open vyaparsetu-airtel.vercel.app',{size:15,fill:SLATE,lh:1.3}).svg;
-  s+=W(1595,812,200,'No login. Demo data only.',{size:14,fill:MUTED,lh:1.3}).svg;
-  s+=foot(5,'**Stretch goals also built:** voice input in Hindi and English, and a partner back-office with propensity scores and reasons.');
-  return s;
-});
-
-// 6 · ARCHITECTURE + PRIVACY
-S.push(()=>{
-  let s=head(6,'Architecture · trust','The AI suggests, the rules engine decides, and privacy is built in','Main components and data flows, with DPDP Act 2023 controls.');
+  let s=head(5,'Architecture · trust','The AI suggests, the rules engine decides, and privacy is built in','Main components and data flows, with DPDP Act 2023 controls.');
   s+=card(110,300,1070,580);
   s+=kick(140,342,'Solution architecture',MUTED);
   const planned=new Set(['WhatsApp','Partner tablet','Field sales app','CRM','Billing (one bill)','Provisioning','Partner payouts']);
@@ -287,13 +234,13 @@ S.push(()=>{
   for(let i=1;i<=12;i++){ const k='K'+String(i).padStart(2,'0'), x=1230+((i-1)%6)*94, y=718+Math.floor((i-1)/6)*52, bad=rej[k];
     s+=R(x,y,84,42,{fill:bad?REDBG:GREENBG,stroke:bad?'#FCA5A5':'#A7F3D0',r:8})+T(x+42,y+28,k,{font:MONO,size:17,w:700,fill:bad?RED:GREEN,anchor:'middle'}); }
   s+=W(1230,840,560,'**6 rejected, 6 cleared** (matches the answer key): cancelled or bogus GSTIN · unreadable cert · missing Udyam · name mismatch · old address proof',{size:14.5,fill:SLATE,bfill:RED,lh:1.25}).svg;
-  s+=foot(6,'**The LLM never sets a price or approves KYC** — catalogue rules and registry data do, with an audit trail.');
+  s+=foot(5,'**The LLM never sets a price or approves KYC** — catalogue rules and registry data do, with an audit trail.');
   return s;
 });
 
 // 6 · COMPETITION
 S.push(()=>{
-  let s=head(7,'Competitive analysis','Rivals sell one piece; we sell the whole setup in one sitting','Our assessment of public SMB offerings, Oct 2026.  ● full  ◐ partial  ○ none.  VyaparSetu column = designed scope; the prototype shows the first four rows.');
+  let s=head(6,'Competitive analysis','Rivals sell one piece; we sell the whole setup in one sitting','Our assessment of public SMB offerings, Oct 2026.  ● full  ◐ partial  ○ none.  VyaparSetu column = designed scope; the prototype shows the first four rows.');
   const cols=['Jio Business','Tata Tele Business','Local ISP / reseller','Single-product apps (POS, email, CCTV)','VyaparSetu (Accel)'];
   const rows=[
     ['Buy online, no sales visit',[1,0,0,2,2]],
@@ -321,13 +268,13 @@ S.push(()=>{
             ['Partners stay in the loop','Self-serve sales are QR-tagged, so the local partner still earns.'],
             ['Trust from verified data','GSTIN leads activate ~5× more; we verify them in seconds.']];
   rw.forEach(([a,b],i)=>{ const x=110+i*575; s+=card(x,762,550,122,{accent:RED}); s+=T(x+30,798,a,{font:SERIF,size:22,w:700}); s+=W(x+30,834,500,b,{size:17.5,fill:SLATE,lh:1.3}).svg; });
-  s+=foot(7,'**Our gap is price, not scope:** one bill for everything the shop needs, from ₹1,996 a month.');
+  s+=foot(6,'**Our gap is price, not scope:** one bill for everything the shop needs, from ₹1,996 a month.');
   return s;
 });
 
 // 7 · IMPACT
 S.push(()=>{
-  let s=head(8,'Impact · metrics · rollout','Twice the activations from the same leads, at half the cost each','6-month targets against the Apr–Jun 2026 baseline.');
+  let s=head(7,'Impact · metrics · rollout','Twice the activations from the same leads, at half the cost each','6-month targets against the Apr–Jun 2026 baseline.');
   // KPI table
   s+=card(110,300,990,420);
   const hd=['Metric','Today','6-mo target','Main lever'], cx=[140,500,640,800];
@@ -363,7 +310,7 @@ S.push(()=>{
   s+=kick(140,778,'Rollout',MUTED);
   const ph=[['0–3 mo · Pilot','2 cities · Hindi/English'],['3–6 mo · Scale','Tier 1–2 · WhatsApp · 6 languages'],['6–12 mo · National','Multi-site, factory · voice']];
   ph.forEach(([a,b],i)=>{ const x=140+i*318; s+=R(x,796,300,8,{fill:i===0?RED:(i===1?'#F87171':'#FCA5A5'),r:4}); s+=T(x,830,a,{size:18,w:700}); s+=T(x,858,b,{size:16,fill:SLATE}); });
-  s+=foot(8,'**Risks covered:** AI errors → rules engine · channel conflict → QR commission · low digital comfort → assisted mode.');
+  s+=foot(7,'**Risks covered:** AI errors → rules engine · channel conflict → QR commission · low digital comfort → assisted mode.');
   return s;
 });
 
