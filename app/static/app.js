@@ -2,7 +2,8 @@
 
 let currentLanguage = 'en';
 let allProducts = [];
-let selectedProductIds = new Set(['P01', 'P19', 'P07', 'P23']); // Default Kirana bundle
+let selectedProductIds = new Set(); // empty until the customer or the Advisor picks products
+let recommendedProductIds = new Set();
 let productQuantities = {}; // advisor-chosen quantities, so the quote matches the advisor price
 let activeCategoryFilter = 'all';
 let currentRecommendation = null;
@@ -294,124 +295,135 @@ async function loadCatalogue() {
   }
 }
 
-// Render Catalogue with Toggles
+// ---- Quote tab -------------------------------------------------------------------------------------------
+function toast(message, kind = 'info') {
+  let host = document.getElementById('toast-host');
+  if (!host) {
+    host = document.createElement('div');
+    host.id = 'toast-host';
+    host.setAttribute('aria-live', 'polite');
+    document.body.appendChild(host);
+  }
+  const t = document.createElement('div');
+  t.className = `toast toast-${kind}`;
+  t.textContent = message;
+  host.appendChild(t);
+  setTimeout(() => t.remove(), 4000);
+}
+
+const inr = n => '₹' + Number(n || 0).toLocaleString('en-IN');
+const customerHasGst = () => document.querySelector('input[name="adv-has-gst"]:checked')?.value !== 'no';
+
 function renderCatalogList() {
   const container = document.getElementById('catalog-products-list');
   if (!container) return;
+  const nameOf = id => (allProducts.find(x => x.product_id === id) || {}).product_name || id;
+  const hasGst = customerHasGst();
 
-  const filtered = activeCategoryFilter === 'all' 
-    ? allProducts 
-    : allProducts.filter(p => p.category === activeCategoryFilter);
-
+  const filtered = activeCategoryFilter === 'all' ? allProducts : allProducts.filter(p => p.category === activeCategoryFilter);
   container.innerHTML = filtered.map(p => {
-    const isChecked = selectedProductIds.has(p.product_id);
-    const requiresGstBadge = p.requires_gstin 
-      ? `<span class="bg-amber-50 text-amber-800 border border-amber-200 text-xs px-2 py-0.5 rounded font-semibold ml-2">Requires GST</span>` 
-      : '';
-    const depNotice = p.requires_one_of && p.requires_one_of.length > 0
-      ? `<span class="text-xs text-slate-600 block mt-1">Needs base connection: ${escapeHtml(p.requires_one_of.join(' | '))}</span>`
-      : '';
-
+    const on = selectedProductIds.has(p.product_id);
+    const locked = p.requires_gstin && !hasGst && !on;
+    const recommended = recommendedProductIds.has(p.product_id);
+    const dep = (p.requires_one_of || []).length
+      ? `<p class="prow-note">Needs a base connection: ${escapeHtml(p.requires_one_of.slice(0, 2).map(nameOf).join(' or '))}${p.requires_one_of.length > 2 ? ' …' : ''}</p>` : '';
+    const lockNote = locked ? `<p class="prow-note">Available once a GSTIN is registered.</p>` : '';
     return `
-      <label class="p-3.5 border rounded-xl flex items-start justify-between cursor-pointer transition min-h-[44px] ${isChecked ? 'bg-indigo-50/60 border-indigo-200' : 'bg-white border-slate-200 hover:border-slate-300'}">
-        <div class="flex items-start space-x-3">
-          <input type="checkbox" onchange="toggleProductSelection('${p.product_id}', this.checked)" ${isChecked ? 'checked' : ''} class="mt-1 w-5 h-5 rounded text-airtel-red focus:ring-airtel-red shrink-0">
-          <div>
-            <div class="flex items-center flex-wrap gap-1">
-              <span class="font-bold text-sm text-slate-900">${escapeHtml(p.product_name)}</span>
-              <span class="text-xs font-mono text-slate-600">(${escapeHtml(p.product_id)})</span>
-              <span class="text-xs bg-slate-100 text-slate-700 px-2 py-0.5 rounded font-medium">${escapeHtml(p.category)}</span>
-              ${requiresGstBadge}
-            </div>
-            <p class="text-sm text-slate-600 mt-1 leading-relaxed">${escapeHtml(p.description)}</p>
-            ${depNotice}
+      <label class="prow${on ? ' is-on' : ''}${locked ? ' is-locked' : ''}">
+        <input type="checkbox" class="chk" ${on ? 'checked' : ''} ${locked ? 'disabled' : ''}
+               aria-label="${escapeHtml(p.product_name)}" onchange="toggleProductSelection('${p.product_id}', this.checked)">
+        <div class="min-w-0 flex-1">
+          <div class="flex items-center flex-wrap gap-x-2 gap-y-1">
+            <span class="prow-name">${escapeHtml(p.product_name)}</span>
+            <span class="badge">${escapeHtml(p.category)}</span>
+            ${recommended ? '<span class="badge badge-info">Recommended</span>' : ''}
+            ${p.requires_gstin ? '<span class="badge badge-warn">Needs GSTIN</span>' : ''}
           </div>
+          <p class="prow-desc">${escapeHtml(p.description)}</p>
+          ${dep}${lockNote}
         </div>
-        <div class="text-right whitespace-nowrap ml-3 shrink-0">
-          <div class="font-bold text-sm text-slate-900 tabular">₹${p.price_min_inr_per_month.toLocaleString('en-IN')}<span class="text-xs text-slate-600 font-normal"> /mo</span></div>
-          <span class="text-xs text-slate-600 tabular block">Setup: ₹${p.one_time_setup_inr.toLocaleString('en-IN')}</span>
+        <div class="prow-price">
+          <span class="tabular"><b>${inr(p.price_min_inr_per_month)}</b>/mo</span>
+          <span class="prow-setup tabular">Setup ${inr(p.one_time_setup_inr)}</span>
         </div>
-      </label>
-    `;
+      </label>`;
   }).join('');
 }
 
 function filterCatalogCategory(cat) {
   activeCategoryFilter = cat;
-  document.querySelectorAll('.cat-filter').forEach(btn => {
-    btn.classList.toggle('active', btn.textContent.includes(cat) || (cat === 'all' && btn.textContent.includes('All')));
-  });
+  document.querySelectorAll('.chips-scroll .chip').forEach(btn => btn.classList.toggle('is-on', btn.dataset.cat === cat));
   renderCatalogList();
 }
 
 function toggleProductSelection(pid, checked) {
-  if (checked) {
-    selectedProductIds.add(pid);
-  } else {
-    selectedProductIds.delete(pid);
-  }
+  if (checked) selectedProductIds.add(pid); else selectedProductIds.delete(pid);
   recalculateQuotePricing();
   renderCatalogList();
 }
 
-// Recalculate Live Quote Pricing & Dependencies
+function showBill(hasItems) {
+  document.getElementById('bill-empty')?.classList.toggle('hidden', hasItems);
+  document.getElementById('bill-body')?.classList.toggle('hidden', !hasItems);
+  const btn = document.getElementById('btn-continue-kyc');
+  if (btn) btn.disabled = !hasItems;
+  document.getElementById('q-mobilebar')?.classList.toggle('hidden', !hasItems);
+}
+
+// Recalculate live quote pricing and dependency/eligibility notices
 async function recalculateQuotePricing() {
   const items = Array.from(selectedProductIds).map(pid => ({ product_id: pid, quantity: productQuantities[pid] || 1 }));
-  
   if (items.length === 0) {
-    const countEl = document.getElementById('bill-item-count');
-    if (countEl) countEl.textContent = '0 products';
-    const totalEl = document.getElementById('bill-monthly-total');
-    if (totalEl) totalEl.innerHTML = `₹0<span class="text-xs text-slate-500 font-normal">/mo</span>`;
+    showBill(false);
+    const box = document.getElementById('bill-validation-alerts');
+    if (box) box.innerHTML = '';
     return;
   }
 
   try {
     const res = await fetch('/api/catalogue/pricing', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ items })
+      method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ items })
     });
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
     const pricing = await res.json();
+    showBill(true);
 
-    document.getElementById('bill-item-count').textContent = `${pricing.items.length} products`;
-    document.getElementById('bill-setup-fee').textContent = `₹${pricing.setup_total_inr.toLocaleString('en-IN')}`;
+    document.getElementById('bill-item-count').textContent = `${pricing.items.length} product${pricing.items.length === 1 ? '' : 's'}`;
+    document.getElementById('bill-setup-fee').textContent = inr(pricing.setup_total_inr);
     document.getElementById('bill-contract').textContent = `${pricing.contract_lock_months} Months`;
     document.getElementById('bill-install-days').textContent = `${pricing.estimated_install_sla_days} Days`;
-    document.getElementById('bill-monthly-total').innerHTML = `₹${pricing.monthly_total_inr.toLocaleString('en-IN')}<span class="text-xs text-slate-500 font-normal">/mo</span>`;
+    document.getElementById('bill-monthly-total').innerHTML = `${inr(pricing.monthly_total_inr)}<span class="text-sm text-slate-500 font-normal">/mo</span>`;
+    const qm = document.getElementById('qm-total'); if (qm) qm.textContent = inr(pricing.monthly_total_inr) + '/mo';
 
-    // Validate
+    const saveEl = document.getElementById('bill-savings');
+    const yearly = pricing.vendor_savings_benchmark?.annual_savings_inr;
+    if (saveEl) {
+      saveEl.classList.toggle('hidden', !yearly);
+      if (yearly) saveEl.innerHTML = `<i data-lucide="trending-down" class="w-4 h-4" aria-hidden="true"></i><span><b>${inr(yearly)} a year</b> saved compared with buying these from separate local vendors.</span>`;
+    }
+
     const valRes = await fetch('/api/catalogue/validate', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         selected_product_ids: Array.from(selectedProductIds),
         city_tier: parseInt(document.getElementById('adv-city-tier')?.value || '1'),
-        employee_count: parseInt(document.getElementById('adv-employees')?.value || '2'),
-        num_sites: parseInt(document.getElementById('adv-sites')?.value || '1'),
-        has_gstin: document.querySelector('input[name="adv-has-gst"]:checked')?.value === 'yes'
+        employee_count: parseInt(document.getElementById('adv-employees')?.value) || 2,
+        num_sites: parseInt(document.getElementById('adv-sites')?.value) || 1,
+        has_gstin: customerHasGst()
       })
     });
     const val = await valRes.json();
     const alertBox = document.getElementById('bill-validation-alerts');
     if (alertBox) {
-      if (!val.is_valid && val.errors.length > 0) {
-        alertBox.innerHTML = `
-          <div class="bg-amber-50 border border-amber-200 text-amber-900 p-3 rounded-xl text-xs space-y-1">
-            <strong class="font-bold flex items-center space-x-1 text-warn">
-              <i data-lucide="alert-triangle" class="w-4 h-4"></i>
-              <span>Catalogue Configuration Notice</span>
-            </strong>
-            ${val.errors.map(e => `<div>• ${escapeHtml(e)}</div>`).join('')}
-          </div>
-        `;
-      } else {
-        alertBox.innerHTML = '';
-      }
+      alertBox.innerHTML = (!val.is_valid && val.errors.length)
+        ? `<div class="notice notice-warn" role="alert"><i data-lucide="alert-triangle" class="w-4 h-4 shrink-0 mt-0.5" aria-hidden="true"></i>
+             <div><b>Check this bundle</b>${val.errors.map(e => `<div>${escapeHtml(e)}</div>`).join('')}</div></div>`
+        : '';
     }
     if (window.lucide) lucide.createIcons();
   } catch (err) {
-    console.error("Pricing calculation error:", err);
+    console.error('Pricing calculation error:', err);
+    toast("Couldn't update the price. Please try again.", 'error');
   }
 }
 
@@ -478,7 +490,6 @@ function renderAdvisorRecommendation(data) {
   document.getElementById('rec-price').innerHTML = `₹${data.pricing.monthly_total_inr.toLocaleString('en-IN')}<span class="text-xs text-slate-500 font-normal"> /mo</span>`;
   document.getElementById('rec-contract').textContent = `${data.pricing.contract_lock_months} Months`;
   document.getElementById('rec-install').textContent = `${data.pricing.estimated_install_sla_days} Days`;
-  const inr = n => '₹' + Number(n || 0).toLocaleString('en-IN');
   const vb = data.pricing.vendor_savings_benchmark || {};
   document.getElementById('kpi-monthly').textContent = inr(data.pricing.monthly_total_inr);
   document.getElementById('kpi-setup').textContent = inr(data.pricing.one_time_setup_total_inr);
@@ -511,6 +522,7 @@ function renderAdvisorRecommendation(data) {
 
   // Sync selected products to Quote tab
   selectedProductIds = new Set(data.selected_product_ids);
+  recommendedProductIds = new Set(data.selected_product_ids);
   productQuantities = Object.fromEntries((data.pricing?.items || []).map(it => [it.product_id, it.quantity]));
   renderCatalogList();
   recalculateQuotePricing();

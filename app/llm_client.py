@@ -88,22 +88,26 @@ class LLMAdvisorClient:
         self._ocr_cache: Dict[str, str] = {}
 
     def _chat(self, messages: list, max_tokens: int, temperature: float, timeout: float) -> Optional[str]:
-        """Tries each provider/model in order; returns the first non-empty reply text, else None."""
-        for url, key, model in self.providers:
-            payload = {"model": model, "messages": messages, "max_tokens": max_tokens, "temperature": temperature}
-            req = urllib.request.Request(
-                url,
-                data=json.dumps(payload).encode('utf-8'),
-                headers={"Authorization": f"Bearer {key}", "Content-Type": "application/json"}
-            )
-            try:
-                with urllib.request.urlopen(req, timeout=timeout) as resp:
-                    data = json.loads(resp.read().decode('utf-8'))
-                content = (data['choices'][0]['message'].get('content') or '').strip()
-                if content:
-                    return content
-            except Exception:
-                continue  # 402/429/503/timeout -> next provider
+        """Tries each provider/model in order with 1 retry and 1-second pause; returns the first non-empty reply text, else None."""
+        import time
+        for attempt in (1, 2):
+            for url, key, model in self.providers:
+                payload = {"model": model, "messages": messages, "max_tokens": max_tokens, "temperature": temperature}
+                req = urllib.request.Request(
+                    url,
+                    data=json.dumps(payload).encode('utf-8'),
+                    headers={"Authorization": f"Bearer {key}", "Content-Type": "application/json"}
+                )
+                try:
+                    with urllib.request.urlopen(req, timeout=timeout) as resp:
+                        data = json.loads(resp.read().decode('utf-8'))
+                    content = (data['choices'][0]['message'].get('content') or '').strip()
+                    if content:
+                        return content
+                except Exception:
+                    continue  # 402/429/503/timeout -> next provider
+            if attempt == 1:
+                time.sleep(1.0)
         return None
 
     def extract_profile(self, query: str, base_profile: Optional[dict] = None) -> Optional[dict]:

@@ -167,38 +167,39 @@ class SmartKYCEngine:
         # Extract legal name and trade name across full text (handles both Gemini key-value & Windows flow)
         legal_name = None
         trade_name = None
-        # Labelled layout (cloud VLM): "Legal name: <value>" or "Legal name\n<value>". A value that is itself a
-        # label ("Trade name", "Constitution"...) means the model listed labels first, so we ignore it.
+
         lab_legal = cls._labelled_value(text, 'Legal name')
-        prop_m = None if lab_legal else re.search(r'([A-Za-z\s]+?\s*\([Pp]rop\.?\s*([^)]+)\))', text)
         if lab_legal:
             legal_name = lab_legal
             trade_name = cls._labelled_value(text, 'Trade name') or legal_name
-        elif prop_m:
-            legal_name = prop_m.group(1).strip()
-            legal_name = re.sub(r'^(?:legal\s*name\s*[:\-]?\s*)', '', legal_name, flags=re.I).strip()
-            toks = legal_name.split()
-            if toks and len(toks) > 1 and toks[0].lower() in cand.lower():
-                legal_name = ' '.join(toks[1:]).strip()
-            rem = text[prop_m.end():].strip()
-            const_m = re.search(r'(Proprietorship|Partnership|Private Limited|Limited Liability)', rem)
-            if const_m:
-                trade_name = rem[:const_m.start()].strip()
-                trade_name = re.sub(r'^trade\s*name\s*[:\-]?\s*', '', trade_name, flags=re.I).strip()
-            else:
-                trade_name = prop_m.group(2).strip()
         else:
-            # Check LLP or Pvt Ltd pattern
-            llp_m = re.search(r'([A-Za-z\s]+?(?:LLP|Pvt Ltd|Private Limited))\s+\1', text)
-            if llp_m:
-                legal_name = llp_m.group(1).strip()
-                trade_name = legal_name
+            prop_m = re.search(r'([A-Za-z\s]+?\s*\([Pp]rop\.?\s*([^)]+)\))', text)
+            if prop_m:
+                raw = prop_m.group(1).split('\n')[-1].strip()
+                legal_name = re.sub(r'^(?:legal\s*name\s*[:\-]?\s*)', '', raw, flags=re.I).strip()
+                toks = legal_name.split()
+                if toks and len(toks) > 1 and toks[0].lower() in cand.lower():
+                    legal_name = ' '.join(toks[1:]).strip()
+                rem = text[prop_m.end():].strip()
+                const_m = re.search(r'(Proprietorship|Partnership|Private Limited|Limited Liability)', rem)
+                if const_m:
+                    lines = [l.strip() for l in rem[:const_m.start()].split('\n') if l.strip() and not l.strip().lower().startswith(cls._FIELD_LABELS)]
+                    trade_name = lines[-1] if lines else prop_m.group(2).strip()
+                    trade_name = re.sub(r'^trade\s*name\s*[:\-]?\s*', '', trade_name, flags=re.I).strip()
+                else:
+                    trade_name = prop_m.group(2).strip()
             else:
-                # Standalone LLP / Pvt Ltd pattern e.g. 'Balaji Realty LLP' or 'Trinity Bake House Pvt Ltd'
-                entity_m = re.search(r'\b([A-Z][A-Za-z\s]+?(?:LLP|Pvt Ltd|Private Limited))\b', text)
-                if entity_m:
-                    legal_name = entity_m.group(1).strip()
+                # Check LLP or Pvt Ltd pattern
+                llp_m = re.search(r'([A-Za-z\s]+?(?:LLP|Pvt Ltd|Private Limited))\s+\1', text)
+                if llp_m:
+                    legal_name = llp_m.group(1).strip()
                     trade_name = legal_name
+                else:
+                    # Standalone LLP / Pvt Ltd pattern e.g. 'Balaji Realty LLP' or 'Trinity Bake House Pvt Ltd'
+                    entity_m = re.search(r'\b([A-Z][A-Za-z\s]+?(?:LLP|Pvt Ltd|Private Limited))\b', text)
+                    if entity_m:
+                        legal_name = entity_m.group(1).strip()
+                        trade_name = legal_name
 
         # Reconcile single-character OCR scan drop if applicable
         # (e.g. K05 where '32TZAXB5481U1Z1' had 'Z' dropped by OCR scanner as '32T AXB5481UIZ1')

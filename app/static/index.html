@@ -306,78 +306,63 @@
 
     <!-- ==================== TAB 2: QUOTE & BUNDLE CONFIGURATOR ==================== -->
     <section id="view-quote" class="tab-view" role="tabpanel" aria-labelledby="tab-btn-quote" tabindex="-1">
-      <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
-        <!-- Left: Product Catalogue & Add-ons -->
-        <div class="lg:col-span-8 bg-white rounded-2xl border border-slate-200 shadow-sm p-6">
-          <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4 pb-3 border-b border-slate-100 gap-3">
+      <div class="quote-split">
+
+        <!-- Left: catalogue as one list -->
+        <div class="q-main">
+          <div class="q-head">
             <div>
-              <h2 class="text-lg font-bold text-slate-900">Custom Bundle Configurator</h2>
-              <p class="text-xs text-slate-500">Toggle products from the Accel Business catalog. Rules & dependencies update in real-time.</p>
+              <h2 class="text-lg font-bold text-slate-900">Build your bundle</h2>
+              <p class="text-sm text-slate-600 mt-0.5">Toggle products from the Accel Business catalogue. Prices and rules update as you go.</p>
             </div>
-            <div class="flex flex-wrap gap-1.5 text-xs">
-              <button type="button" onclick="filterCatalogCategory('all')" class="cat-filter active min-h-[44px] flex items-center">All (25)</button>
-              <button type="button" onclick="filterCatalogCategory('Connectivity')" class="cat-filter min-h-[44px] flex items-center">Connectivity</button>
-              <button type="button" onclick="filterCatalogCategory('Communication')" class="cat-filter min-h-[44px] flex items-center">Comms</button>
-              <button type="button" onclick="filterCatalogCategory('Cloud & Productivity')" class="cat-filter min-h-[44px] flex items-center">Cloud</button>
-              <button type="button" onclick="filterCatalogCategory('Security')" class="cat-filter min-h-[44px] flex items-center">Security</button>
-              <button type="button" onclick="filterCatalogCategory('IoT & Physical')" class="cat-filter min-h-[44px] flex items-center">IoT</button>
+            <div class="chips-scroll" role="group" aria-label="Filter by category">
+              <button type="button" data-cat="all" onclick="filterCatalogCategory('all')" class="chip is-on">All</button>
+              <button type="button" data-cat="Connectivity" onclick="filterCatalogCategory('Connectivity')" class="chip">Connectivity</button>
+              <button type="button" data-cat="Communication" onclick="filterCatalogCategory('Communication')" class="chip">Communication</button>
+              <button type="button" data-cat="Cloud & Productivity" onclick="filterCatalogCategory('Cloud & Productivity')" class="chip">Cloud</button>
+              <button type="button" data-cat="Security" onclick="filterCatalogCategory('Security')" class="chip">Security</button>
+              <button type="button" data-cat="IoT & Physical" onclick="filterCatalogCategory('IoT & Physical')" class="chip">IoT</button>
             </div>
           </div>
-
-          <!-- Catalog List with Toggles -->
-          <div id="catalog-products-list" class="space-y-2.5 max-h-[580px] overflow-y-auto pr-2">
-            <!-- Dynamic Product items -->
-          </div>
+          <div id="catalog-products-list" class="q-list"></div>
         </div>
 
-        <!-- Right: Real-time Live Bill & Checkout Summary -->
-        <div class="lg:col-span-4 flex flex-col space-y-4">
-          <div class="bg-white rounded-2xl border border-slate-200 shadow-sm p-6 sticky top-24">
-            <h3 class="text-base font-bold text-slate-900 mb-1">Single Monthly Invoicing</h3>
-            <p class="text-xs text-slate-500 mb-4">Unified Accel Business enterprise account</p>
-
-            <!-- Pricing Breakdown -->
-            <div class="bg-slate-50 rounded-xl p-4 border border-slate-100 space-y-2 text-xs mb-4">
-              <div class="flex justify-between text-slate-600">
-                <span>Selected Items</span>
-                <span id="bill-item-count" class="font-bold text-slate-800">4 products</span>
-              </div>
-              <div class="flex justify-between text-slate-600">
-                <span>One-time Setup / Install</span>
-                <span id="bill-setup-fee" class="font-semibold text-slate-800 tabular">₹0</span>
-              </div>
-              <div class="flex justify-between text-slate-600">
-                <span>Contract Duration</span>
-                <span id="bill-contract" class="font-semibold text-slate-800">12 Months</span>
-              </div>
-              <div class="flex justify-between text-slate-600">
-                <span>Estimated Activation</span>
-                <span id="bill-install-days" class="font-semibold text-emerald-700">3 Days</span>
-              </div>
-              <div class="pt-2 border-t border-slate-200 flex justify-between items-baseline">
-                <span class="text-sm font-bold text-slate-900">Total Monthly Cost</span>
-                <span class="text-xl font-extrabold text-airtel-red tabular" id="bill-monthly-total">₹2,597<span class="text-xs text-slate-500 font-normal">/mo</span></span>
-              </div>
-            </div>
-
-            <!-- Savings vs Multiple Vendors -->
-            <div class="bg-emerald-50 border border-emerald-200 rounded-xl p-3 mb-5 text-xs text-emerald-900">
-              <div class="flex items-center space-x-1.5 font-bold mb-1">
-                <i data-lucide="trending-down" class="w-4 h-4 text-emerald-600"></i>
-                <span>₹13,800 Annual Savings</span>
-              </div>
-              <p class="text-xs text-emerald-800 leading-relaxed">Compared to buying fragmented services from local ISPs, separate email vendors, and CCTV installers.</p>
-            </div>
-
-            <!-- Rule Validation Alerts -->
-            <div id="bill-validation-alerts" class="mb-4"></div>
-
-            <button type="button" onclick="switchTab('kyc')" class="w-full bg-airtel-red hover:bg-airtel-darkred text-white font-bold py-3 rounded-xl shadow-sm transition flex items-center justify-center space-x-2 min-h-[44px]">
-              <span>Proceed to Instant KYC</span>
-              <i data-lucide="arrow-right" class="w-4 h-4"></i>
-            </button>
-          </div>
+        <div id="q-mobilebar" class="q-mobilebar hidden" aria-hidden="false">
+          <div><span class="text-xs text-slate-600 block">Total per month</span><b id="qm-total" class="tabular">₹0</b></div>
+          <button type="button" onclick="switchTab('kyc')" class="btn-primary">Continue to KYC</button>
         </div>
+
+        <!-- Right: pinned bill -->
+        <aside class="q-side" aria-label="Your monthly bill">
+          <h3 class="text-base font-bold text-slate-900">Your monthly bill</h3>
+          <p class="text-sm text-slate-600 mt-0.5">One invoice, one support number.</p>
+
+          <div id="bill-empty" class="empty mt-4">
+            <p class="font-semibold text-slate-800">Nothing selected yet</p>
+            <p class="text-sm text-slate-600 mt-1">Pick a bundle from the Advisor, or choose products on the left.</p>
+            <button type="button" onclick="switchTab('advisor')" class="btn-secondary mt-3">Ask the Advisor</button>
+          </div>
+
+          <div id="bill-body" class="hidden mt-4">
+            <dl class="bill-rows">
+              <div><dt>Products</dt><dd id="bill-item-count">0 products</dd></div>
+              <div><dt>One-time setup</dt><dd id="bill-setup-fee" class="tabular">₹0</dd></div>
+              <div><dt>Contract</dt><dd id="bill-contract">12 Months</dd></div>
+              <div><dt>Estimated activation</dt><dd id="bill-install-days">3 Days</dd></div>
+            </dl>
+            <div class="bill-total">
+              <span>Total per month</span>
+              <span id="bill-monthly-total" class="tabular">₹0<span class="text-sm text-slate-500 font-normal">/mo</span></span>
+            </div>
+            <p id="bill-savings" class="bill-save hidden"></p>
+            <div id="bill-validation-alerts" class="mt-3" aria-live="polite"></div>
+          </div>
+
+          <button type="button" id="btn-continue-kyc" onclick="switchTab('kyc')" class="btn-primary w-full mt-5" disabled>
+            <span>Continue to KYC</span><i data-lucide="arrow-right" class="w-4 h-4" aria-hidden="true"></i>
+          </button>
+        </aside>
+
       </div>
     </section>
 
