@@ -637,3 +637,21 @@ body {
 .shadow-sm, .shadow-md { box-shadow: none !important; }
 .btn-compact { white-space: nowrap; }
 .thread .chip { min-height: var(--h-control); height: auto; padding: .5rem .9rem; text-align: left; line-height: 1.3; border-radius: var(--r-panel); }
+
+/* ===== Dark theme: remap every remaining Tailwind palette class (incl. hover/divide) so no light surface can appear ===== */
+[data-theme="dark"] .hover\:bg-slate-50:hover, [data-theme="dark"] .hover\:bg-slate-50\/50:hover,
+[data-theme="dark"] .hover\:bg-slate-100:hover { background-color: var(--theme-surface-2) !important; }
+[data-theme="dark"] .to-slate-50 { --tw-gradient-to: var(--theme-surface-2) !important; }
+[data-theme="dark"] .divide-slate-100 > :not([hidden]) ~ :not([hidden]) { border-color: var(--theme-border) !important; }
+[data-theme="dark"] .border-slate-700 { border-color: var(--theme-border-soft) !important; }
+[data-theme="dark"] .text-slate-300 { color: var(--theme-text) !important; }
+[data-theme="dark"] .hover\:text-slate-900:hover, [data-theme="dark"] .hover\:text-slate-800:hover { color: var(--theme-ink) !important; }
+[data-theme="dark"] .hover\:border-airtel-red:hover { border-color: var(--brand-strong) !important; }
+[data-theme="dark"] .bg-emerald-100 { background-color: #123D31 !important; }
+[data-theme="dark"] .text-emerald-600, [data-theme="dark"] .text-emerald-700 { color: #86E3BC !important; }
+[data-theme="dark"] .bg-amber-50 { background-color: #3A2A0B !important; }
+[data-theme="dark"] .border-amber-200 { border-color: #5B4216 !important; }
+[data-theme="dark"] .text-amber-900 { color: #F6C877 !important; }
+[data-theme="dark"] .border-red-200 { border-color: #5E2327 !important; }
+[data-theme="dark"] .bg-slate-800 { background-color: var(--theme-border-soft) !important; }
+[data-theme="dark"] tr:hover td { background-color: var(--theme-surface-2); }
