@@ -55,6 +55,7 @@ const R=(x,y,w,h,o={})=>{const {fill='#fff',stroke='none',r=0,sw=1.5,dash='',op=
 const C=(cx,cy,r,o={})=>{const {fill=INK,stroke='none',sw=2}=o; return `<circle cx="${cx}" cy="${cy}" r="${r}" fill="${fill}" stroke="${stroke}" stroke-width="${sw}"/>`;};
 const Ln=(x1,y1,x2,y2,o={})=>{const {stroke=LINE,sw=2,dash='',marker=''}=o;
   return `<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke="${stroke}" stroke-width="${sw}" ${dash?`stroke-dasharray="${dash}"`:''} ${marker?`marker-end="url(#${marker})"`:''}/>`;};
+const btn=(x,y,w,h,label,size=16)=>R(x,y,w,h,{fill:RED,r:h/2})+T(x+w/2,y+h/2+size*0.35,label,{size,w:700,fill:'#fff',anchor:'middle'});
 // card: white panel, thin border, optional left accent / hard offset shadow (bold-card look)
 function card(x,y,w,h,o={}){
   const {accent='',fill='#fff',stroke=LINE,shadow=false,r=14}=o; let s='';
@@ -93,11 +94,11 @@ S.push(()=>{
   s+=T(124,740,'व्यापारसेतु — a bridge to digital for every small business',{size:30,fill:'#FFD0D0'});
   s+=W(124,800,820,'Discover the right bundle, buy it, finish KYC and track activation — **on one phone, in one sitting, in the owner’s language.**',{size:26,fill:'#E5E7EB',bfill:'#fff'}).svg;
   // team strip
-  s+=R(120,886,840,170,{fill:'#000',op:.55,r:14})+R(120,886,6,170,{fill:RED});
-  s+=T(150,924,'TEAM HACKER_247  ·  ABV-IIITM GWALIOR',{font:MONO,size:18,w:700,fill:'#fff',ls:2});
-  s+=T(150,958,'Abhishek Kokadwar  ·  Sumit Sahu   |   github.com/abhishekKokadwar/vyaparsetu',{size:19,fill:'#CBD5E1'});
-  s+=T(150,996,'LIVE PROTOTYPE  →  vyaparsetu-airtel.vercel.app',{font:MONO,size:19,w:700,fill:'#FF8A8A'});
-  s+=T(150,1032,'DEMO VIDEO  →  youtu.be/ir74cLLgy4A',{font:MONO,size:19,w:700,fill:'#FF8A8A'});
+  s+=R(120,846,840,210,{fill:'#000',op:.6,r:14})+R(120,846,6,210,{fill:RED});
+  s+=T(150,884,'TEAM HACKER_247  ·  ABV-IIITM GWALIOR',{font:MONO,size:18,w:700,fill:'#fff',ls:2});
+  s+=T(150,916,'Abhishek Kokadwar  ·  Sumit Sahu   |   github.com/abhishekKokadwar/vyaparsetu',{size:19,fill:'#CBD5E1'});
+  s+=btn(150,938,640,50,'▶  TRY THE LIVE PROTOTYPE  ·  vyaparsetu-airtel.vercel.app',20);
+  s+=btn(150,998,640,50,'▶  WATCH THE DEMO VIDEO  ·  youtu.be/ir74cLLgy4A',20);
   return s;
 });
 
@@ -184,7 +185,9 @@ S.push(()=>{
     {n:'Smart KYC',t:'~3 min',was:'Paper copies, in person',b:['GSTIN / Udyam lookup fills the form','OCR checks and logged consent; DigiLocker and e-sign are next']},
     {n:'Tracker',t:'2–5 days',was:'3 chase calls per customer',b:['5 milestones, technician and slot','WhatsApp updates, no chase calls']},
   ];
-  s+=`<image href="assets/qr.png" x="1700" y="162" width="96" height="96"/>`+T(1810,274,'Try it live  ·  vyaparsetu-airtel.vercel.app',{size:15,w:700,fill:RED,anchor:'end'})+T(1810,293,'Demo video  ·  youtu.be/ir74cLLgy4A',{size:15,w:700,fill:RED,anchor:'end'});
+  s+=`<image href="assets/qr.png" x="1714" y="124" width="96" height="96"/>`;
+  s+=btn(1290,124,410,42,'▶  TRY IT LIVE  ·  vyaparsetu-airtel.vercel.app',15.5);
+  s+=btn(1360,174,340,42,'▶  DEMO VIDEO  ·  youtu.be/ir74cLLgy4A',15.5);
   const x0=110,w=400,g=33,y=300;
   st.forEach((p,i)=>{
     const x=x0+i*(w+g);
@@ -326,7 +329,8 @@ S.push(()=>{
 // 9 · IMPACT
 S.push(()=>{
   let s=head(9,'Impact · metrics · rollout','Twice the activations from the same leads, at half the cost each','6-month targets against the Apr–Jun 2026 baseline.');
-  s+=T(1810,252,'Try it live  ·  vyaparsetu-airtel.vercel.app',{size:15,w:700,fill:RED,anchor:'end'})+T(1810,274,'Demo video  ·  youtu.be/ir74cLLgy4A',{size:15,w:700,fill:RED,anchor:'end'});
+  s+=btn(990,238,410,42,'▶  TRY IT LIVE  ·  vyaparsetu-airtel.vercel.app',15.5);
+  s+=btn(1410,238,400,42,'▶  DEMO VIDEO  ·  youtu.be/ir74cLLgy4A',15.5);
   // KPI table
   s+=card(110,300,990,420);
   const hd=['Metric','Today','6-mo target','Main lever'], cx=[140,500,640,800];

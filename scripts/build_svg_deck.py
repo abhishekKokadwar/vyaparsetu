@@ -47,14 +47,14 @@ def link_box(slide, x, y, w, h, url):
     b.fill.background(); b.line.fill.background(); b.shadow.inherit = False
     b.click_action.hyperlink.address = url
 DEMO = 'https://youtu.be/ir74cLLgy4A'
-link_box(prs.slides[0], 150, 976, 640, 28, 'https://vyaparsetu-airtel.vercel.app')
-link_box(prs.slides[0], 600, 938, 360, 28, 'https://github.com/abhishekKokadwar/vyaparsetu')
-link_box(prs.slides[0], 150, 1012, 460, 28, DEMO)
+link_box(prs.slides[0], 150, 938, 640, 50, 'https://vyaparsetu-airtel.vercel.app')
+link_box(prs.slides[0], 150, 998, 640, 50, DEMO)
+link_box(prs.slides[0], 600, 896, 360, 28, 'https://github.com/abhishekKokadwar/vyaparsetu')
+link_box(prs.slides[3], 1290, 124, 410, 42, 'https://vyaparsetu-airtel.vercel.app')
+link_box(prs.slides[3], 1360, 174, 340, 42, DEMO)
+link_box(prs.slides[N - 1], 990, 238, 410, 42, 'https://vyaparsetu-airtel.vercel.app')
+link_box(prs.slides[N - 1], 1410, 238, 400, 42, DEMO)
 
-link_box(prs.slides[3], 1450, 258, 370, 19, 'https://vyaparsetu-airtel.vercel.app')
-link_box(prs.slides[3], 1450, 278, 370, 19, DEMO)
-link_box(prs.slides[N - 1], 1450, 236, 370, 19, 'https://vyaparsetu-airtel.vercel.app')
-link_box(prs.slides[N - 1], 1450, 258, 370, 19, DEMO)
 
 NAME = NAME if DECK == '7' else NAME + '_extended_9slides'
 pptx = ROOT / f'{NAME}.pptx'
