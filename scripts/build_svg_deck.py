@@ -46,11 +46,15 @@ def link_box(slide, x, y, w, h, url):
     b = slide.shapes.add_shape(MSO_SHAPE.RECTANGLE, int(x * k), int(y * k), int(w * k), int(h * k))
     b.fill.background(); b.line.fill.background(); b.shadow.inherit = False
     b.click_action.hyperlink.address = url
-link_box(prs.slides[0], 150, 1016 - 30, 640, 40, 'https://vyaparsetu-airtel.vercel.app')
-link_box(prs.slides[0], 600, 972 - 26, 360, 36, 'https://github.com/abhishekKokadwar/vyaparsetu')
+DEMO = 'https://youtu.be/ir74cLLgy4A'
+link_box(prs.slides[0], 150, 976, 640, 28, 'https://vyaparsetu-airtel.vercel.app')
+link_box(prs.slides[0], 600, 938, 360, 28, 'https://github.com/abhishekKokadwar/vyaparsetu')
+link_box(prs.slides[0], 150, 1012, 460, 28, DEMO)
 
-link_box(prs.slides[3], 1450, 262, 370, 32, 'https://vyaparsetu-airtel.vercel.app')
-link_box(prs.slides[N - 1], 1450, 246, 370, 32, 'https://vyaparsetu-airtel.vercel.app')
+link_box(prs.slides[3], 1450, 258, 370, 19, 'https://vyaparsetu-airtel.vercel.app')
+link_box(prs.slides[3], 1450, 278, 370, 19, DEMO)
+link_box(prs.slides[N - 1], 1450, 236, 370, 19, 'https://vyaparsetu-airtel.vercel.app')
+link_box(prs.slides[N - 1], 1450, 258, 370, 19, DEMO)
 
 NAME = NAME if DECK == '7' else NAME + '_extended_9slides'
 pptx = ROOT / f'{NAME}.pptx'
