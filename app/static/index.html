@@ -44,34 +44,35 @@
   <div class="min-h-screen lg:min-h-0 lg:h-screen flex">
 
   <!-- Sidebar (desktop) -->
-  <aside class="hidden lg:flex w-[15.5rem] shrink-0 flex-col bg-white border-r border-slate-200">
-    <div class="h-16 px-5 flex items-center gap-3 border-b border-slate-100 cursor-pointer" onclick="switchTab('advisor')">
+  <div id="sidebar-scrim" class="sidebar-scrim" onclick="toggleSidebar(false)"></div>
+  <aside id="app-sidebar" class="app-sidebar" aria-label="Main navigation">
+    <div class="side-brand h-16 px-5 flex items-center gap-3 border-b border-slate-100 cursor-pointer" onclick="switchTab('advisor')">
       <img src="/static/logo-mark.png" alt="VyaparSetu logo" width="36" height="36" class="w-9 h-9 object-contain">
-      <div class="leading-tight">
+      <div class="brand-text leading-tight">
         <h1 class="text-[1.1rem] font-extrabold tracking-tight text-slate-900">Vyapar<span style="color:#B3262D">Setu</span></h1>
         <p class="text-[0.8rem] text-slate-500 font-medium">व्यापारसेतु · MSME Suite</p>
       </div>
     </div>
     <nav role="tablist" aria-label="Onboarding steps" class="flex-1 overflow-y-auto px-3 py-4 flex flex-col gap-1">
       <p class="nav-label">Onboarding</p>
-        <button onclick="switchTab('advisor')" id="tab-btn-advisor" type="button" role="tab" data-tab="advisor" aria-controls="view-advisor" aria-selected="true" class="nav-tab active">
-          <i data-lucide="compass" class="w-4 h-4"></i><span class="flex-1 text-left">GenAI Advisor</span><span class="nav-step">1</span>
+        <button onclick="switchTab('advisor')" id="tab-btn-advisor" type="button" title="AI Advisor" role="tab" data-tab="advisor" aria-controls="view-advisor" aria-selected="true" class="nav-tab active">
+          <i data-lucide="compass" class="w-4 h-4"></i><span class="nav-text flex-1 text-left">AI Advisor</span><span class="nav-step">1</span>
         </button>
-        <button onclick="switchTab('quote')" id="tab-btn-quote" type="button" role="tab" data-tab="quote" aria-controls="view-quote" aria-selected="false" class="nav-tab">
-          <i data-lucide="layers" class="w-4 h-4"></i><span class="flex-1 text-left">Quote &amp; Bundle</span><span class="nav-step">2</span>
+        <button onclick="switchTab('quote')" id="tab-btn-quote" type="button" title="Quote & Bundle" role="tab" data-tab="quote" aria-controls="view-quote" aria-selected="false" class="nav-tab">
+          <i data-lucide="layers" class="w-4 h-4"></i><span class="nav-text flex-1 text-left">Quote &amp; Bundle</span><span class="nav-step">2</span>
         </button>
-        <button onclick="switchTab('kyc')" id="tab-btn-kyc" type="button" role="tab" data-tab="kyc" aria-controls="view-kyc" aria-selected="false" class="nav-tab">
-          <i data-lucide="shield-check" class="w-4 h-4"></i><span class="flex-1 text-left">Smart KYC</span><span class="nav-step">3</span>
+        <button onclick="switchTab('kyc')" id="tab-btn-kyc" type="button" title="Smart KYC" role="tab" data-tab="kyc" aria-controls="view-kyc" aria-selected="false" class="nav-tab">
+          <i data-lucide="shield-check" class="w-4 h-4"></i><span class="nav-text flex-1 text-left">Smart KYC</span><span class="nav-step">3</span>
         </button>
-        <button onclick="switchTab('tracker')" id="tab-btn-tracker" type="button" role="tab" data-tab="tracker" aria-controls="view-tracker" aria-selected="false" class="nav-tab">
-          <i data-lucide="map-pin" class="w-4 h-4"></i><span class="flex-1 text-left">Order Tracker</span><span class="nav-step">4</span>
+        <button onclick="switchTab('tracker')" id="tab-btn-tracker" type="button" title="Order Tracker" role="tab" data-tab="tracker" aria-controls="view-tracker" aria-selected="false" class="nav-tab">
+          <i data-lucide="map-pin" class="w-4 h-4"></i><span class="nav-text flex-1 text-left">Order Tracker</span><span class="nav-step">4</span>
         </button>
       <p class="nav-label mt-4">Channel</p>
-        <button onclick="switchTab('partner')" id="tab-btn-partner" type="button" role="tab" data-tab="partner" aria-controls="view-partner" aria-selected="false" class="nav-tab">
-          <i data-lucide="users" class="w-4 h-4"></i><span class="flex-1 text-left">Partner Portal</span>
+        <button onclick="switchTab('partner')" id="tab-btn-partner" type="button" title="Partner Portal" role="tab" data-tab="partner" aria-controls="view-partner" aria-selected="false" class="nav-tab">
+          <i data-lucide="users" class="w-4 h-4"></i><span class="nav-text flex-1 text-left">Partner Portal</span>
         </button>
     </nav>
-    <div class="px-5 py-4 border-t border-slate-100 text-[0.8rem] text-slate-500 space-y-1.5">
+    <div class="side-foot px-5 py-4 border-t border-slate-100 text-[0.8rem] text-slate-500 space-y-1.5">
       <div class="flex items-center gap-2"><span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>Prototype · Airtel Sync 2026</div>
       <div>Team <strong class="text-slate-800">Hacker_247</strong> · ABV-IIITM</div>
       <div class="flex gap-3 pt-1">
@@ -85,6 +86,10 @@
   <!-- Top bar -->
   <header class="bg-white border-b border-slate-200 sticky lg:static top-0 z-50 shrink-0">
     <div class="px-4 sm:px-6 lg:px-8 flex justify-between items-center h-14 lg:h-16 gap-3">
+      <div class="flex items-center gap-3 min-w-0">
+      <button id="sidebar-toggle" type="button" onclick="toggleSidebar()" aria-controls="app-sidebar" aria-expanded="true" aria-label="Show or hide navigation" title="Show or hide navigation" class="icon-btn">
+        <i data-lucide="panel-left" class="w-5 h-5" aria-hidden="true"></i>
+      </button>
       <div class="flex items-center gap-3 lg:hidden cursor-pointer" onclick="switchTab('advisor')">
         <img src="/static/logo-mark.png" alt="VyaparSetu logo" width="32" height="32" class="w-8 h-8 object-contain">
         <h1 class="text-lg font-extrabold tracking-tight text-slate-900">Vyapar<span style="color:#B3262D">Setu</span></h1>
@@ -92,6 +97,7 @@
       <div class="hidden lg:block min-w-0">
         <p class="text-[0.8rem] font-semibold uppercase tracking-wider text-slate-500">Airtel Sync 2026 · Enterprise Track A</p>
         <p class="text-sm font-bold text-slate-900 truncate">Project Udyam Digital — Digital in One Sitting</p>
+      </div>
       </div>
       <div class="flex items-center gap-3">
         <div class="inline-flex rounded-xl border border-slate-200 p-0.5 bg-slate-50">
@@ -219,6 +225,8 @@
           </div>
         </div>
 
+        <div class="splitter" role="separator" aria-orientation="vertical" tabindex="0" aria-label="Resize the form panel (drag, or use the arrow keys; double-click resets)" data-var="--rail-w" data-mode="left" data-min="280" data-max="560" data-key="vs_rail_w"></div>
+
         <!-- Right: recommendation workspace (scrolling body + pinned action bar) -->
         <div id="advisor-result-card" class="adv-result">
           <div id="advisor-loading" class="hidden flex-1 flex flex-col items-center justify-center py-12 text-slate-500">
@@ -331,6 +339,8 @@
           <div><span class="text-xs text-slate-600 block">Total per month</span><b id="qm-total" class="tabular">₹0</b></div>
           <button type="button" onclick="switchTab('kyc')" class="btn-primary">Continue to KYC</button>
         </div>
+
+        <div class="splitter" role="separator" aria-orientation="vertical" tabindex="0" aria-label="Resize the bill panel (drag, or use the arrow keys; double-click resets)" data-var="--side-w" data-mode="right" data-min="280" data-max="560" data-key="vs_side_w"></div>
 
         <!-- Right: pinned bill -->
         <aside class="q-side" aria-label="Your monthly bill">

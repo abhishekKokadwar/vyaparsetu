@@ -88,20 +88,23 @@ def test_ui_smoke_navigation_and_zero_console_errors():
         assert verdict_title.is_visible()
 
         # Test K02 (Clean Pass)
-        page.select_option("#kyc-applicant-select", "K02")
-        page.wait_for_timeout(500)
+        with page.expect_response(lambda r: "/api/kyc/verify-applicant" in r.url, timeout=15000):
+            page.select_option("#kyc-applicant-select", "K02")
+        page.wait_for_timeout(300)
         k02_status = page.locator("#kyc-verdict-title").inner_text()
         assert "VERIFIED" in k02_status or "PASS" in k02_status
 
         # Test K06 (Planted Fake GSTIN)
-        page.select_option("#kyc-applicant-select", "K06")
-        page.wait_for_timeout(500)
+        with page.expect_response(lambda r: "/api/kyc/verify-applicant" in r.url, timeout=15000):
+            page.select_option("#kyc-applicant-select", "K06")
+        page.wait_for_timeout(300)
         k06_status = page.locator("#kyc-verdict-title").inner_text()
         assert "REJECTED" in k06_status
 
         # Test K07 (Legal Entity Mismatch)
-        page.select_option("#kyc-applicant-select", "K07")
-        page.wait_for_timeout(500)
+        with page.expect_response(lambda r: "/api/kyc/verify-applicant" in r.url, timeout=15000):
+            page.select_option("#kyc-applicant-select", "K07")
+        page.wait_for_timeout(300)
         k07_status = page.locator("#kyc-verdict-title").inner_text()
         assert "REJECTED" in k07_status
 
@@ -129,6 +132,19 @@ def test_ui_smoke_navigation_and_zero_console_errors():
         page.click("#tab-btn-tracker")
         page.wait_for_timeout(600)
 
+        # No order is open until the customer looks one up; a wrong mobile number must not reveal anything.
+        assert not page.locator("#trk-order-num").is_visible()
+        assert page.locator("#tracker-form").is_visible()
+        page.fill("#tracker-order-id", "VS-2026-00000")
+        page.fill("#tracker-phone", "9111111111")
+        with page.expect_response(lambda r: "/api/orders/VS-2026-00000" in r.url, timeout=15000) as lookup:
+            page.click("#tracker-form button[type=submit]")
+        assert lookup.value.status == 404
+        page.wait_for_timeout(300)
+        assert "No order found" in page.locator("#tracker-not-found-msg").inner_text()
+
+        page.evaluate("openSampleOrder()")
+        page.wait_for_timeout(800)
         assert page.locator("#trk-order-num").is_visible()
         order_num = page.locator("#trk-order-num").inner_text()
         assert "VS-2026" in order_num

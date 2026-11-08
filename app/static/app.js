@@ -147,6 +147,7 @@ function switchTab(tabName) {
   if (location.hash !== `#${tabName}`) {
     history.replaceState(null, '', `#${tabName}`);
   }
+  if (window.innerWidth < 1024) toggleSidebar(false);
   const mainEl = document.querySelector('main');
   if (mainEl) { mainEl.scrollTop = 0; mainEl.scrollIntoView({ block: 'start' }); }
   if (window.lucide) lucide.createIcons();
@@ -1294,3 +1295,61 @@ function assistDroppedLead(leadId) {
   if (radio) radio.checked = true;
   submitAdvisorProfile();
 }
+
+
+// ---- App shell: collapsible sidebar (drawer on small screens) ------------------------------------------------
+const SIDEBAR_KEY = 'vs_sidebar_collapsed';
+function toggleSidebar(force) {
+  const small = window.innerWidth < 1024;
+  const cls = small ? 'sidebar-open' : 'sidebar-collapsed';
+  const current = document.body.classList.contains(cls);
+  // force === true means "show": open the drawer, or un-collapse the rail. false means "hide".
+  const next = force === undefined ? !current : (small ? force : !force);
+  document.body.classList.toggle(cls, next);
+  const shown = small ? next : !next;
+  document.getElementById('sidebar-toggle')?.setAttribute('aria-expanded', String(shown));
+  if (!small) { try { localStorage.setItem(SIDEBAR_KEY, next ? '1' : '0'); } catch (e) {} }
+}
+document.addEventListener('keydown', e => { if (e.key === 'Escape' && document.body.classList.contains('sidebar-open')) toggleSidebar(false); });
+window.addEventListener('resize', () => { if (window.innerWidth >= 1024) document.body.classList.remove('sidebar-open'); });
+try { if (localStorage.getItem(SIDEBAR_KEY) === '1' && window.innerWidth >= 1024) {
+  document.body.classList.add('sidebar-collapsed');
+  document.getElementById('sidebar-toggle')?.setAttribute('aria-expanded', 'false');
+} } catch (e) {}
+
+// ---- Resizable panels: <div class="splitter" data-var data-mode data-min data-max data-key> ------------------
+function initSplitter(el) {
+  const box = el.parentElement;
+  const cssVar = el.dataset.var, mode = el.dataset.mode;
+  const min = +el.dataset.min, max = +el.dataset.max, key = el.dataset.key;
+  const apply = px => box.style.setProperty(cssVar, Math.max(min, Math.min(max, Math.round(px))) + 'px');
+  const current = () => parseFloat(getComputedStyle(box).getPropertyValue(cssVar)) || (mode === 'left' ? el.previousElementSibling : el.nextElementSibling).getBoundingClientRect().width;
+  try { const saved = localStorage.getItem(key); if (saved) apply(+saved); } catch (e) {}
+  const save = () => { try { localStorage.setItem(key, String(parseFloat(box.style.getPropertyValue(cssVar)))); } catch (e) {} };
+
+  el.addEventListener('pointerdown', ev => {
+    ev.preventDefault();
+    el.setPointerCapture(ev.pointerId);
+    el.classList.add('is-dragging');
+    document.body.classList.add('is-resizing');
+  });
+  el.addEventListener('pointermove', ev => {
+    if (!el.classList.contains('is-dragging')) return;
+    const r = box.getBoundingClientRect();
+    apply(mode === 'left' ? ev.clientX - r.left : r.right - ev.clientX);
+  });
+  const stop = () => { el.classList.remove('is-dragging'); document.body.classList.remove('is-resizing'); save(); };
+  el.addEventListener('pointerup', stop);
+  el.addEventListener('pointercancel', stop);
+  el.addEventListener('keydown', ev => {
+    const step = ev.shiftKey ? 48 : 16;
+    if (ev.key === 'ArrowLeft' || ev.key === 'ArrowRight') {
+      ev.preventDefault();
+      const grow = (ev.key === 'ArrowRight') === (mode === 'left');
+      apply(current() + (grow ? step : -step));
+      save();
+    }
+  });
+  el.addEventListener('dblclick', () => { box.style.removeProperty(cssVar); try { localStorage.removeItem(key); } catch (e) {} });
+}
+document.addEventListener('DOMContentLoaded', () => document.querySelectorAll('.splitter').forEach(initSplitter));
