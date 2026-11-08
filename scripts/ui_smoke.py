@@ -82,6 +82,7 @@ def run_journey(page, mode_name: str, base_url: str):
     page.wait_for_timeout(400)
     page.check("#dpdp-consent-chk")
     page.wait_for_timeout(300)
+    page.evaluate("document.querySelector('#kyc-applicant-select').closest('details').open = true")  # demo specimens live in a collapsed section
     for app_code in PASS_APPLICANTS:
         with page.expect_response(lambda res: "/api/kyc/verify-applicant" in res.url, timeout=15000):
             page.select_option("#kyc-applicant-select", app_code)

@@ -83,6 +83,7 @@ def test_ui_smoke_navigation_and_zero_console_errors():
         page.wait_for_timeout(500)
         page.check("#dpdp-consent-chk")
         page.wait_for_timeout(300)
+        page.evaluate("document.querySelector('#kyc-applicant-select').closest('details').open = true")  # demo specimens live in a collapsed section
 
         verdict_title = page.locator("#kyc-verdict-title")
         assert verdict_title.is_visible()

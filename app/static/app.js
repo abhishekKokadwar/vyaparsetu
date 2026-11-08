@@ -94,11 +94,9 @@ document.addEventListener('DOMContentLoaded', async () => {
     consentChk.addEventListener('change', () => {
       if (consentChk.checked) {
         if (consentHelp) consentHelp.classList.add('hidden');
-        consentBox.classList.remove('bg-amber-50/70', 'border-amber-200');
-        consentBox.classList.add('bg-ok-soft', 'border-emerald-200');
+        consentBox.classList.add('is-ok');
       } else {
-        consentBox.classList.remove('bg-ok-soft', 'border-emerald-200');
-        consentBox.classList.add('bg-amber-50/70', 'border-amber-200');
+        consentBox.classList.remove('is-ok');
       }
     });
   }
@@ -579,10 +577,10 @@ async function loadKYCApplicants() {
     const res = await fetch('/api/kyc/applicants');
     const data = await res.json();
     const select = document.getElementById('kyc-applicant-select');
-    select.innerHTML = `<option value="">-- Select an Applicant Specimen (K01 – K12) --</option>` + 
+    select.innerHTML = `<option value="">Select an applicant…</option>` + 
       data.applicants.map(a => `
         <option value="${a.code}">
-          [${a.code}] ${a.business_name} (${a.expected_verdict}) - ${a.reason}
+          ${a.code} · ${a.business_name}
         </option>
       `).join('');
   } catch (err) {
@@ -862,6 +860,7 @@ async function runSmartKYCVerification() {
 
 // Render KYC Diagnostics & Checklist
 function renderKYCDiagnostics(res) {
+  updateKycStepper(res.verdict);
   const banner = document.getElementById('kyc-verdict-banner');
   const orderBtn = document.getElementById('btn-place-order');
   const orderHint = document.getElementById('btn-place-order-hint');
@@ -1353,3 +1352,26 @@ function initSplitter(el) {
   el.addEventListener('dblclick', () => { box.style.removeProperty(cssVar); try { localStorage.removeItem(key); } catch (e) {} });
 }
 document.addEventListener('DOMContentLoaded', () => document.querySelectorAll('.splitter').forEach(initSplitter));
+
+
+// ---- KYC stepper ------------------------------------------------------------------------------------------
+function updateKycStepper(verdict) {
+  const stepper = document.getElementById('kyc-stepper');
+  if (!stepper) return;
+  const consent = !!document.getElementById('dpdp-consent-chk')?.checked;
+  const set = (n, cls, text) => {
+    const li = stepper.querySelector(`li[data-step="${n}"]`);
+    if (!li) return;
+    li.className = cls;
+    li.querySelector('.stepper-dot').textContent = text;
+  };
+  document.getElementById('kstep-2')?.classList.toggle('is-locked', !consent);
+  set(1, consent ? 'is-done' : 'is-active', consent ? '✓' : '1');
+  if (verdict === 'PASS') { set(2, 'is-done', '✓'); set(3, 'is-done', '✓'); }
+  else if (verdict) { set(2, 'is-done', '✓'); set(3, 'is-fail', '!'); }
+  else { set(2, consent ? 'is-active' : '', '2'); set(3, '', '3'); }
+}
+document.addEventListener('DOMContentLoaded', () => {
+  document.getElementById('dpdp-consent-chk')?.addEventListener('change', () => updateKycStepper());
+  updateKycStepper();
+});
