@@ -122,7 +122,7 @@ arch_svg = """<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 680" wid
     <text x="20" y="30" fill="#FFFFFF" font-size="13" font-weight="700">DPDP Act 2023 Shield</text>
     <text x="20" y="50" fill="#94A3B8" font-size="11">• Unbundled digital consent</text>
     <text x="20" y="68" fill="#94A3B8" font-size="11">• Dynamic PAN/GSTIN masking</text>
-    <text x="20" y="86" fill="#94A3B8" font-size="11">• 30-day auto-purge policy</text>
+    <text x="20" y="86" fill="#94A3B8" font-size="11">• Upload deleted after OCR</text>
     <text x="20" y="110" fill="#38BDF8" font-size="10" font-weight="600">Privacy by Design</text>
   </g>
 

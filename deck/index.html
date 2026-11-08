@@ -179,7 +179,7 @@ S.push(()=>{
   const st=[
     {n:'Advisor',t:'~3 min',was:'Sales visit after 3+ calls',b:['Chat in Hindi, English + 6 languages','Explains “why this bundle” plainly']},
     {n:'Quote & pay',t:'~2 min',was:'PDF quote in 3–5 days',b:['One monthly price, no product codes','Add-ons toggle; rules checked live']},
-    {n:'Smart KYC',t:'~3 min',was:'Paper copies, in person',b:['GSTIN / Udyam lookup fills the form','OCR checks, consent, DigiLocker, e-sign']},
+    {n:'Smart KYC',t:'~3 min',was:'Paper copies, in person',b:['GSTIN / Udyam lookup fills the form','OCR checks and logged consent; DigiLocker and e-sign are next']},
     {n:'Tracker',t:'2–5 days',was:'3 chase calls per customer',b:['5 milestones, technician and slot','WhatsApp updates, no chase calls']},
   ];
   const x0=110,w=400,g=33,y=300;
@@ -238,14 +238,14 @@ S.push(()=>{
       o+=T(x+16,y+39,a,{size:17,w:700}); }); return o; };
   s+=lane(140,210,'CHANNELS',[['Mobile web / PWA','EN, हिंदी + 6 languages'],['WhatsApp','same flow in chat'],['Partner tablet','assisted mode, QR-tagged'],['Field sales app',''],['Voice (next)','']],INK);
   s+=lane(390,300,'VYAPARSETU CORE',[['GenAI Advisor','LLM for the chat; output is checked by the rules engine'],['Catalogue rules engine','25 products: city tier, size, GSTIN rules, dependencies'],['Smart KYC (OCR + lookup)',''],['Order tracker','milestones, technician dispatch, WhatsApp'],['Lead scoring','propensity score for leads to call back']],RED);
-  s+=lane(730,200,'DATA',[['Consent ledger','purpose, time, version'],['Doc vault (30 days)',''],['Lead & order DB','PAN digits masked'],['Catalogue',''],['Audit log','']],INK);
+  s+=lane(730,200,'DATA',[['Consent ledger','purpose, time, version'],['Uploads (not stored)','deleted after OCR'],['Lead & order DB','PAN digits masked'],['Catalogue',''],['Audit log','']],INK);
   s+=lane(970,180,'ACCEL SYSTEMS',[['CRM','partner payouts'],['Billing (one bill)',''],['Provisioning','field workforce'],['GSTN / Udyam',''],['Partner payouts','']],INK);
   [[352,388],[692,728],[932,968]].forEach(([xa,xb])=>[622].forEach(y=>{ s+=`<path d="M${xa} ${y} H${xb}" stroke="${RED}" stroke-width="3" marker-end="url(#arR)"/>`; }));
 
   // DPDP pillars
   s+=card(1200,300,610,340);
   s+=kick(1230,342,'DPDP Act, 2023 · built into the flow',GREEN);
-  const dp=[['Consent','Separate yes/no consent before any upload, logged with time'],['Purpose limitation','KYC data used only for activation and billing, not marketing'],['Data minimisation','Only needed fields kept; PAN digits in GSTIN are masked'],['Storage limitation','Images deleted 30 days after activation; only a hash is kept']];
+  const dp=[['Consent','Separate yes/no consent before any upload, logged with time'],['Purpose limitation','KYC data used only for activation and billing, not marketing'],['Data minimisation','Only needed fields kept; PAN digits in GSTIN are masked'],['Storage limitation','Uploaded images are deleted right after reading; scheduled 30-day purge is the production step']];
   dp.forEach(([a,b],j)=>{ const y=378+j*64; s+=tick(1242,y+4); s+=T(1266,y+11,a,{size:18,w:700}); s+=W(1266,y+35,520,b,{size:15,fill:SLATE,lh:1.25}).svg; });
 
   // KYC result grid
