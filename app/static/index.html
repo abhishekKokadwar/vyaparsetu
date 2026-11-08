@@ -39,7 +39,7 @@
   <link rel="stylesheet" href="/static/style.css">
   <script src="/static/vendor/lucide.min.js"></script>
 </head>
-<body class="bg-[#EDF0F5] text-slate-800 antialiased font-sans lg:h-screen lg:overflow-hidden">
+<body class="antialiased font-sans lg:h-screen lg:overflow-hidden" data-theme="light">
   <a href="#main" class="sr-only focus:not-sr-only focus:fixed focus:top-2 focus:left-2 focus:z-[100] bg-white px-3 py-2 rounded-lg text-sm font-semibold shadow-md min-h-[44px] flex items-center">Skip to content</a>
   <div class="min-h-screen lg:min-h-0 lg:h-screen flex">
 
@@ -103,6 +103,9 @@
         <div class="inline-flex rounded-xl border border-slate-200 p-0.5 bg-slate-50">
           <button id="lang-en" type="button" onclick="setLanguage('en')" class="px-3 py-2 min-h-[44px] text-xs font-bold rounded-lg bg-white shadow-sm text-slate-800 flex items-center justify-center">EN</button>
           <button id="lang-hi" type="button" onclick="setLanguage('hi')" class="px-3 py-2 min-h-[44px] text-xs font-bold rounded-lg text-slate-600 hover:text-slate-800 flex items-center justify-center">हिंदी</button>
+        </div>
+        <button id="theme-toggle" type="button" onclick="toggleTheme()" aria-label="Switch theme" title="Switch theme" class="p-2 min-h-[44px] min-w-[44px] rounded-lg bg-slate-50 border border-slate-200 text-slate-600 hover:bg-slate-100 flex items-center justify-center transition">
+          <i id="theme-icon" data-lucide="moon" class="w-5 h-5"></i>
         </div>
         <button onclick="switchTab('kyc')" class="hidden sm:flex bg-airtel-red hover:bg-airtel-darkred text-white text-xs font-semibold px-4 py-2.5 min-h-[44px] rounded-lg shadow-sm transition items-center space-x-1.5">
           <span>Start KYC</span>

@@ -12,6 +12,43 @@ let lastCreatedOrderId = null;
 const SAMPLE_ORDER_ID = 'VS-2026-90412';
 let partnerLeads = [];
 let chatProfile = null;
+let currentTheme = 'light';
+
+// ---------- Theme toggle ----------
+function applyTheme(theme) {
+  currentTheme = theme;
+  const html = document.documentElement;
+  const body = document.body;
+  const icon = document.getElementById('theme-icon');
+  const btn = document.getElementById('theme-toggle');
+
+  if (theme === 'dark') {
+    html.setAttribute('data-theme', 'dark');
+    body.setAttribute('data-theme', 'dark');
+    if (icon) { icon.setAttribute('data-lucide', 'sun'); icon.classList.remove('text-slate-600'); icon.classList.add('text-amber-500'); }
+    if (btn) { btn.classList.remove('bg-slate-50', 'text-slate-600', 'border-slate-200'); btn.classList.add('bg-slate-800', 'text-amber-500', 'border-slate-700'); }
+  } else {
+    html.removeAttribute('data-theme');
+    body.removeAttribute('data-theme');
+    if (icon) { icon.setAttribute('data-lucide', 'moon'); icon.classList.remove('text-amber-500'); icon.classList.add('text-slate-600'); }
+    if (btn) { btn.classList.remove('bg-slate-800', 'text-amber-500', 'border-slate-700'); btn.classList.add('bg-slate-50', 'text-slate-600', 'border-slate-200'); }
+  }
+  if (window.lucide) lucide.createIcons();
+  try { localStorage.setItem('vyapar_theme', theme); } catch (e) { /* storage may be blocked */ }
+}
+
+function toggleTheme() {
+  applyTheme(currentTheme === 'light' ? 'dark' : 'light');
+}
+
+function initTheme() {
+  let theme = 'light';
+  try { theme = localStorage.getItem('vyapar_theme'); } catch (e) { /* ignore */ }
+  if (!theme || (theme !== 'light' && theme !== 'dark')) {
+    theme = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+  }
+  applyTheme(theme);
+}
 
 // Multi-language text dictionary
 const i18n = {
@@ -86,7 +123,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     lucide.createIcons();
   }
 
-  // Setup DPDP Consent Box visual changes
+  initTheme();
   const consentChk = document.getElementById('dpdp-consent-chk');
   const consentBox = document.getElementById('dpdp-consent-box');
   const consentHelp = document.getElementById('dpdp-consent-help');
