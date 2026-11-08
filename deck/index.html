@@ -23,7 +23,7 @@ const q = new URLSearchParams(location.search);
 const RED='#E40000', INK='#0F172A', SLATE='#475569', MUTED='#64748B', LINE='#E2E8F0',
       SOFT='#F8FAFC', REDBG='#FFF1F1', GREEN='#059669', GREENBG='#ECFDF5', AMBER='#D97706', AMBERBG='#FFF7E6';
 const SERIF="Georgia, 'Nirmala UI', serif", SANS="'Segoe UI', 'Nirmala UI', sans-serif", MONO="Consolas, monospace";
-const TOTAL=7;
+const TOTAL=8;
 
 // ---------- svg helpers ----------
 const esc = s => String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
@@ -139,19 +139,19 @@ S.push(()=>{
 
 // 3 · SEGMENTS & BUNDLES
 S.push(()=>{
-  let s=head(3,'Who first · what bundle','Four segments, four bundles, one monthly price each','Baseline configurations; VyaparSaarthi dynamically sizes seats and hardware per establishment');
+  let s=head(3,'Who first · what bundle','Four segments, four bundles, one monthly price each','Live advisor output for an example of each: a 3-staff kirana, an 8-staff clinic, a 3-site restaurant chain, a 60-staff factory');
   const seg=[
     {wave:'WAVE 1 · SELF-SERVE',wc:RED,name:'Micro retail & services',ex:'kirana · salon · pharmacy',st:[['54%','of leads'],['4.1%','convert'],['22.7%','6-mo churn']],
-     b:'Vyapar Starter',items:[['Biz 5G AirFiber 100',899],['Cloud POS & UPI billing',599],['Business Postpaid 299',299],['Cloud CCTV · 1 camera',199]],tot:'₹1,996',term:'12 months · setup ₹4,300',
+     b:'Vyapar Booster Pack',items:[['Biz 5G AirFiber 100',899],['Cloud POS & billing',599],['Business Postpaid 299',299],['Cloud CCTV',199]],tot:'₹1,996',term:'12 months · setup ₹4,300',
      why:'Cheaper than today’s ₹2,505 average'},
     {wave:'WAVE 1 · LAUNCH SEGMENT',wc:RED,name:'Professional offices',ex:'clinic · CA firm · coaching',st:[['25%','of leads'],['11.1%','convert'],['13.8%','6-mo churn']],
-     b:'Vyapar Pro Office',items:[['Biz Fibre 300',1499],['Cloud email × 5 users',625],['Endpoint security × 5',495],['Cloud backup 1 TB',499],['Secure guest Wi-Fi',399]],tot:'₹3,517',term:'12 months · setup ₹1,000',
+     b:'Vyapar Professional Suite',items:[['Biz Fibre 300',1499],['Static IP',200],['Cloud email × 8',1000],['Cloud backup 1 TB',499],['Secure guest Wi-Fi',399]],tot:'₹3,597',term:'12 months · setup ₹1,000',
      why:'Best conversion + retention'},
     {wave:'WAVE 2 · DIGITAL + FIELD',wc:AMBER,name:'Multi-site businesses',ex:'restaurant chain · 3–10 stores',st:[['15%','of leads'],['11.0%','convert'],['10.8%','6-mo churn']],
-     b:'Vyapar Multi-Site (3 sites)',items:[['Biz Fibre 300 × 3',4497],['4G/5G failover × 3',1497],['Cloud POS × 3',1797],['Cloud CCTV × 6',1194]],tot:'₹8,985',term:'12 months · one bill for all sites',
-     why:'Highest value: ₹31k average bundle'},
+     b:'Vyapar Multi-Site Connect',items:[['Biz Fibre 300 × 3',4497],['4G/5G failover × 3',1497],['Managed SD-WAN',2500],['Cloud CCTV × 6',1194],['Toll-free number',1500]],tot:'₹11,188',term:'24 months · one bill for all sites',
+     why:'One bill and failover across all sites'},
     {wave:'WAVE 3 · FIELD-LED',wc:SLATE,name:'Small manufacturers',ex:'auto-parts · textile unit',st:[['6%','of leads'],['12.8%','convert'],['8.1%','6-mo churn']],
-     b:'Vyapar Factory',items:[['Leased line 20 Mbps',8000],['Managed firewall',1999],['Machine IoT × 5',745],['Business Postpaid 599 × 3',1797]],tot:'₹12,541',term:'24 months · 21-day line install',
+     b:'Vyapar Industry Pro',items:[['Leased line 20 Mbps',8000],['Managed firewall',1999],['Machine IoT × 5',745],['Cloud backup 1 TB',499]],tot:'₹11,243',term:'24 months · 21-day line install',
      why:'Lowest churn; needs a site survey'},
   ];
   seg.forEach((g,i)=>{
@@ -227,20 +227,52 @@ S.push(()=>{
   return s;
 });
 
-// 5 · ARCHITECTURE + PRIVACY
+// 5 · PROOF (real screenshots of the running prototype)
 S.push(()=>{
-  let s=head(5,'Architecture · trust','The AI suggests, the rules engine decides, and privacy is built in','Main components and data flows, with DPDP Act 2023 controls.');
+  let s=head(5,'Proof · live prototype','It runs: four real screens, live today','Screenshots from the deployed prototype, not mock-ups. Try it at vyaparsetu-airtel.vercel.app');
+  const shots=[['shot_advisor','1 · Advisor','Describe the business, typed or spoken; get a bundle with reasons'],
+               ['shot_quote','2 · Quote','One monthly price; toggle add-ons, rules re-check live'],
+               ['shot_kyc','3 · Smart KYC','Consent first; a cancelled GSTIN is caught, with the reason'],
+               ['shot_tracker','4 · Tracker','Order number + mobile: timeline, technician, messages sent']];
+  shots.forEach(([f,t,c],i)=>{
+    const x=110+i*430, w=410, y=300;
+    s+=card(x,y,w,330);
+    s+=`<clipPath id="clip${i}"><rect x="${x+10}" y="${y+10}" width="390" height="240" rx="8"/></clipPath><image href="assets/${f}.jpg" x="${x+10}" y="${y+10}" width="390" height="240" preserveAspectRatio="xMidYMid slice" clip-path="url(#clip${i})"/>`;
+    s+=`<rect x="${x+10}" y="${y+10}" width="390" height="240" rx="8" fill="none" stroke="${LINE}"/>`;
+    s+=T(x+16,y+280,t,{size:19,w:700});
+    s+=W(x+16,y+296,380,c,{size:15,fill:SLATE,lh:1.25}).svg;
+  });
+  // evidence strip
+  s+=card(110,650,1270,230);
+  s+=kick(140,692,'Evidence',MUTED);
+  const ev=[['19 / 19','advisor test scenarios passed'],['12 / 12','KYC specimen applicants match the answer key (6 pass, 6 reject)'],['927','high-propensity leads, each ranked with reasons'],['116','automated tests pass; UI audited in light and dark']];
+  ev.forEach(([v,l],i)=>{ const x=140+i*310; s+=T(x,775,v,{font:SERIF,size:44,w:700,fill:i===0?RED:INK}); s+=W(x,800,280,l,{size:16,fill:SLATE,lh:1.3}).svg; });
+  // QR
+  s+=card(1400,650,410,230,{accent:RED});
+  s+=`<image href="assets/qr.png" x="1425" y="690" width="150" height="150"/>`;
+  s+=T(1595,730,'Try it live',{font:SERIF,size:26,w:700});
+  s+=W(1595,752,200,'Scan, or open vyaparsetu-airtel.vercel.app',{size:15,fill:SLATE,lh:1.3}).svg;
+  s+=W(1595,812,200,'No login. Demo data only.',{size:14,fill:MUTED,lh:1.3}).svg;
+  s+=foot(5,'**Stretch goals also built:** voice input in Hindi and English, and a partner back-office with propensity scores and reasons.');
+  return s;
+});
+
+// 6 · ARCHITECTURE + PRIVACY
+S.push(()=>{
+  let s=head(6,'Architecture · trust','The AI suggests, the rules engine decides, and privacy is built in','Main components and data flows, with DPDP Act 2023 controls.');
   s+=card(110,300,1070,580);
   s+=kick(140,342,'Solution architecture',MUTED);
+  const planned=new Set(['WhatsApp','Partner tablet','Field sales app','CRM','Billing (one bill)','Provisioning','Partner payouts']);
   const lane=(x,w,title,items,col)=>{ let o=T(x,382,title,{font:MONO,size:14,w:700,fill:col,ls:2});
     const h=64, step=(448-h)/(items.length-1);
-    items.forEach(([a],j)=>{ const y=398+j*step; o+=R(x,y,w,h,{fill:col===RED?REDBG:SOFT,stroke:col===RED?'#FCA5A5':LINE,r:10});
-      o+=T(x+16,y+39,a,{size:17,w:700}); }); return o; };
-  s+=lane(140,210,'CHANNELS',[['Mobile web / PWA','EN, हिंदी + 6 languages'],['WhatsApp','same flow in chat'],['Partner tablet','assisted mode, QR-tagged'],['Field sales app',''],['Voice (next)','']],INK);
+    items.forEach(([a],j)=>{ const y=398+j*step, soft=planned.has(a); o+=R(x,y,w,h,{fill:soft?'#fff':(col===RED?REDBG:SOFT),stroke:soft?'#CBD5E1':(col===RED?'#FCA5A5':LINE),r:10});
+      o+=T(x+16,y+39,a,{size:17,w:700,fill:soft?MUTED:INK}); }); return o; };
+  s+=lane(140,210,'CHANNELS',[['Mobile web','EN, हिंदी'],['WhatsApp','same flow in chat'],['Partner tablet','assisted mode, QR-tagged'],['Field sales app',''],['Voice input','']],INK);
   s+=lane(390,300,'VYAPARSETU CORE',[['GenAI Advisor','LLM for the chat; output is checked by the rules engine'],['Catalogue rules engine','25 products: city tier, size, GSTIN rules, dependencies'],['Smart KYC (OCR + lookup)',''],['Order tracker','milestones, technician dispatch, WhatsApp'],['Lead scoring','propensity score for leads to call back']],RED);
   s+=lane(730,200,'DATA',[['Consent ledger','purpose, time, version'],['Uploads (not stored)','deleted after OCR'],['Lead & order DB','PAN digits masked'],['Catalogue',''],['Audit log','']],INK);
   s+=lane(970,180,'ACCEL SYSTEMS',[['CRM','partner payouts'],['Billing (one bill)',''],['Provisioning','field workforce'],['GSTN / Udyam',''],['Partner payouts','']],INK);
   [[352,388],[692,728],[932,968]].forEach(([xa,xb])=>[622].forEach(y=>{ s+=`<path d="M${xa} ${y} H${xb}" stroke="${RED}" stroke-width="3" marker-end="url(#arR)"/>`; }));
+  s+=T(140,870,'Solid = built and running.  Grey = simulated in the prototype or planned for rollout.',{size:15,fill:MUTED});
 
   // DPDP pillars
   s+=card(1200,300,610,340);
@@ -251,17 +283,17 @@ S.push(()=>{
   // KYC result grid
   s+=card(1200,660,610,220);
   s+=kick(1230,700,'Smart KYC on the 12 specimen applicants',MUTED);
-  const rej={K01:'GSTIN cancelled',K04:'GST cert unreadable',K05:'Udyam missing',K11:'bill > 90 days'};
+  const rej={K01:'GSTIN cancelled',K04:'GST cert unreadable',K05:'Udyam missing',K06:'bogus GSTIN',K07:'name mismatch',K11:'bill > 90 days'};
   for(let i=1;i<=12;i++){ const k='K'+String(i).padStart(2,'0'), x=1230+((i-1)%6)*94, y=718+Math.floor((i-1)/6)*52, bad=rej[k];
     s+=R(x,y,84,42,{fill:bad?REDBG:GREENBG,stroke:bad?'#FCA5A5':'#A7F3D0',r:8})+T(x+42,y+28,k,{font:MONO,size:17,w:700,fill:bad?RED:GREEN,anchor:'middle'}); }
-  s+=W(1230,840,560,'**4 flagged:** cancelled GSTIN · unreadable GST cert · missing Udyam · old address proof',{size:14.5,fill:SLATE,bfill:RED,lh:1.25}).svg;
-  s+=foot(5,'**The LLM never sets a price or approves KYC** — catalogue rules and registry data do, with an audit trail.');
+  s+=W(1230,840,560,'**6 rejected, 6 cleared** (matches the answer key): cancelled or bogus GSTIN · unreadable cert · missing Udyam · name mismatch · old address proof',{size:14.5,fill:SLATE,bfill:RED,lh:1.25}).svg;
+  s+=foot(6,'**The LLM never sets a price or approves KYC** — catalogue rules and registry data do, with an audit trail.');
   return s;
 });
 
 // 6 · COMPETITION
 S.push(()=>{
-  let s=head(6,'Competitive analysis','Rivals sell one piece; we sell the whole setup in one sitting','Our assessment of public SMB offerings, Oct 2026.   ● full   ◐ partial   ○ none');
+  let s=head(7,'Competitive analysis','Rivals sell one piece; we sell the whole setup in one sitting','Our assessment of public SMB offerings, Oct 2026.  ● full  ◐ partial  ○ none.  VyaparSetu column = designed scope; the prototype shows the first four rows.');
   const cols=['Jio Business','Tata Tele Business','Local ISP / reseller','Single-product apps (POS, email, CCTV)','VyaparSetu (Accel)'];
   const rows=[
     ['Buy online, no sales visit',[1,0,0,2,2]],
@@ -289,13 +321,13 @@ S.push(()=>{
             ['Partners stay in the loop','Self-serve sales are QR-tagged, so the local partner still earns.'],
             ['Trust from verified data','GSTIN leads activate ~5× more; we verify them in seconds.']];
   rw.forEach(([a,b],i)=>{ const x=110+i*575; s+=card(x,762,550,122,{accent:RED}); s+=T(x+30,798,a,{font:SERIF,size:22,w:700}); s+=W(x+30,834,500,b,{size:17.5,fill:SLATE,lh:1.3}).svg; });
-  s+=foot(6,'**Our gap is price, not scope:** one bill for everything the shop needs, from ₹1,996 a month.');
+  s+=foot(7,'**Our gap is price, not scope:** one bill for everything the shop needs, from ₹1,996 a month.');
   return s;
 });
 
 // 7 · IMPACT
 S.push(()=>{
-  let s=head(7,'Impact · metrics · rollout','Twice the activations from the same leads, at half the cost each','6-month targets against the Apr–Jun 2026 baseline.');
+  let s=head(8,'Impact · metrics · rollout','Twice the activations from the same leads, at half the cost each','6-month targets against the Apr–Jun 2026 baseline.');
   // KPI table
   s+=card(110,300,990,420);
   const hd=['Metric','Today','6-mo target','Main lever'], cx=[140,500,640,800];
@@ -331,7 +363,7 @@ S.push(()=>{
   s+=kick(140,778,'Rollout',MUTED);
   const ph=[['0–3 mo · Pilot','2 cities · Hindi/English'],['3–6 mo · Scale','Tier 1–2 · WhatsApp · 6 languages'],['6–12 mo · National','Multi-site, factory · voice']];
   ph.forEach(([a,b],i)=>{ const x=140+i*318; s+=R(x,796,300,8,{fill:i===0?RED:(i===1?'#F87171':'#FCA5A5'),r:4}); s+=T(x,830,a,{size:18,w:700}); s+=T(x,858,b,{size:16,fill:SLATE}); });
-  s+=foot(7,'**Risks covered:** AI errors → rules engine · channel conflict → QR commission · low digital comfort → assisted mode.');
+  s+=foot(8,'**Risks covered:** AI errors → rules engine · channel conflict → QR commission · low digital comfort → assisted mode.');
   return s;
 });
 
