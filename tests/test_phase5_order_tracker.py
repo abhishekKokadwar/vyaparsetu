@@ -207,3 +207,17 @@ def test_catalog_sla_floor_enforcement(order_service):
     # The order MUST enforce the 21-day floor
     assert order['estimated_install_days'] >= 21
 
+
+
+def test_notifications_endpoint_needs_registered_mobile():
+    """The message log contains the technician PIN, so it uses the same gate as the tracker."""
+    from fastapi.testclient import TestClient
+    from app.main import app, order_service as svc
+    o = svc.create_order({'business_name': 'Gate Test', 'contact_name': 'A', 'contact_phone': '+91 98230 44556',
+                          'bundle_name': 'X', 'selected_products': []})
+    c = TestClient(app)
+    url = f"/api/orders/{o['order_id']}/notifications"
+    assert c.get(url).status_code == 404
+    assert c.get(url + "?phone=9111111111").status_code == 404
+    assert c.get(url + "?phone=9823044556").status_code == 200
+    assert c.get("/api/orders/VS-2026-90412/notifications").status_code == 200  # labelled sample

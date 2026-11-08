@@ -527,7 +527,8 @@ def lookup_orders_by_phone(phone: str):
     return {'total': len(orders), 'orders': orders}
 
 @app.get("/api/orders/{order_id}/notifications")
-def get_order_notifications(order_id: str):
+def get_order_notifications(order_id: str, phone: Optional[str] = None):
+    get_order_tracking(order_id, phone)  # same registered-mobile gate as the tracker (404 otherwise)
     res = order_service.get_order_notifications(order_id)
     return {'order_id': order_id, 'notifications': res}
 

@@ -574,7 +574,7 @@
       <div class="max-w-6xl mx-auto bg-white rounded-2xl border border-slate-200 shadow-sm p-6 sm:p-8">
         
         <!-- Lookup -->
-        <div class="flex flex-col gap-4 pb-6 border-b border-slate-100">
+        <div id="tracker-lookup" class="flex flex-col gap-4 pb-6 border-b border-slate-100">
           <div>
             <span class="eyebrow">Self-service status</span>
             <h2 class="text-xl font-bold text-slate-900 mt-1">Order Tracker</h2>
@@ -610,55 +610,51 @@
           </button>
           <p id="tracker-sample-badge" class="hidden mt-1 text-sm bg-slate-100 text-slate-700 rounded-lg px-3 py-2">Sample order with illustrative data. It does not belong to a real customer.</p>
 
-        <!-- Order Summary Card -->
-        <div id="tracker-summary-card" class="mt-6 bg-slate-50 border border-slate-200 rounded-xl p-5 grid grid-cols-2 md:grid-cols-4 gap-4 text-xs">
-          <div>
-            <span class="text-slate-500 block">Order Number</span>
-            <strong class="text-slate-900 font-mono text-sm tabular" id="trk-order-num">VS-2026-90412</strong>
-          </div>
-          <div>
-            <span class="text-slate-500 block">Business Entity</span>
-            <strong class="text-slate-900" id="trk-biz-name">Balaji Dental Clinic</strong>
-          </div>
-          <div>
-            <span class="text-slate-500 block">Selected Bundle</span>
-            <strong class="text-slate-900" id="trk-bundle">Vyapar Professional Suite</strong>
-          </div>
-          <div>
-            <span class="text-slate-500 block">Est. Live Date</span>
-            <strong class="text-emerald-700 text-sm" id="trk-est-date">Within 2 Days</strong>
-          </div>
-        </div>
+        <!-- Summary strip -->
+        <dl id="tracker-summary-card" class="kpi-strip mt-4">
+          <div><dt class="kpi-l">Order number</dt><dd class="kpi-v font-mono text-base" id="trk-order-num">VS-2026-90412</dd></div>
+          <div><dt class="kpi-l">Business</dt><dd class="kpi-v text-base" id="trk-biz-name">Balaji Dental Clinic</dd></div>
+          <div><dt class="kpi-l">Bundle</dt><dd class="kpi-v text-base" id="trk-bundle">Vyapar Professional Suite</dd></div>
+          <div><dt class="kpi-l">Est. live date</dt><dd class="kpi-v text-base text-ok" id="trk-est-date">Within 2 Days</dd></div>
+        </dl>
 
-        <!-- Milestone Timeline (Solving the 3 status chase calls) -->
-        <div class="mt-8">
-          <h3 class="text-xs font-bold text-slate-700 uppercase tracking-wider mb-6">Activation Progress Stages</h3>
-          <div id="tracker-timeline" class="space-y-6 relative before:absolute before:left-5 before:top-2 before:bottom-2 before:w-0.5 before:bg-slate-200">
-            <!-- Dynamic timeline steps -->
-          </div>
-        </div>
+        <div class="trk-grid mt-6">
+          <!-- Left: timeline -->
+          <section aria-labelledby="trk-tl-h">
+            <h3 id="trk-tl-h" class="section-h">Activation progress</h3>
+            <div id="tracker-timeline" class="space-y-6 relative before:absolute before:left-5 before:top-2 before:bottom-2 before:w-0.5 before:bg-slate-200"></div>
+          </section>
 
-        <!-- Assigned Field Engineer Card -->
-        <div id="tracker-tech-card" class="mt-8 bg-gradient-to-r from-indigo-50 to-slate-50 border border-slate-200 rounded-xl p-5 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 text-xs">
-          <div class="flex items-center space-x-3">
-            <div class="w-12 h-12 rounded-full bg-white shadow-sm border border-slate-200 flex items-center justify-center text-airtel-red shrink-0">
-              <i data-lucide="wrench" class="w-6 h-6"></i>
-            </div>
-            <div>
-              <span class="text-xs font-bold text-airtel-red uppercase">Assigned Field Technician</span>
-              <h4 class="text-sm font-bold text-slate-900" id="trk-tech-name">Ramesh Kumar</h4>
-              <p class="text-slate-600 text-xs" id="trk-tech-slot">Slot: Tomorrow, 11:00 AM - 01:00 PM</p>
-            </div>
-          </div>
-          <div class="flex items-center space-x-3">
-            <div class="text-right">
-              <span class="text-xs text-slate-500 block">Technician Verification PIN</span>
-              <strong class="text-sm font-mono text-slate-900 tabular" id="trk-tech-pin">8492</strong>
-            </div>
-            <a id="trk-tech-call" href="tel:+919840122334" aria-label="Call technician Ramesh Kumar" class="min-h-[44px] px-3.5 py-2 bg-white border border-slate-200 hover:border-airtel-red rounded-lg text-slate-800 font-semibold flex items-center space-x-1.5 transition">
-              <i data-lucide="phone" class="w-3.5 h-3.5 text-emerald-600"></i>
-              <span>Call Technician</span>
-            </a>
+          <!-- Right: technician + notification log -->
+          <div class="trk-side">
+            <section id="tracker-tech-card" aria-labelledby="trk-tech-h">
+              <h3 id="trk-tech-h" class="section-h">Assigned field technician</h3>
+              <div class="flex items-center gap-3">
+                <div class="w-11 h-11 rounded-full bg-slate-100 flex items-center justify-center text-slate-700 shrink-0"><i data-lucide="wrench" class="w-5 h-5"></i></div>
+                <div class="min-w-0">
+                  <div class="text-sm font-bold text-slate-900" id="trk-tech-name">Ramesh Kumar</div>
+                  <div class="text-sm text-slate-600" id="trk-tech-slot">Slot: Tomorrow, 11:00 AM - 01:00 PM</div>
+                </div>
+              </div>
+              <div class="flex items-center justify-between gap-3 mt-4">
+                <div>
+                  <span class="kpi-l">Verification PIN</span>
+                  <strong class="text-base font-mono text-slate-900 tabular block" id="trk-tech-pin">8492</strong>
+                </div>
+                <a id="trk-tech-call" href="tel:+919840122334" aria-label="Call technician" class="btn-secondary inline-flex items-center gap-2 px-3">
+                  <i data-lucide="phone" class="w-4 h-4"></i><span>Call technician</span>
+                </a>
+              </div>
+              <p class="help mt-3">Share the PIN with the engineer only when they arrive at your premises.</p>
+            </section>
+
+            <section aria-labelledby="trk-nt-h">
+              <div class="flex items-center justify-between gap-3">
+                <h3 id="trk-nt-h" class="section-h">Messages sent to you</h3>
+                <span class="badge badge-info">Simulated</span>
+              </div>
+              <ol id="tracker-notifs" class="trk-notifs"></ol>
+            </section>
           </div>
         </div>
 

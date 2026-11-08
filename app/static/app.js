@@ -1111,6 +1111,7 @@ function openSampleOrder() {
 }
 
 function showTrackerHome() {
+  document.getElementById('tracker-lookup').classList.remove('hidden');
   document.getElementById('tracker-order-view').classList.add('hidden');
   document.getElementById('tracker-empty').classList.remove('hidden');
   trackerMessage('');
@@ -1194,6 +1195,7 @@ async function fetchOrderStatus(orderId, phone) {
 }
 
 function renderOrderTracker(order, note = null) {
+  document.getElementById('tracker-lookup').classList.add('hidden');
   document.getElementById('tracker-order-view').classList.remove('hidden');
   document.getElementById('tracker-empty').classList.add('hidden');
   const sampleBadge = document.getElementById('tracker-sample-badge');
@@ -1256,7 +1258,32 @@ function renderOrderTracker(order, note = null) {
     document.getElementById('trk-tech-call').href = `tel:${order.technician.phone}`;
   }
 
+  loadOrderNotifications(order);
   if (window.lucide) lucide.createIcons();
+}
+
+async function loadOrderNotifications(order) {
+  const box = document.getElementById('tracker-notifs');
+  if (!box) return;
+  box.innerHTML = '<li class="skeleton" style="height:4.5rem"></li>';
+  try {
+    const ph = digits10(document.getElementById('tracker-phone').value || order.contact_phone);
+    const res = await fetch(`/api/orders/${encodeURIComponent(order.order_id)}/notifications?phone=${ph}`);
+    if (!res.ok) throw new Error(res.status);
+    const hi = currentLanguage === 'hi';
+    const items = (await res.json()).notifications || [];
+    box.innerHTML = items.length ? items.slice().reverse().map(n => `
+      <li class="trk-notif">
+        <div class="flex items-baseline justify-between gap-2">
+          <strong class="text-sm text-slate-900">${escapeHtml(n.title)}</strong>
+          <span class="text-xs text-slate-500 shrink-0">${escapeHtml(n.channel)}</span>
+        </div>
+        <p class="text-sm text-slate-700 mt-1">${escapeHtml(hi ? n.message_hi : n.message_en)}</p>
+        <span class="text-xs text-slate-500 tabular">${escapeHtml(n.timestamp || '')}</span>
+      </li>`).join('') : '<li class="help">No messages yet.</li>';
+  } catch (e) {
+    box.innerHTML = '<li class="help">Messages are unavailable right now.</li>';
+  }
 }
 
 // Load Partner Dropped Leads Portal

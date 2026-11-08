@@ -655,3 +655,13 @@ body {
 [data-theme="dark"] .border-red-200 { border-color: #5E2327 !important; }
 [data-theme="dark"] .bg-slate-800 { background-color: var(--theme-border-soft) !important; }
 [data-theme="dark"] tr:hover td { background-color: var(--theme-surface-2); }
+
+/* ===== Tracker: summary strip + two columns ===== */
+.trk-grid { display: grid; gap: 2rem; grid-template-columns: 1fr; }
+.trk-side { display: flex; flex-direction: column; gap: 1.5rem; }
+.trk-side > section { padding-top: 1.25rem; border-top: 1px solid var(--line); }
+.trk-side > section:first-child { padding-top: 0; border-top: 0; }
+.trk-notifs { list-style: none; margin: .5rem 0 0; padding: 0; }
+.trk-notif { padding: .75rem 0; border-top: 1px solid var(--line); }
+.trk-notif:first-child { border-top: 0; }
+@media (min-width: 1024px) { .trk-grid { grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr); gap: 3rem; } }
